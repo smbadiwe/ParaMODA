@@ -1,0 +1,16 @@
+Graph G{
+      node [ 
+      fontname="Arial"
+      width="0.40000"
+      height="0.400000"
+      color="black"
+          ]
+
+      edge [ 
+      color="black"
+           ]
+
+n_1 -- n_2
+n_1 -- n_3
+n_2 -- n_3
+}

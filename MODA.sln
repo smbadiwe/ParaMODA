@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Motif1", "MODAForm\Motif1.csproj", "{57F8E5EC-7757-4D45-A2FC-CEE2EBFB92BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MODA", "MODA\MODA.csproj", "{5EA51F5C-A1C0-476C-8835-A66415FD4394}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MODA.Impl", "MODA.Impl\MODA.Impl.csproj", "{D9455E2F-1009-4A4C-8953-66E7F5CBA577}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MODA.UI", "MODA.UI\MODA.UI.csproj", "{8AEAE325-CE56-4DDD-B514-919C171004CE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57F8E5EC-7757-4D45-A2FC-CEE2EBFB92BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57F8E5EC-7757-4D45-A2FC-CEE2EBFB92BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57F8E5EC-7757-4D45-A2FC-CEE2EBFB92BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57F8E5EC-7757-4D45-A2FC-CEE2EBFB92BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5EA51F5C-A1C0-476C-8835-A66415FD4394}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5EA51F5C-A1C0-476C-8835-A66415FD4394}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5EA51F5C-A1C0-476C-8835-A66415FD4394}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5EA51F5C-A1C0-476C-8835-A66415FD4394}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9455E2F-1009-4A4C-8953-66E7F5CBA577}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9455E2F-1009-4A4C-8953-66E7F5CBA577}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9455E2F-1009-4A4C-8953-66E7F5CBA577}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9455E2F-1009-4A4C-8953-66E7F5CBA577}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AEAE325-CE56-4DDD-B514-919C171004CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AEAE325-CE56-4DDD-B514-919C171004CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AEAE325-CE56-4DDD-B514-919C171004CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AEAE325-CE56-4DDD-B514-919C171004CE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
