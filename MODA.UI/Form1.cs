@@ -1,4 +1,5 @@
 ﻿using MODA.Impl;
+using MODA.Impl.Graphics;
 using MODA.Impl.Isomorphism;
 using QuickGraph;
 using System;
@@ -7,6 +8,8 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -78,22 +81,6 @@ namespace MODA.UI
         {
 
         }
-        void show_result(RichTextBox rTxtBox, List<List<int>> result)
-        {
-            int i = 0;
-            int j = 0;
-            string s = string.Empty;
-            rTxtBox.Clear();
-            for (i = 0; i < result.Count; i++)
-            {
-                s = string.Empty;
-                for (j = 0; j < result[i].Count; j++)
-                    s += "  " + result[i][j].ToString();
-                rTxtBox.Text += s + "\n";
-            }
-
-
-        }
 
         string convert_list_to_string(List<int> items)
         {
@@ -142,35 +129,7 @@ namespace MODA.UI
         {
 
         }
-        List<List<int>> find_equivalents(List<List<int>> A)
-        {
-            int n = A[0].Count;
-            List<int> V = new List<int>();
-            List<List<int>> result = new List<List<int>>();
-            List<int> local;
-            int i = 0;
-            for (; i < n; i++)
-                V.Add(i);
-            i = 0;
-            while (V.Count != 0 && i < n)
-            {
-                local = new List<int>();
-                for (int k = 0; k < A.Count; k++)
-                {
-                    if (!local.Contains(A[k][i]))
-                    {
-                        local.Add(A[k][i]);
-                        V.Remove(A[k][i]);
-                    }
-
-                }
-                result.Add(local);
-                i++;
-            }
-            return result;
-        }
-
-
+        
         private void button8_Click_1(object sender, EventArgs e)
         {
 
@@ -208,6 +167,7 @@ namespace MODA.UI
             edgeLBL.Text = _networkGraph.EdgeCount.ToString();
             DensityLBL.Text = _networkGraph.GetAverageDegree().ToString();
             DirectedLBL.Text = _networkGraph.IsDirected ? "Directed" : "Undirected";
+
             MessageBox.Show($"Network Graph (G) loaded. {gist}", "MODA", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -236,9 +196,31 @@ namespace MODA.UI
             }
             _queryGraph.Clear();
             string gist = GraphProcessor.LoadGraph(filename, _queryGraph);
+            
+            string dotFileFulllName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"Q_Img_{DateTime.UtcNow.ToString("yyyyMMddhhmmss.tttt")}.dot");
+            Visualizer.Visualize(_queryGraph, dotFileFulllName);
+            string imageFile = dotFileFulllName + ".png";
+            
+            //DOT program might not have generated the image file before this call, so this
+            // little trick helps us wait while that is being done
+            while (true)
+            {
+                try
+                {
+                    using (File.OpenRead(imageFile))
+                    {
+                        break;
+                    }
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+            pictureBox1.Image = GraphicsUtils.ResizeImage(Image.FromFile(imageFile), pictureBox1.Width, pictureBox1.Height);
             MessageBox.Show($"Query Graph (H) loaded. {gist}", MessageBoxTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        
+
         //The 'Load G' button on top
         private void btnLoadG_Top_Click(object sender, EventArgs e)
         {

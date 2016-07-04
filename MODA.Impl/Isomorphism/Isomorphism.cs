@@ -73,7 +73,7 @@ namespace MODA.Impl.Isomorphism
                     Mode.COUNT, null).get(Mode.COUNT);
         }
 
-        public abstract Dictionary<Mode, Object> completeMapsHelper(
+        public abstract Dictionary<Mode, object> completeMapsHelper(
                 Dictionary<TVertex, TVertex> vertMap, TGraph smallGraph, TGraph bigGraph,
                 Mode mode, Dictionary<Mode, object> result);
 

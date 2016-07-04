@@ -49,6 +49,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -57,7 +58,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExpansionTreeBuilder.cs" />
+    <Compile Include="ExpansionTreeNode.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Graphics\DotPrinter.cs" />
+    <Compile Include="Graphics\FileDotEngine.cs" />
+    <Compile Include="Graphics\GraphicsUtils.cs" />
+    <Compile Include="Graphics\Visualizer.cs" />
+    <Compile Include="GraphLoader.cs" />
     <Compile Include="GraphProcessor.cs" />
     <Compile Include="Isomorphism\Enums.cs" />
     <Compile Include="Isomorphism\Isomorphism.cs" />
