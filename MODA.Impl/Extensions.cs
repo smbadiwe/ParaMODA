@@ -4,12 +4,35 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using QuickGraph;
+using System.Diagnostics;
 
 namespace MODA.Impl
 {
     public static class Extensions
     {
-        public static IList<TVertex> getNeighbors<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph, TVertex vertex)
+        public static List<int> GetNeighboursWithFlag(this UndirectedGraph<int, Edge<int>> graph, int node, List<int> flag)
+        {
+            List<int> result = new List<int>();
+            int index = (node * (2 * graph.VertexCount - 1 - node) / 2);
+            int i = 0;
+            for (i = index; i < index + graph.VertexCount - 1 - node; i++)
+            {
+                if (graph.ContainsEdge(node, i) && !flag.Contains(node))
+                {
+                    result.Add(node + i - index + 1);
+                }
+            }
+            for (i = 0; i < node; i++)
+            {
+                if (graph.ContainsEdge(node, i) && flag.Contains(node))
+                {
+                    result.Add(i);
+                }
+            }
+            return result;
+        }
+
+        public static List<TVertex> getNeighbors<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph, TVertex vertex)
         {
            return graph.AdjacentEdges(vertex).Select(x => x.Target).ToList();
         }
@@ -25,6 +48,38 @@ namespace MODA.Impl
             }
             avgDegree = sumDegrees / graph.VertexCount;
             return avgDegree;
+        }
+
+        public static UndirectedGraph<TVertex, Edge<TVertex>> Clone<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph)
+        {
+            var inputGraphClone = new UndirectedGraph<TVertex, Edge<TVertex>>();
+            inputGraphClone.AddVerticesAndEdgeRange(graph.Edges);
+            Debug.Assert(inputGraphClone.EdgeCount == graph.EdgeCount && inputGraphClone.VertexCount == graph.VertexCount);
+            return inputGraphClone;
+        }
+
+        /// <summary>
+        /// NB: The degree sequence of an undirected graph is the non-increasing sequence of its vertex degrees;
+        /// </summary>
+        /// <typeparam name="TVertex"></typeparam>
+        /// <param name="graph"></param>
+        /// <returns></returns>
+        public static List<TVertex> GetDegreeSequence<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph)
+        {
+            var listToReturn = new List<TVertex>();
+            if (graph.IsVerticesEmpty) return listToReturn;
+
+            var tempList = new Dictionary<TVertex, int>();
+            foreach (var node in graph.Vertices)
+            {
+                tempList.Add(node, graph.AdjacentDegree(node));
+            }
+
+            foreach (var item in tempList.OrderByDescending(x => x.Value))
+            {
+                listToReturn.Add(item.Key);
+            }
+            return listToReturn;
         }
 
         /// <summary>

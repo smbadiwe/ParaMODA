@@ -6,7 +6,7 @@ namespace Motif1
 {
     class graph
     {
-        public int number_node;
+        public int number_node { get; set; }
         bool directed;
         public List<bool> Adj_matrix;
         
@@ -49,6 +49,12 @@ namespace Motif1
             Adj_matrix[index] = false;
         }
 
+        /// <summary>
+        /// Soma: Same as checking whether there is an edge between the given two nodes
+        /// </summary>
+        /// <param name="node1"></param>
+        /// <param name="node2"></param>
+        /// <returns></returns>
         public bool is_link_between(int node1, int node2)
         {
             int tmp_n1 = 0;

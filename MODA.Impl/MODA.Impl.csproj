@@ -60,6 +60,9 @@
   <ItemGroup>
     <Compile Include="ExpansionTreeBuilder.cs" />
     <Compile Include="ExpansionTreeNode.cs" />
+    <Compile Include="ExpansionTrees\ThreeNodes.cs" />
+    <Compile Include="ExpansionTrees\FiveNodes.cs" />
+    <Compile Include="ExpansionTrees\FourNodes.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Graphics\DotPrinter.cs" />
     <Compile Include="Graphics\FileDotEngine.cs" />
@@ -72,6 +75,9 @@
     <Compile Include="Isomorphism\MappingIsomorphism.cs" />
     <Compile Include="Isomorphism\OrbitSymmetryBreaker.cs" />
     <Compile Include="Isomorphism\SymmetryIsomorphism.cs" />
+    <Compile Include="ModaAlgorithms.3.cs" />
+    <Compile Include="ModaAlgorithms.2.cs" />
+    <Compile Include="ModaAlgorithms.1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleDegreeDistribution.cs" />
     <Compile Include="Tools\AbstractVerbosifier.cs" />

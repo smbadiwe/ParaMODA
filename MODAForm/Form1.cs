@@ -720,6 +720,11 @@ namespace Motif1
             return null;
         }
 
+        /// <summary>
+        /// Add contents of <paramref name="added_list"/> to <paramref name="original"/>
+        /// </summary>
+        /// <param name="original"></param>
+        /// <param name="added_list"></param>
         void add_list(List<int> original, List<int> added_list)
         {
             int i = 0;
