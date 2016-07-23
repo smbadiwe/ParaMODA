@@ -12,18 +12,17 @@ namespace MODA.Console
     {
         static void Main(string[] args)
         {
-            string filename = "Ecoli20141001CR_idx.txt";
+            string filename = "QueryGraph.txt"; // "Ecoli20141001CR_idx.txt";
             string graphFolder = @"C:\SOMA\Drive\MyUW\Research\Kim\remodaalgorithmimplementation";
             var newGraphInstance = GraphProcessor.LoadGraph(Path.Combine(graphFolder, filename));
-
             var nodeCount = newGraphInstance.VertexCount;
             var edgeCount = newGraphInstance.EdgeCount;
             var inv = (nodeCount * nodeCount) / edgeCount;
             var sparse = inv > 64;
             var invDeg = string.Format("{0} ({1} Graph)", inv, inv > 64 ? "Sparse" : "Dense");
-            System.Console.WriteLine($"\tFile loaded: {Path.GetFileName(filename)}\n\nNumber of lines in file:\t{edgeCount}\nNumber of nodes:\t\t{nodeCount}\nInv Degree:\t{invDeg}");
+            System.Console.WriteLine($"\tFile loaded: {Path.GetFileName(filename)}\n\nNumber of Edges:\t{edgeCount}\nNumber of Nodes:\t\t{nodeCount}\nInv Degree:\t{invDeg}");
 
-            var frequentSubgraphs = new ModaAlgorithms().Algorithm1(newGraphInstance, 4);
+            var frequentSubgraphs = new ModaAlgorithms().Algorithm1(newGraphInstance, 3);
             System.Console.ReadKey();
         }
     }

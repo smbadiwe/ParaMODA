@@ -34,7 +34,17 @@ namespace MODA.Impl
 
         public void Build()
         {
-            var rootNode = ExpansionTree.BuildFourNodesTree();
+            ExpansionTreeNode<Edge<int>> rootNode;
+            switch (NumberOfNodes)
+            {
+                case 3:
+                    rootNode = ExpansionTree.BuildThreeNodesTree();
+                    break;
+                case 4:
+                default:
+                    rootNode = ExpansionTree.BuildFourNodesTree();
+                    break;
+            }
             //TODO: Construct the tree.
             // It turns out there's yet no formula to determine the number of isomorphic trees that can be formed
             // from n nodes; hence no way(?) of writing a general code

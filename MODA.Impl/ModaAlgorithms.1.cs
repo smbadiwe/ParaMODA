@@ -54,7 +54,10 @@ namespace MODA.Impl
                 }
             }
             while (true);
-
+            foreach (var item in allMappings)
+            {
+                Console.WriteLine("Subgraph: [Nodes: {0}; Edges: {1}]:\tNo. of mappings: {2}", item.Key.VertexCount, item.Key.EdgeCount, item.Value.Count);
+            }
             return frequentSubgraphs;
         }
         

@@ -34,7 +34,20 @@ namespace MODA.Impl
 
         public static List<TVertex> getNeighbors<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph, TVertex vertex)
         {
-           return graph.AdjacentEdges(vertex).Select(x => x.Target).ToList();
+            var neighbors = new List<TVertex>();
+            var adjEdges = graph.AdjacentEdges(vertex);
+            foreach (var edge in adjEdges)
+            {
+                if (edge.Source.Equals(vertex))
+                {
+                    neighbors.Add(edge.Target);
+                }
+                else
+                {
+                    neighbors.Add(edge.Source);
+                }
+            }
+            return neighbors;
         }
 
         public static double GetAverageDegree<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph)
