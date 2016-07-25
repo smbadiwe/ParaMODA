@@ -9,24 +9,22 @@ namespace MODA.Impl
 {
     public partial class ModaAlgorithms
     {
-
         /// <summary>
         /// Enumeration module
         /// </summary>
         /// <param name="queryGraph"></param>
         /// <param name="inputGraph"></param>
         /// <param name="expansionTree"></param>
-        public HashSet<Mapping<int>> Algorithm3(UndirectedGraph<int, Edge<int>> queryGraph, UndirectedGraph<int, Edge<int>> inputGraph,
+        private HashSet<Mapping<int>> Algorithm3(UndirectedGraph<int, Edge<int>> queryGraph, UndirectedGraph<int, Edge<int>> inputGraph,
             AdjacencyGraph<ExpansionTreeNode<Edge<int>>, Edge<ExpansionTreeNode<Edge<int>>>> expansionTree,
             Dictionary<UndirectedGraph<int, Edge<int>>, HashSet<Mapping<int>>> foundMappings)
         {
-            var mappingsToReturn = new HashSet<Mapping<int>>();
-
             var parentQueryGraph = GetParent(queryGraph, expansionTree); // H
-            var mappings = foundMappings[parentQueryGraph];
+            var mappings = foundMappings[parentQueryGraph]; //It's guaranteed to be there. If it's not, there's a prolem
+            if (mappings.Count == 0) return new HashSet<Mapping<int>>();
 
             // Get the new edge in the queryGraph
-            Edge<int> theNewEdge; // E(G') - E(H)
+            // New Edge = E(G') - E(H)
             var newEdgeNodes = new List<int>(2);
             foreach (var node in queryGraph.Vertices)
             {
@@ -38,20 +36,41 @@ namespace MODA.Impl
 
                 newEdgeNodes.Add(node);
             }
-            theNewEdge = new Edge<int>(newEdgeNodes[0], newEdgeNodes[1]);
+            var theNewEdge = new Edge<int>(newEdgeNodes[0], newEdgeNodes[1]);
 
+            var theMappings = new HashSet<Mapping<int>>();
             foreach (var map in mappings)
             {
                 if (map.Function.Count != map.InputSubGraph.VertexCount) continue;
-                // Remember, .MapGraph is a subgraph of inputGraph
+
                 // Reember, f(h) = g
+                // Remember, map.InputSubGraph is a subgraph of inputGraph
                 Edge<int> edge;
                 if (map.InputSubGraph.TryGetEdge(map.Function[theNewEdge.Source], map.Function[theNewEdge.Target], out edge))
                 {
-                    mappingsToReturn.Add(new Mapping<int>(map.Function) { InputSubGraph = queryGraph });
+                    var newMap = new Mapping<int>(map.Function)
+                    {
+                        InputSubGraph = map.InputSubGraph,
+                        MapOnInputSubGraph = map.InputSubGraph
+                    };
+                    if (theMappings.Any(x => x.Equals(newMap)))
+                    {
+                        continue;
+                    }
+                    theMappings.Add(newMap);
                 }
             }
-            return mappingsToReturn;
+
+            var sb = new StringBuilder();
+            sb.AppendFormat("{0}", queryGraph.AsString());
+            sb.AppendLine("======================================");
+            foreach (var map in theMappings)
+            {
+                sb.Append(map);
+            }
+            Console.WriteLine(sb);
+            Console.WriteLine();
+            return theMappings;
         }
 
         /// <summary>

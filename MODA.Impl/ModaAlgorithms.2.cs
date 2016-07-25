@@ -16,7 +16,7 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size</param>
-        public HashSet<Mapping<int>> Algorithm2(UndirectedGraph<int, Edge<int>> queryGraph, UndirectedGraph<int, Edge<int>> inputGraph, int numberOfSamples = -1)
+        private HashSet<Mapping<int>> Algorithm2(UndirectedGraph<int, Edge<int>> queryGraph, UndirectedGraph<int, Edge<int>> inputGraph, int numberOfSamples = -1)
         {
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount;
             int i = 0;
@@ -82,11 +82,13 @@ namespace MODA.Impl
                 if (i == numberOfSamples) break;
             }
             var sb = new StringBuilder();
+            sb.AppendFormat("{0}", queryGraph.AsString());
+            sb.AppendLine("\n======================================");
             foreach (var map in theMappings)
             {
                 sb.Append(map);
             }
-            Console.WriteLine(sb.ToString());
+            Console.WriteLine(sb);
             Console.WriteLine();
             return theMappings;
         }

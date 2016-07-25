@@ -60,6 +60,18 @@ namespace MODA.Impl
             return avgDegree;
         }
 
+        public static string AsString<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph)
+        {
+            if (graph.IsEdgesEmpty) return "";
+            var sb = new StringBuilder("Graph: Edges - ");
+            foreach (var edge in graph.Edges)
+            {
+                sb.AppendFormat("[{0}], ", edge);
+            }
+            //sb.AppendLine();
+            return sb.ToString();
+        }
+
         public static UndirectedGraph<TVertex, Edge<TVertex>> Clone<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph)
         {
             var inputGraphClone = new UndirectedGraph<TVertex, Edge<TVertex>>();

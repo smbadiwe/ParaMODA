@@ -17,11 +17,12 @@ namespace MODA.Impl
         public Dictionary<TVertex, TVertex> Function { get; }
 
         /// <summary>
-        /// The subgraph (with all edges) in the input graph G that fit the query graph
+        /// The subgraph (with all edges) in the input graph G that fit the query graph (---Function.Values)
         /// </summary>
         public UndirectedGraph<TVertex, Edge<TVertex>> InputSubGraph { get; set; }
+
         /// <summary>
-        /// The subgraph (with mapped edges) in the input graph G that fit the query graph
+        /// The subgraph (with mapped edges) in the input graph G that fit the query graph (---Function.Keys)
         /// </summary>
         public UndirectedGraph<TVertex, Edge<TVertex>> MapOnInputSubGraph { get; set; }
         
@@ -41,16 +42,18 @@ namespace MODA.Impl
             }
 
             //Test 2 - Edge count
-            test = MapOnInputSubGraph.EdgeCount == other.MapOnInputSubGraph.EdgeCount;
+            test = this.MapOnInputSubGraph.EdgeCount == other.MapOnInputSubGraph.EdgeCount;
             if (test == false)
             {
                 return false;
             }
 
-            //Test 3 - Node degrees
+            //Test 3 - Node degrees. 
+            //  This seems to be giving us isomorphic graphs; as in, same graph cast as diferent.
+            //  So it may be nice to take it out.
             foreach (var node in InputSubGraph.Vertices)
             {
-                if (MapOnInputSubGraph.AdjacentDegree(node) != other.MapOnInputSubGraph.AdjacentDegree(node))
+                if (this.MapOnInputSubGraph.AdjacentDegree(node) != other.MapOnInputSubGraph.AdjacentDegree(node))
                 {
                     return false;
                 }
@@ -71,12 +74,14 @@ namespace MODA.Impl
             {
                 sb.AppendFormat("{0}-", item.Key);
             }
+            //sb.AppendFormat("<{0}>] => [", this.MapOnInputSubGraph.AsString());
             sb.Append("] => [");
             foreach (var item in this.Function)
             {
                 sb.AppendFormat("{0}-", item.Value);
             }
-            sb.AppendLine("]");
+            sb.AppendFormat("] Exact map: <{0}>\n", this.MapOnInputSubGraph.AsString());
+            //sb.AppendLine("]");
             return sb.ToString();
         }
     }

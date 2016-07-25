@@ -22,7 +22,7 @@ namespace MODA.Console
             var inv = (nodeCount * nodeCount) / edgeCount;
             var sparse = inv > 64;
             var invDeg = string.Format("{0} ({1} Graph)", inv, inv > 64 ? "Sparse" : "Dense");
-            System.Console.WriteLine($"\tFile loaded: {Path.GetFileName(filename)}\n\nNumber of Edges:\t{edgeCount}\nNumber of Nodes:\t\t{nodeCount}\nInv Degree:\t{invDeg}");
+            System.Console.WriteLine($"\tFile loaded: {Path.GetFileName(filename)}\n\nNumber of Edges:\t{edgeCount}\nNumber of Nodes:\t\t{nodeCount}\nInv Degree:\t{invDeg}\n\n");
 
             var frequentSubgraphs = new ModaAlgorithms().Algorithm1(newGraphInstance, 3);
             System.Console.ReadKey();
