@@ -1,10 +1,8 @@
 ﻿using MODA.Impl;
+using MODA.Impl.Graphics;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MODA.Console
 {
@@ -14,7 +12,11 @@ namespace MODA.Console
         {
             string filename = "QueryGraph.txt"; // "Ecoli20141001CR_idx.txt";
             string graphFolder = @"C:\SOMA\Drive\MyUW\Research\Kim\remodaalgorithmimplementation";
-            var newGraphInstance = GraphProcessor.LoadGraph(Path.Combine(graphFolder, filename));
+            var dotFileFulllName = Path.Combine(graphFolder, filename);
+            var newGraphInstance = GraphProcessor.LoadGraph(dotFileFulllName);
+
+            Visualizer.Visualize(newGraphInstance, dotFileFulllName + ".dot");
+
             var nodeCount = newGraphInstance.VertexCount;
             var edgeCount = newGraphInstance.EdgeCount;
             var inv = (nodeCount * nodeCount) / edgeCount;

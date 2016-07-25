@@ -19,7 +19,7 @@ namespace MODA.Impl.Transformers
         public List<int> transform(TVertex input)
         {
             List<int> nbrDegs = new List<int>();
-            foreach (TVertex n in graph.getNeighbors(input))
+            foreach (TVertex n in graph.GetNeighbors(input))
             {
                 nbrDegs.Add(graph.AdjacentDegree(n));
             }

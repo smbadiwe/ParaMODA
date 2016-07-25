@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,35 +16,62 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size</param>
-        public List<Dictionary<int, int>> Algorithm2(UndirectedGraph<int, Edge<int>> queryGraph, UndirectedGraph<int, Edge<int>> inputGraph, int numberOfSamples = -1)
+        public HashSet<Mapping<int>> Algorithm2(UndirectedGraph<int, Edge<int>> queryGraph, UndirectedGraph<int, Edge<int>> inputGraph, int numberOfSamples = -1)
         {
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount;
             int i = 0;
             // Do we need this clone? Can't we just remove the node directly from the graph?
             var inputGraphClone = inputGraph.Clone();
-            var theMappings = new List<Dictionary<int, int>>();
-            //var degreeSeq = new List<int>();
-            foreach (int g in inputGraph.GetDegreeSequence())
+            var theMappings = new HashSet<Mapping<int>>();
+
+            foreach (var g in inputGraph.GetDegreeSequence())
             {
-                List<int> domain_tags = new List<int>();
-                List<int> range_tags = new List<int>();
-                var domainAndRangeTags = new Dictionary<int, int>();
-                foreach (int h in queryGraph.Vertices)
+                foreach (var h in queryGraph.Vertices)
                 {
                     if (CanSupport(queryGraph, h, inputGraphClone, g))
                     {
                         //Remember: f(h) = g, so h is Domain and g is Range
-                        domainAndRangeTags.Add(h, g);
-                        var partialMap = new Dictionary<int, int>();
-                        partialMap.Add(h, g);
+                        var function = new Dictionary<int, int>(); //function, f
+                        function.Add(h, g);
+                        var mappings = IsomorphicExtension(function, queryGraph, inputGraphClone);
+                        foreach (var map in mappings)
+                        {
+                            map.InputSubGraph = new UndirectedGraph<int, Edge<int>>(false);
+                            var subgraphNodesInInputGraph = map.Function.Values.ToArray();
+                            for (i = 0; i < subgraphNodesInInputGraph.Length; i++)
+                            {
+                                for (int j = (i + 1); j < subgraphNodesInInputGraph.Length; j++)
+                                {
+                                    Edge<int> edge;
+                                    if (inputGraph.TryGetEdge(subgraphNodesInInputGraph[i], subgraphNodesInInputGraph[j], out edge))
+                                    {
+                                        map.InputSubGraph.AddVerticesAndEdge(edge);
+                                    }
+                                }
+                            }
 
-                        domain_tags.Add(h);
-                        range_tags.Add(g);
-
-                        var domain = new List<int> { h };
-                        var used_range = new List<int> { g };
-                        var mappings = IsomorphicExtension(partialMap, queryGraph, inputGraphClone, domain, used_range, domain_tags, range_tags);
-                        theMappings.AddRange(mappings);
+                            //Now we've captured the subgrph on the input as it is, with all of its edges, it's time to
+                            //the exact edges mapped. 
+                            //Put differently, we've gotten the nodes mapped, now is time to get the edges mapped.
+                            map.MapOnInputSubGraph = new UndirectedGraph<int, Edge<int>>(false);
+                            subgraphNodesInInputGraph = map.Function.Keys.ToArray();
+                            for (i = 0; i < subgraphNodesInInputGraph.Length; i++)
+                            {
+                                for (int j = (i + 1); j < subgraphNodesInInputGraph.Length; j++)
+                                {
+                                    Edge<int> edge;
+                                    if (queryGraph.TryGetEdge(subgraphNodesInInputGraph[i], subgraphNodesInInputGraph[j], out edge))
+                                    {
+                                        map.MapOnInputSubGraph.AddVerticesAndEdge(new Edge<int>(map.Function[edge.Source], map.Function[edge.Target]));
+                                    }
+                                }
+                            }
+                            if (theMappings.Any(x => x.Equals(map)))
+                            {
+                                continue;
+                            }
+                            theMappings.Add(map);
+                        }
                     }
                 }
 
@@ -56,17 +84,7 @@ namespace MODA.Impl
             var sb = new StringBuilder();
             foreach (var map in theMappings)
             {
-                sb.Append("[");
-                foreach (var item in map.Keys)
-                {
-                    sb.AppendFormat("{0}-", item);
-                }
-                sb.Append("] => [");
-                foreach (var item in map.Values)
-                {
-                    sb.AppendFormat("{0}-", item);
-                }
-                sb.AppendLine("]");
+                sb.Append(map);
             }
             Console.WriteLine(sb.ToString());
             Console.WriteLine();
@@ -74,115 +92,51 @@ namespace MODA.Impl
         }
 
         /// <summary>
-        /// Algorithm taken from Grochow and Kellis
+        /// Algorithm taken from Grochow and Kellis. This is failing at the moment
         /// </summary>
         /// <param name="partialMap">f; Map is represented as a dictionary, with the Key as h and the Valuw as g</param>
         /// <param name="queryGraph">G</param>
         /// <param name="inputGraph">H</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
-        private List<Dictionary<int, int>> IsomorphicExtension(Dictionary<int, int> partialMap, UndirectedGraph<int, Edge<int>> queryGraph, 
-            UndirectedGraph<int, Edge<int>> inputGraph)
+        private HashSet<Mapping<int>> IsomorphicExtension(Dictionary<int, int> partialMap, UndirectedGraph<int, Edge<int>> queryGraph
+            , UndirectedGraph<int, Edge<int>> inputGraph)
         {
             if (partialMap.Count == queryGraph.VertexCount)
             {
-                return new List<Dictionary<int, int>> { partialMap };
+                return new HashSet<Mapping<int>> { new Mapping<int>(partialMap) };
             }
 
-            var listOfIsomorphisms = new List<Dictionary<int, int>>();
-
-            //Remember: f(h) = g, so h is Domain and g is Range.
-            //  In other words, Key is h and Value is g in the dictionary
-
-            // get m, most constrained neighbor of the domain
-            int m = GetMostConstrainedNeighbour(queryGraph);
-            if (m == -1) return listOfIsomorphisms; // This should NEVER happen
-
-            List<int> neighbourRange = ChooseNeighboursOfRange(used_range, inputGraph, range_tags);
-            foreach (int neighbour in neighbourRange)
-            {
-                if (IsNeighbourCompatible(inputGraph, queryGraph, neighbour, m, domain, partialMap)) continue;
-
-                //It's not; so, let f' = f on D, and f'(m) = n. Find all isomorphic extensions of f'.
-                var newPartialMap = new Dictionary<int, int>(partialMap);
-                newPartialMap[m] = neighbour;
-
-                var usedRangeCopy = new List<int>(used_range);
-                usedRangeCopy.Add(neighbour);
-
-                var domainCopy = new List<int>(domain);
-                domainCopy.Add(m);
-
-                //var domainTagsCopy = new List<int>(domain_tags);
-                //domainTagsCopy.Add(m);
-                domain_tags.Add(m);
-
-                //var rangeTagsCopy = new List<int>(range_tags);
-                //rangeTagsCopy.Add(neighbour);
-                range_tags.Add(neighbour);
-
-                //var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph, domainCopy, usedRangeCopy, domain_tags, range_tags);
-
-                var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph, domainCopy, range_tags, domain_tags, range_tags);
-                listOfIsomorphisms.AddRange(subList);
-            }
-            return listOfIsomorphisms;
-        }
-
-
-
-
-
-        /// <summary>
-        /// Algorithm taken from Grochow and Kellis
-        /// </summary>
-        /// <param name="partialMap">f; Map is represented as a dictionary, with the Key as h and the Valuw as g</param>
-        /// <param name="queryGraph">G</param>
-        /// <param name="inputGraph">H</param>
-        /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
-        private List<Dictionary<int, int>> IsomorphicExtension(Dictionary<int, int> partialMap, UndirectedGraph<int, Edge<int>> queryGraph, UndirectedGraph<int, Edge<int>> inputGraph
-            , List<int> domain, List<int> used_range, List<int> domain_tags, List<int> range_tags)
-        {
-            if (partialMap.Count == queryGraph.VertexCount)
-            {
-                return new List<Dictionary<int, int>> { partialMap };
-            }
-
-            var listOfIsomorphisms = new List<Dictionary<int, int>>();
+            var listOfIsomorphisms = new HashSet<Mapping<int>>();
 
             //Remember: f(h) = g, so h is Domain and g is Range.
             //  In other words, Key is h and Value is g in the dictionary
 
             // get m, most constrained neighbor
-            int m = GetMostConstrainedNeighbour(domain, queryGraph, domain_tags);
-            if (m == -1) return listOfIsomorphisms; // This should NEVER happen
+            var domainList = partialMap.Keys.ToList();
+            int m = GetMostConstrainedNeighbour(domainList, queryGraph);
+            if (m == -1) return listOfIsomorphisms;
 
-            List<int> neighbourRange = ChooseNeighboursOfRange(used_range, inputGraph, range_tags);
-            foreach (int neighbour in neighbourRange)
+            var neighbourRange = ChooseNeighboursOfRange(partialMap.Values.ToList(), inputGraph);
+            foreach (var n in neighbourRange) //foreach neighbour n of f(D)
             {
-                if (IsNeighbourCompatible(inputGraph, queryGraph, neighbour, m, domain, partialMap)) continue;
-
-                //It's not; so, let f' = f on D, and f'(m) = n. Find all isomorphic extensions of f'.
+                if (IsNeighbourIncompatible(inputGraph, queryGraph, n, m, partialMap))
+                {
+                    continue;
+                }
+                //It's not; so, let f' = f on D, and f'(m) = n.
                 var newPartialMap = new Dictionary<int, int>(partialMap);
-                newPartialMap[m] = neighbour;
+                newPartialMap[m] = n;
 
-                var usedRangeCopy = new List<int>(used_range);
-                usedRangeCopy.Add(neighbour);
-
-                var domainCopy = new List<int>(domain);
-                domainCopy.Add(m);
-
-                //var domainTagsCopy = new List<int>(domain_tags);
-                //domainTagsCopy.Add(m);
-                domain_tags.Add(m);
-
-                //var rangeTagsCopy = new List<int>(range_tags);
-                //rangeTagsCopy.Add(neighbour);
-                range_tags.Add(neighbour);
-
-                //var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph, domainCopy, usedRangeCopy, domain_tags, range_tags);
-
-                var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph, domainCopy, range_tags, domain_tags, range_tags);
-                listOfIsomorphisms.AddRange(subList);
+                //Find all isomorphic extensions of f'.
+                var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);
+                foreach (var item in subList)
+                {
+                    if (new HashSet<int>(item.Function.Values).Count != item.Function.Count)
+                    {
+                        continue;
+                    }
+                    listOfIsomorphisms.Add(item);
+                }
             }
             return listOfIsomorphisms;
         }
@@ -200,79 +154,71 @@ namespace MODA.Impl
         /// <param name="domain">domain_in_H</param>
         /// <param name="partialMap">function</param>
         /// <returns></returns>
-        private bool IsNeighbourCompatible(UndirectedGraph<int, Edge<int>> inputGraph, UndirectedGraph<int, Edge<int>> queryGraph,
-            int n, int m, List<int> domain, Dictionary<int, int> partialMap)
+        private bool IsNeighbourIncompatible(UndirectedGraph<int, Edge<int>> inputGraph, UndirectedGraph<int, Edge<int>> queryGraph,
+            int n, int m, Dictionary<int, int> partialMap)
         {
-            if (partialMap.ContainsValue(n))
-            {
-                return false;
-            }
-            var neighbor = queryGraph.getNeighbors(m);
+            //  RECALL: m is for Domain, the Key => the query graph
 
-            //split into two sets
-            int i = 0;
-            int local_counter = 0;
-            for (i = 0; i < neighbor.Count + local_counter; i++)
+            //A: If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d)...
+            var neighboursOfN = inputGraph.GetNeighbors(n);
+            var neighborsOfM = queryGraph.GetNeighbors(m);
+            foreach (var d in neighborsOfM)
             {
-                if (!domain.Contains(neighbor[i - local_counter]))
+                if (!partialMap.ContainsKey(d)) return false; // continue;
+
+                if (!neighboursOfN.Contains(partialMap[d]))
                 {
-                    neighbor.Remove(neighbor[i - local_counter]);
-                    local_counter++;
-                }
-            }
-            List<int> non_neighbor = new List<int>();
-            for (i = 0; i < domain.Count; i++)
-            {
-                if (!neighbor.Contains(domain[i]))
-                {
-                    non_neighbor.Add(domain[i]);
+                    return true;
                 }
             }
 
-            var local = inputGraph.GetNeighboursWithFlag(n, new List<int>()); //_flag
-            if (local.Count == 0) return false;
-
-            for (i = 0; i < neighbor.Count; i++)
+            //B: ...or if there is a NON-neighbor d ∈ D of m such that n is neighbors with f(d) 
+            var nonNeighborsOfM = queryGraph.GetNonNeighbors(m, neighborsOfM);
+            foreach (var d in nonNeighborsOfM)
             {
-                if (!local.Contains(partialMap.Keys.ElementAt(neighbor[i])))
+                if (!partialMap.ContainsKey(d)) return false;
+
+                if (neighboursOfN.Contains(partialMap[d]))
                 {
                     return false;
                 }
             }
 
-            return true;
+            return false;
         }
 
-        private List<int> ChooseNeighboursOfRange(List<int> used_range, UndirectedGraph<int, Edge<int>> inputGraph, List<int> range_tags)
+        private HashSet<int> ChooseNeighboursOfRange(List<int> used_range, UndirectedGraph<int, Edge<int>> inputGraph)
         {
-            List<int> local = new List<int>();
-            List<int> result = new List<int>();
-            int local_counter = 0;
+            var local = new List<int>();
+            var result = new HashSet<int>();
             for (int i = 0; i < used_range.Count; i++)
             {
-                local = inputGraph.getNeighbors(used_range[i]);
-                if (local.Count == 0) return result;
+                local = inputGraph.GetNeighbors(used_range[i]);
+                if (local.Count == 0) continue; // return result;
 
-                local_counter = 0;
-                for (int j = 0; j < local.Count + local_counter; j++)
+                int counter = 0;
+                for (int j = 0; j < local.Count + counter; j++)
                 {
-                    if (range_tags.Contains(local[j - local_counter]) || false) // || _flag[local[j - local_counter]])
+                    if (used_range.Contains(local[j - counter]))
                     {
-                        local.Remove(local[j - local_counter]);
-                        local_counter++;
+                        local.Remove(local[j - counter]);
+                        counter++;
                     }
                 }
-                result.AddRange(local);
+                foreach (var item in local)
+                {
+                    result.Add(item);
+                }
             }
             return result;
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="domain">Domain, D, of fumction f</param>
         /// <param name="queryGraph">H</param>
-        private int GetMostConstrainedNeighbour(List<int> domain, UndirectedGraph<int, Edge<int>> queryGraph, List<int> domain_tags)
+        private int GetMostConstrainedNeighbour(List<int> domain, UndirectedGraph<int, Edge<int>> queryGraph)
         {
             /*
              * As is standard in backtracking searches, the algorithm uses the most constrained neighbor
@@ -281,59 +227,29 @@ namespace MODA.Impl
              * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
              * the highest degree and largest neighbor degree sequence.
              * */
-            List<int> result = new List<int>();
+            HashSet<int> result = new HashSet<int>();
             for (int i = 0; i < domain.Count; i++)
             {
-                var local = queryGraph.getNeighbors(domain[i]);
+                var local = queryGraph.GetNeighbors(domain[i]);
                 int local_counter = 0;
                 for (int j = 0; j < local.Count + local_counter; j++)
                 {
-                    if (domain_tags.Contains(local[j - local_counter]))
+                    if (domain.Contains(local[j - local_counter]))
                     {
                         local.Remove(local[j - local_counter]);
                         local_counter++;
                     }
                 }
-                result.AddRange(local);
-            }
-            if (result.Count == 0) return -1;
-
-            return result[0];
-        }
-
-        /// <summary>
-        /// get m, most constrained neighbor of the domain
-        /// </summary>
-        /// <param name="domain">Domain, D, of fumction f</param>
-        /// <param name="queryGraph">H</param>
-        private int GetMostConstrainedNeighbour(UndirectedGraph<int, Edge<int>> queryGraph)
-        {
-            /*
-             * As is standard in backtracking searches, the algorithm uses the most constrained neighbor
-             * to eliminate maps that cannot be isomorphisms: that is, the neighbor of the already-mapped 
-             * nodes which is likely to have the fewest possible nodes it can be mapped to. First we select 
-             * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
-             * the highest degree and largest neighbor degree sequence.
-             * */
-            List<int> result = new List<int>();
-            foreach (var node in queryGraph.Vertices)
-            {
-                var local = queryGraph.getNeighbors(node);
-                int local_counter = 0; // Used to ensure the counter in the 'for' loop remains constant
-                for (int j = 0; j < local.Count + local_counter; j++)
+                foreach (var item in local)
                 {
-                    if (domain_tags.Contains(local[j - local_counter]))
-                    {
-                        local.Remove(local[j - local_counter]);
-                        local_counter++;
-                    }
+                    result.Add(item);
                 }
-                result.AddRange(local);
             }
             if (result.Count == 0) return -1;
 
-            return result[0];
+            return result.ElementAt(0);
         }
+
 
         /// <summary>
         /// We say that <paramref name="node_G"/> (g) of <paramref name="inputGraph"/> (G) can support <paramref name="node_H"/> (h) of <paramref name="queryGraph"/> (H)
@@ -352,8 +268,8 @@ namespace MODA.Impl
             //So, deg(g) >= deg(h).
             //2. Based on the degree of their neighbors
             bool canSupport = false;
-            var gNeighbors = inputGraph.getNeighbors(node_G);
-            foreach (var hNeighbor in queryGraph.getNeighbors(node_H))
+            var gNeighbors = inputGraph.GetNeighbors(node_G);
+            foreach (var hNeighbor in queryGraph.GetNeighbors(node_H))
             {
                 if (gNeighbors.Any(x =>
                     inputGraph.AdjacentDegree(x) >= queryGraph.AdjacentDegree(hNeighbor)))

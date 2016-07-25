@@ -75,6 +75,7 @@
     <Compile Include="Isomorphism\MappingIsomorphism.cs" />
     <Compile Include="Isomorphism\OrbitSymmetryBreaker.cs" />
     <Compile Include="Isomorphism\SymmetryIsomorphism.cs" />
+    <Compile Include="Mapping.cs" />
     <Compile Include="ModaAlgorithms.3.cs" />
     <Compile Include="ModaAlgorithms.2.cs" />
     <Compile Include="ModaAlgorithms.1.cs" />

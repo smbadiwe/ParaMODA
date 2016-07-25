@@ -22,11 +22,11 @@ namespace MODA.Impl
             builder.Build();
 
             var frequentSubgraphs = new List<UndirectedGraph<int, Edge<int>>>();
-            var allMappings = new Dictionary<UndirectedGraph<int, Edge<int>>, List<Dictionary<int, int>>>();
+            var allMappings = new Dictionary<UndirectedGraph<int, Edge<int>>, HashSet<Mapping<int>>>();
             do
             {
                 var qGraph = GetNextNode(builder.VerticesSorted).QueryGraph;
-                List<Dictionary<int, int>> mappings;
+                HashSet<Mapping<int>> mappings;
                 if (qGraph.EdgeCount == (subgraphSize - 1))
                 {
                     //TODO: Mapping module - Grockow & Kellis
@@ -35,7 +35,7 @@ namespace MODA.Impl
                 else
                 {
                     //TODO: Enumeration moodule - 
-                    mappings = Algorithm3(qGraph, inputGraph, builder.ExpansionTree);
+                    mappings = Algorithm3(qGraph, inputGraph, builder.ExpansionTree, allMappings);
                 }
 
                 //TODO: Do we need to save to disk?

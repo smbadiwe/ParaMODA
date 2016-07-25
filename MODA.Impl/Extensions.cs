@@ -10,29 +10,26 @@ namespace MODA.Impl
 {
     public static class Extensions
     {
-        public static List<int> GetNeighboursWithFlag(this UndirectedGraph<int, Edge<int>> graph, int node, List<int> flag)
+        public static List<TVertex> GetNonNeighbors<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph, TVertex vertex, List<TVertex> neighboursOfVertex = null)
         {
-            List<int> result = new List<int>();
-            int index = (node * (2 * graph.VertexCount - 1 - node) / 2);
-            int i = 0;
-            for (i = index; i < index + graph.VertexCount - 1 - node; i++)
+            if (neighboursOfVertex == null)
             {
-                if (graph.ContainsEdge(node, i) && !flag.Contains(node))
+                neighboursOfVertex = GetNeighbors(graph, vertex);
+            }
+            var nonNeighbors = new List<TVertex>();
+
+            foreach (var node in graph.Vertices)
+            {
+                if (node.Equals(vertex)) continue;
+                if (!neighboursOfVertex.Contains(node))
                 {
-                    result.Add(node + i - index + 1);
+                    nonNeighbors.Add(node);
                 }
             }
-            for (i = 0; i < node; i++)
-            {
-                if (graph.ContainsEdge(node, i) && flag.Contains(node))
-                {
-                    result.Add(i);
-                }
-            }
-            return result;
+            return nonNeighbors;
         }
 
-        public static List<TVertex> getNeighbors<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph, TVertex vertex)
+        public static List<TVertex> GetNeighbors<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph, TVertex vertex)
         {
             var neighbors = new List<TVertex>();
             var adjEdges = graph.AdjacentEdges(vertex);
