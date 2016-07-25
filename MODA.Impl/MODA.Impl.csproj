@@ -70,31 +70,11 @@
     <Compile Include="Graphics\Visualizer.cs" />
     <Compile Include="GraphLoader.cs" />
     <Compile Include="GraphProcessor.cs" />
-    <Compile Include="Isomorphism\Enums.cs" />
-    <Compile Include="Isomorphism\Isomorphism.cs" />
-    <Compile Include="Isomorphism\MappingIsomorphism.cs" />
-    <Compile Include="Isomorphism\OrbitSymmetryBreaker.cs" />
-    <Compile Include="Isomorphism\SymmetryIsomorphism.cs" />
     <Compile Include="Mapping.cs" />
     <Compile Include="ModaAlgorithms.3.cs" />
     <Compile Include="ModaAlgorithms.2.cs" />
     <Compile Include="ModaAlgorithms.1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SimpleDegreeDistribution.cs" />
-    <Compile Include="Tools\AbstractVerbosifier.cs" />
-    <Compile Include="Tools\Tools.cs" />
-    <Compile Include="Tools\UserData.cs" />
-    <Compile Include="Tools\UserDataContainer.cs" />
-    <Compile Include="Transformers\AuxiliaryTransformer.cs" />
-    <Compile Include="Transformers\GetEqualVertexTransformer.cs" />
-    <Compile Include="Tools\MapUtils.cs" />
-    <Compile Include="Tools\MathUtils.cs" />
-    <Compile Include="Tools\StandardVerbosifier.cs" />
-    <Compile Include="Transformers\NbrDegreeTransformer.cs" />
-    <Compile Include="Transformers\SizeTransformer.cs" />
-    <Compile Include="Transformers\Transformer.cs" />
-    <Compile Include="Utils.cs" />
-    <Compile Include="VertexNbrDegComp.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,7 +1,5 @@
 ﻿using MODA.Impl;
 using MODA.Impl.Graphics;
-using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace MODA.Console
