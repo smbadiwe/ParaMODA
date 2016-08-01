@@ -1,6 +1,8 @@
 ﻿using MODA.Impl;
 using MODA.Impl.Graphics;
+using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace MODA.Console
 {
@@ -8,21 +10,46 @@ namespace MODA.Console
     {
         static void Main(string[] args)
         {
-            string filename = "QueryGraph.txt"; // "Ecoli20141001CR_idx.txt";
-            string graphFolder = @"C:\SOMA\Drive\MyUW\Research\Kim\remodaalgorithmimplementation";
-            var dotFileFulllName = Path.Combine(graphFolder, filename);
-            var newGraphInstance = GraphProcessor.LoadGraph(dotFileFulllName);
+            try
+            {
+                string graphFolder = args[0]; // @"C:\SOMA\Drive\MyUW\Research\Kim\remodaalgorithmimplementation";
+                string filename = args[1]; // "QueryGraph.txt"; // "Ecoli20141001CR_idx.txt";
+                var dotFileFulllName = Path.Combine(graphFolder, filename);
+                int subGraphSize = int.Parse(args[2]);
+                int numIterations = int.Parse(args[3]);
 
-            Visualizer.Visualize(newGraphInstance, dotFileFulllName + ".dot");
+                System.Console.WriteLine("Network File: {0}\nSub-graph Size: {1}\nNumber of Iterations: {2}\n", dotFileFulllName, subGraphSize, numIterations);
 
-            var nodeCount = newGraphInstance.VertexCount;
-            var edgeCount = newGraphInstance.EdgeCount;
-            var inv = (nodeCount * nodeCount) / edgeCount;
-            var sparse = inv > 64;
-            var invDeg = string.Format("{0} ({1} Graph)", inv, inv > 64 ? "Sparse" : "Dense");
-            System.Console.WriteLine($"\tFile loaded: {Path.GetFileName(filename)}\n\nNumber of Edges:\t{edgeCount}\nNumber of Nodes:\t\t{nodeCount}\nInv Degree:\t{invDeg}\n\n");
+                var sb = new StringBuilder("Processing Graph...");
+                sb.AppendFormat("Network File: {0}\nSub-graph Size: {1}\nNumber of Iterations: {2}\n", dotFileFulllName, subGraphSize, numIterations);
+                sb.AppendLine("==========================================================================\n");
+                for (int i = 0; i < numIterations; i++)
+                {
+                    var sw = Stopwatch.StartNew();
+                    var newGraphInstance = GraphProcessor.LoadGraph(dotFileFulllName);
 
-            var frequentSubgraphs = new ModaAlgorithms().Algorithm1(newGraphInstance, 3);
+                    //Visualizer.Visualize(newGraphInstance, dotFileFulllName + ".dot");
+
+                    var frequentSubgraphs = new ModaAlgorithms().Algorithm1(newGraphInstance, subGraphSize);
+                    sw.Stop();
+                    sb.AppendFormat("Iteration {0}: Time Taken: {1}ms\t Network: Nodes - {2}; Edges: {3}\n", (i + 1), sw.ElapsedMilliseconds.ToString("N"), newGraphInstance.VertexCount, newGraphInstance.EdgeCount);
+                    System.Console.WriteLine("Iteration {0}: Time Taken: {1}ms\n", (i + 1), sw.ElapsedMilliseconds.ToString("N"));
+                    sb.AppendLine("-------------------------------------------");
+                    foreach (var queryGraph in frequentSubgraphs)
+                    {
+                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\n", queryGraph.Key.AsString(), queryGraph.Value);
+                    }
+                    newGraphInstance = null;
+                    frequentSubgraphs = null;
+                    sb.AppendLine();
+                }
+                File.WriteAllText(dotFileFulllName + ".puo", sb.ToString());
+            }
+            catch (System.Exception ex)
+            {
+                System.Console.WriteLine(ex);
+            }
+            System.Console.WriteLine("Done!");
             System.Console.ReadKey();
         }
     }

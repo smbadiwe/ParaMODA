@@ -15,7 +15,7 @@ namespace MODA.Impl
         /// <param name="filename">The uploaded filename</param>
         /// <param name="newGraphInstance"></param>
         /// <returns>A string containing feedback of the processing</returns>
-        public static string LoadGraph<T>(string filename, UndirectedGraph<T, Edge<T>> newGraphInstance)
+        private static string LoadGraph<T>(string filename, UndirectedGraph<T, Edge<T>> newGraphInstance)
         {
             var lines = File.ReadAllLines(filename);
             Stopwatch sw = Stopwatch.StartNew();
@@ -51,23 +51,18 @@ namespace MODA.Impl
         /// <param name="filename">The uploaded filename</param>
         /// <param name="newGraphInstance"></param>
         /// <returns>A string containing feedback of the processing</returns>
-        public static UndirectedGraph<int, Edge<int>> LoadGraph(string filename)
+        public static UndirectedGraph<string, Edge<string>> LoadGraph(string filename)
         {
             var lines = File.ReadAllLines(filename);
 
-            var newGraphInstance = new UndirectedGraph<int, Edge<int>>();
+            var newGraphInstance = new UndirectedGraph<string, Edge<string>>();
             //Parallelizing this actually made it take longer to process my datasets
             string[] tmp;
-            int sourceNode;
-            int targetNode;
             foreach (var line in lines)
             {
                 if (line.StartsWith("#")) continue;
                 tmp = line.Split(new string[] { " ", "\t" }, StringSplitOptions.None);
-                sourceNode = Convert.ToInt32(tmp[0]);
-                targetNode = Convert.ToInt32(tmp[1]);
-
-                newGraphInstance.AddVerticesAndEdge(new Edge<int>(sourceNode, targetNode));
+                newGraphInstance.AddVerticesAndEdge(new Edge<string>(tmp[0], tmp[1]));
             }
             return newGraphInstance;
         }

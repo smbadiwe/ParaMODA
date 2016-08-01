@@ -1,11 +1,13 @@
 ﻿using QuickGraph;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace MODA.Impl
 {
     public partial class ModaAlgorithms
     {
+        public static string MapFolder = @"C:\SOMA\Drive\MyUW\Research\Kim\Capstone\ExperimentalNetworks\MapFolder";
         /// <summary>
         /// Algo 1: Find subgraph frequency
         /// </summary>
@@ -13,16 +15,16 @@ namespace MODA.Impl
         /// <param name="subgraphSize"></param>
         /// <param name="thresholdValue"></param>
         /// <returns>Fg, frequent subgraph list</returns>
-        public Dictionary<UndirectedGraph<int, Edge<int>>, HashSet<Mapping<int>>> Algorithm1(UndirectedGraph<int, Edge<int>> inputGraph, int subgraphSize, int thresholdValue = 0)
+        public Dictionary<UndirectedGraph<string, Edge<string>>, int> Algorithm1(UndirectedGraph<string, Edge<string>> inputGraph, int subgraphSize, int thresholdValue = 0)
         {
-            var builder = new ExpansionTreeBuilder<Edge<int>>(subgraphSize);
+            var builder = new ExpansionTreeBuilder<Edge<string>>(subgraphSize);
             builder.Build();
 
-            var allMappings = new Dictionary<UndirectedGraph<int, Edge<int>>, HashSet<Mapping<int>>>();
+            var allMappings = new Dictionary<UndirectedGraph<string, Edge<string>>, int>();
             do
             {
                 var qGraph = GetNextNode(builder.VerticesSorted).QueryGraph;
-                HashSet<Mapping<int>> mappings;
+                HashSet<Mapping> mappings;
                 if (qGraph.EdgeCount == (subgraphSize - 1))
                 {
                     //TODO: Mapping module - MODA and Grockow & Kellis
@@ -31,34 +33,31 @@ namespace MODA.Impl
                 else
                 {
                     //TODO: Enumeration moodule - MODA
-                    mappings = Algorithm3(qGraph, inputGraph, builder.ExpansionTree, allMappings);
+                    mappings = Algorithm3(qGraph, inputGraph, builder.ExpansionTree); //, allMappings
                 }
                 if (mappings.Count == 0) continue;
 
-                allMappings.Add(qGraph, mappings); //Save mappings. Do we need to save to disk?
-
+                //Save mappings. Do we need to save to disk?
+                allMappings.Add(qGraph, mappings.Count);
+                File.WriteAllBytes(Path.Combine(MapFolder, qGraph.AsString().Replace(">", "&lt;") + ".map"), MyXmlSerializer.Serialize(new Map
+                {
+                    QueryGraph = qGraph,
+                    Mappings = mappings,
+                }));
+                mappings = null;
+                
                 //Check for complete-ness; if complete, break
                 //  A Complete graph of n nodes has n(n-1)/2 edges
                 if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))
                 {
+                    qGraph = null;
                     break;
                 }
+                qGraph = null;
             }
             while (true);
 
-            var frequentSubgraphs = new Dictionary<UndirectedGraph<int, Edge<int>>, HashSet<Mapping<int>>>();
-            if (allMappings.Count > 0)
-            {
-                foreach (var item in allMappings)
-                {
-                    if (item.Value.Count > thresholdValue)
-                    {
-                        frequentSubgraphs.Add(item.Key, item.Value);
-                    }
-                    Console.WriteLine("Subgraph: [Nodes: {0}; Edges: {1}]:\tNo. of mappings: {2}", item.Key.VertexCount, item.Key.EdgeCount, item.Value.Count);
-                }
-            }
-            return frequentSubgraphs;
+            return allMappings;
         }
 
         /// <summary>
@@ -66,7 +65,7 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="extTreeNodesQueued"></param>
         /// <returns></returns>
-        private ExpansionTreeNode<Edge<int>> GetNextNode(IDictionary<ExpansionTreeNode<Edge<int>>, GraphColor> extTreeNodesQueued)
+        private ExpansionTreeNode<Edge<string>> GetNextNode(IDictionary<ExpansionTreeNode<Edge<string>>, GraphColor> extTreeNodesQueued)
         {
             foreach (var node in extTreeNodesQueued)
             {

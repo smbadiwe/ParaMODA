@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace MODA.Impl
 {
-    public class ExpansionTreeBuilder<TEdge> where TEdge : IEdge<int>
+    public class ExpansionTreeBuilder<TEdge> where TEdge : IEdge<string>
     {
         public enum TreeTraversalType
         {
@@ -12,9 +12,9 @@ namespace MODA.Impl
             DFS
         }
 
-        public IDictionary<ExpansionTreeNode<Edge<int>>, GraphColor> VerticesSorted { get; set; }
-        public IVertexListGraph<ExpansionTreeNode<Edge<int>>, Edge<ExpansionTreeNode<Edge<int>>>> Graph { get; private set; }
-        public AdjacencyGraph<ExpansionTreeNode<Edge<int>>, Edge<ExpansionTreeNode<Edge<int>>>> ExpansionTree { get; private set; }
+        public IDictionary<ExpansionTreeNode<Edge<string>>, GraphColor> VerticesSorted { get; set; }
+        public IVertexListGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> Graph { get; private set; }
+        public AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> ExpansionTree { get; private set; }
 
         public int NumberOfNodes { get; private set; }
         public TreeTraversalType TraversalType { get; private set; }
@@ -23,14 +23,14 @@ namespace MODA.Impl
         {
             NumberOfNodes = numberOfNodes;
             TraversalType = traversalType;
-            ExpansionTree = new AdjacencyGraph<ExpansionTreeNode<Edge<int>>, Edge<ExpansionTreeNode<Edge<int>>>>(false);
+            ExpansionTree = new AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>>(false);
 
             ExpansionTree.EdgeAdded += e => e.Target.ParentNode = e.Source;
         }
 
         public void Build()
         {
-            ExpansionTreeNode<Edge<int>> rootNode;
+            ExpansionTreeNode<Edge<string>> rootNode;
             switch (NumberOfNodes)
             {
                 case 3:
@@ -47,7 +47,7 @@ namespace MODA.Impl
 
             if (TraversalType == TreeTraversalType.BFS)
             {
-                var bfs = new BreadthFirstSearchAlgorithm<ExpansionTreeNode<Edge<int>>, Edge<ExpansionTreeNode<Edge<int>>>>(ExpansionTree);
+                var bfs = new BreadthFirstSearchAlgorithm<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>>(ExpansionTree);
                 bfs.SetRootVertex(rootNode);
                 bfs.Compute();
 
@@ -56,7 +56,7 @@ namespace MODA.Impl
             }
             else
             {
-                var dfs = new DepthFirstSearchAlgorithm<ExpansionTreeNode<Edge<int>>, Edge<ExpansionTreeNode<Edge<int>>>>(ExpansionTree);
+                var dfs = new DepthFirstSearchAlgorithm<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>>(ExpansionTree);
                 dfs.SetRootVertex(rootNode);
                 dfs.Compute();
 

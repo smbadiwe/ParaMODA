@@ -33,7 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="QuickGraph, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -54,6 +53,10 @@
     <ProjectReference Include="..\MODA.Impl\MODA.Impl.csproj">
       <Project>{d9455e2f-1009-4a4c-8953-66e7f5cba577}</Project>
       <Name>MODA.Impl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\QuickGraph\QuickGraph.csproj">
+      <Project>{9f41dbef-471a-438b-8ac1-ae124f2c7af3}</Project>
+      <Name>QuickGraph</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -31,21 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="QuickGraph, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\quickgraph-69709\3.0\sources\QuickGraph.Data\bin\Debug\QuickGraph.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph.Data, Version=3.6.61114.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\quickgraph-69709\3.0\sources\QuickGraph.Data\bin\Debug\QuickGraph.Data.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph.Graphviz, Version=3.6.61114.0, Culture=neutral, PublicKeyToken=f3fb40175eec2af3, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\quickgraph-69709\3.0\sources\QuickGraph.Data\bin\Debug\QuickGraph.Graphviz.dll</HintPath>
-    </Reference>
-    <Reference Include="QuickGraph.Serialization, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\quickgraph-69709\3.0\sources\QuickGraph.Serialization\bin\Debug\QuickGraph.Serialization.dll</HintPath>
+    <Reference Include="MsgPack, Version=0.1.4298.15470, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MsgPack.0.1.0.2011042300\lib\net40\MsgPack.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -70,11 +58,26 @@
     <Compile Include="Graphics\Visualizer.cs" />
     <Compile Include="GraphLoader.cs" />
     <Compile Include="GraphProcessor.cs" />
+    <Compile Include="Map.cs" />
     <Compile Include="Mapping.cs" />
     <Compile Include="ModaAlgorithms.3.cs" />
     <Compile Include="ModaAlgorithms.2.cs" />
     <Compile Include="ModaAlgorithms.1.cs" />
+    <Compile Include="MyXmlSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj">
+      <Project>{cc478062-45ee-4e06-92d6-fa844a318d10}</Project>
+      <Name>QuickGraph.Graphviz</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\QuickGraph\QuickGraph.csproj">
+      <Project>{9f41dbef-471a-438b-8ac1-ae124f2c7af3}</Project>
+      <Name>QuickGraph</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,38 +1,40 @@
 ﻿using QuickGraph;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace MODA.Impl
 {
-    public class Mapping<TVertex>
+    [Serializable]
+    public class Mapping
     {
-        public Mapping(Dictionary<TVertex, TVertex> function)
+        public Mapping(Dictionary<string, string> function)
         {
             Function = function;
         }
 
-        public Dictionary<TVertex, TVertex> Function { get; }
+        public Dictionary<string, string> Function { get; }
 
         /// <summary>
         /// The subgraph (with all edges) in the input graph G that fit the query graph (---Function.Values)
         /// </summary>
-        public UndirectedGraph<TVertex, Edge<TVertex>> InputSubGraph { get; set; }
+        public UndirectedGraph<string, Edge<string>> InputSubGraph { get; set; }
 
         /// <summary>
         /// The subgraph (with mapped edges) in the input graph G that fit the query graph (---Function.Keys)
         /// </summary>
-        public UndirectedGraph<TVertex, Edge<TVertex>> MapOnInputSubGraph { get; set; }
+        public UndirectedGraph<string, Edge<string>> MapOnInputSubGraph { get; set; }
         
         public override bool Equals(object obj)
         {
             //Test 0 - basic object test
             if (obj == null) return false;
-            var other = obj as Mapping<TVertex>;
+            var other = obj as Mapping;
             if (other == null) return false;
 
             //Test 1 - Vertices
-            var test = (new HashSet<TVertex>(this.Function.Keys).SetEquals(other.Function.Keys)
-                && new HashSet<TVertex>(this.Function.Values).SetEquals(other.Function.Values));
+            var test = (new HashSet<string>(this.Function.Keys).SetEquals(other.Function.Keys)
+                && new HashSet<string>(this.Function.Values).SetEquals(other.Function.Values));
             if (test == false)
             {
                 return false;

@@ -7,7 +7,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MODA.Impl", "MODA.Impl\MODA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MODA.Console", "MODA.Console\MODA.Console.csproj", "{463F9808-D6E8-44AD-BC64-0430EC78895F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickGraph", "QuickGraph\QuickGraph.csproj", "{9F41DBEF-471A-438B-8AC1-AE124F2C7AF3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickGraph.Graphviz", "QuickGraph.Graphviz\QuickGraph.Graphviz.csproj", "{CC478062-45EE-4E06-92D6-FA844A318D10}"
+EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -21,6 +28,14 @@ Global
 		{463F9808-D6E8-44AD-BC64-0430EC78895F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{463F9808-D6E8-44AD-BC64-0430EC78895F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{463F9808-D6E8-44AD-BC64-0430EC78895F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F41DBEF-471A-438B-8AC1-AE124F2C7AF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F41DBEF-471A-438B-8AC1-AE124F2C7AF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F41DBEF-471A-438B-8AC1-AE124F2C7AF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F41DBEF-471A-438B-8AC1-AE124F2C7AF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC478062-45EE-4E06-92D6-FA844A318D10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC478062-45EE-4E06-92D6-FA844A318D10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC478062-45EE-4E06-92D6-FA844A318D10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC478062-45EE-4E06-92D6-FA844A318D10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

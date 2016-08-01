@@ -2,13 +2,13 @@
 
 namespace MODA.Impl
 {
-    public class ExpansionTreeNode<TEdge> where TEdge : IEdge<int>
+    public class ExpansionTreeNode<TEdge> where TEdge : IEdge<string>
     {
         public int Level { get; set; }
         public ExpansionTreeNode<TEdge> ParentNode { get; set; }
         public bool IsRootNode { get { return QueryGraph == null; } }
 
-        public UndirectedGraph<int, TEdge> QueryGraph { get; set; }
+        public UndirectedGraph<string, TEdge> QueryGraph { get; set; }
 
         public override bool Equals(object obj)
         {

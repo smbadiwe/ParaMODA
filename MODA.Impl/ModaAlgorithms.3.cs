@@ -1,6 +1,7 @@
 ﻿using QuickGraph;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -14,17 +15,20 @@ namespace MODA.Impl
         /// <param name="queryGraph"></param>
         /// <param name="inputGraph"></param>
         /// <param name="expansionTree"></param>
-        private HashSet<Mapping<int>> Algorithm3(UndirectedGraph<int, Edge<int>> queryGraph, UndirectedGraph<int, Edge<int>> inputGraph,
-            AdjacencyGraph<ExpansionTreeNode<Edge<int>>, Edge<ExpansionTreeNode<Edge<int>>>> expansionTree,
-            Dictionary<UndirectedGraph<int, Edge<int>>, HashSet<Mapping<int>>> foundMappings)
+        private HashSet<Mapping> Algorithm3(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph,
+            AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree)
+            //, Dictionary<UndirectedGraph<string, Edge<string>>, HashSet<Mapping>> foundMappings
         {
             var parentQueryGraph = GetParent(queryGraph, expansionTree); // H
-            var mappings = foundMappings[parentQueryGraph]; //It's guaranteed to be there. If it's not, there's a prolem
-            if (mappings.Count == 0) return new HashSet<Mapping<int>>();
+            var file = Path.Combine(MapFolder, parentQueryGraph.AsString().Replace(">", "&lt;") + ".map");
+            var mapObject = MyXmlSerializer.DeSerialize<Map>(File.ReadAllBytes(file));
+            var mappings = mapObject.Mappings; // foundMappings[parentQueryGraph]; //It's guaranteed to be there. If it's not, there's a prolem
+            if (mappings.Count == 0) return new HashSet<Mapping>();
 
             // Get the new edge in the queryGraph
             // New Edge = E(G') - E(H)
-            var newEdgeNodes = new List<int>(2);
+            var newEdgeNodes = new string[2];
+            int index = 0;
             foreach (var node in queryGraph.Vertices)
             {
                 //Trick: 
@@ -33,21 +37,22 @@ namespace MODA.Impl
                 // These two nodes form the new edge.
                 if (queryGraph.AdjacentDegree(node) == parentQueryGraph.AdjacentDegree(node)) continue;
 
-                newEdgeNodes.Add(node);
+                newEdgeNodes[index] = node;
+                index++;
             }
-            var theNewEdge = new Edge<int>(newEdgeNodes[0], newEdgeNodes[1]);
+            var theNewEdge = new Edge<string>(newEdgeNodes[0], newEdgeNodes[1]);
 
-            var theMappings = new HashSet<Mapping<int>>();
+            var theMappings = new HashSet<Mapping>();
             foreach (var map in mappings)
             {
                 if (map.Function.Count != map.InputSubGraph.VertexCount) continue;
 
                 // Reember, f(h) = g
                 // Remember, map.InputSubGraph is a subgraph of inputGraph
-                Edge<int> edge;
+                Edge<string> edge;
                 if (map.InputSubGraph.TryGetEdge(map.Function[theNewEdge.Source], map.Function[theNewEdge.Target], out edge))
                 {
-                    var newMap = new Mapping<int>(map.Function)
+                    var newMap = new Mapping(map.Function)
                     {
                         InputSubGraph = map.InputSubGraph,
                         MapOnInputSubGraph = map.InputSubGraph
@@ -60,15 +65,6 @@ namespace MODA.Impl
                 }
             }
 
-            var sb = new StringBuilder();
-            sb.AppendFormat("{0}", queryGraph.AsString());
-            sb.AppendLine("======================================");
-            foreach (var map in theMappings)
-            {
-                sb.Append(map);
-            }
-            Console.WriteLine(sb);
-            Console.WriteLine();
             return theMappings;
         }
 
@@ -78,9 +74,9 @@ namespace MODA.Impl
         /// <param name="queryGraph"></param>
         /// <param name="expansionTree"></param>
         /// <returns></returns>
-        private UndirectedGraph<int, Edge<int>> GetParent(UndirectedGraph<int, Edge<int>> queryGraph, AdjacencyGraph<ExpansionTreeNode<Edge<int>>, Edge<ExpansionTreeNode<Edge<int>>>> expansionTree)
+        private UndirectedGraph<string, Edge<string>> GetParent(UndirectedGraph<string, Edge<string>> queryGraph, AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree)
         {
-            var vertex = new ExpansionTreeNode<Edge<int>>
+            var vertex = new ExpansionTreeNode<Edge<string>>
             {
                 QueryGraph = queryGraph,
             };

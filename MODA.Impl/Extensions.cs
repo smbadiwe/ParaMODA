@@ -8,13 +8,13 @@ namespace MODA.Impl
 {
     public static class Extensions
     {
-        public static List<TVertex> GetNonNeighbors<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph, TVertex vertex, List<TVertex> neighboursOfVertex = null)
+        public static List<string> GetNonNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, List<string> neighboursOfVertex = null)
         {
             if (neighboursOfVertex == null)
             {
                 neighboursOfVertex = GetNeighbors(graph, vertex);
             }
-            var nonNeighbors = new List<TVertex>();
+            var nonNeighbors = new List<string>();
 
             foreach (var node in graph.Vertices)
             {
@@ -27,39 +27,30 @@ namespace MODA.Impl
             return nonNeighbors;
         }
 
-        public static List<TVertex> GetNeighbors<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph, TVertex vertex)
+        public static List<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex)
         {
-            var neighbors = new List<TVertex>();
             var adjEdges = graph.AdjacentEdges(vertex);
-            foreach (var edge in adjEdges)
-            {
-                if (edge.Source.Equals(vertex))
-                {
-                    neighbors.Add(edge.Target);
-                }
-                else
-                {
-                    neighbors.Add(edge.Source);
-                }
-            }
-            return neighbors;
+            var set = new HashSet<string>(adjEdges.Select(x => x.Source).Union(adjEdges.Select(x => x.Target)));
+            set.Remove(vertex);
+            adjEdges = null;
+            return set.ToList();
         }
         
-        public static string AsString<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph)
+        public static string AsString(this UndirectedGraph<string, Edge<string>> graph)
         {
             if (graph.IsEdgesEmpty) return "";
-            var sb = new StringBuilder("Graph: Edges - ");
+            var sb = new StringBuilder("Graph-Edges_");
             foreach (var edge in graph.Edges)
             {
-                sb.AppendFormat("[{0}], ", edge);
+                sb.AppendFormat("[{0}],", edge);
             }
             //sb.AppendLine();
-            return sb.ToString();
+            return sb.ToString().TrimEnd();
         }
 
-        public static UndirectedGraph<TVertex, Edge<TVertex>> Clone<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph)
+        public static UndirectedGraph<string, Edge<string>> Clone(this UndirectedGraph<string, Edge<string>> graph)
         {
-            var inputGraphClone = new UndirectedGraph<TVertex, Edge<TVertex>>();
+            var inputGraphClone = new UndirectedGraph<string, Edge<string>>();
             inputGraphClone.AddVerticesAndEdgeRange(graph.Edges);
             Debug.Assert(inputGraphClone.EdgeCount == graph.EdgeCount && inputGraphClone.VertexCount == graph.VertexCount);
             return inputGraphClone;
@@ -68,32 +59,27 @@ namespace MODA.Impl
         /// <summary>
         /// NB: The degree sequence of an undirected graph is the non-increasing sequence of its vertex degrees;
         /// </summary>
-        /// <typeparam name="TVertex"></typeparam>
+        /// <typeparam name="string"></typeparam>
         /// <param name="graph"></param>
         /// <returns></returns>
-        public static List<TVertex> GetDegreeSequence<TVertex>(this UndirectedGraph<TVertex, Edge<TVertex>> graph)
+        public static string[] GetDegreeSequence(this UndirectedGraph<string, Edge<string>> graph)
         {
-            var listToReturn = new List<TVertex>();
-            if (graph.IsVerticesEmpty) return listToReturn;
+            if (graph.IsVerticesEmpty) return new string[0];
 
-            var tempList = new Dictionary<TVertex, int>();
-            foreach (var node in graph.Vertices)
+            var vertices = graph.Vertices.ToArray();
+            var listToReturn = new string[vertices.Length];
+            var tempList = new Dictionary<string, int>(vertices.Length);
+            foreach (var node in vertices)
             {
                 tempList.Add(node, graph.AdjacentDegree(node));
             }
-
+            int index = 0;
             foreach (var item in tempList.OrderByDescending(x => x.Value))
             {
-                listToReturn.Add(item.Key);
+                listToReturn[index] = item.Key;
+                index++;
             }
             return listToReturn;
-        }
-        
-        public static TValue get<TKey, TValue>(this Dictionary<TKey, TValue> dict, TKey key)
-        {
-            TValue val;
-            if (dict.TryGetValue(key, out val)) return val;
-            return default(TValue);
         }
         
     }
