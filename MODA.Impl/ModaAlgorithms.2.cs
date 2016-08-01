@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace MODA.Impl
 {
@@ -16,80 +16,121 @@ namespace MODA.Impl
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size</param>
         private HashSet<Mapping> Algorithm2(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
         {
-            if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount; // / 3;
-            int i = 0;
+            if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3;
+            int counter = 0;
             // Do we need this clone? Can't we just remove the node directly from the graph?
             var inputGraphClone = inputGraph.Clone();
             var theMappings = new HashSet<Mapping>();
-
             foreach (var g in inputGraph.GetDegreeSequence())
             {
+                //var lockObj = new object();
                 foreach (var h in queryGraph.Vertices)
+                //Parallel.ForEach(queryGraph.Vertices, h =>
                 {
                     if (CanSupport(queryGraph, h, inputGraphClone, g))
                     {
+                        #region Can Support
                         //Remember: f(h) = g, so h is Domain and g is Range
-                        var function = new Dictionary<string, string>(1); //function, f
-                        function.Add(h, g);
+                        var function = new Dictionary<string, string>(1) { { h, g } }; //function, f
                         var mappings = IsomorphicExtension(function, queryGraph, inputGraphClone);
+                        int count = mappings.Count;
                         foreach (var map in mappings)
+                        //Parallel.ForEach(mappings, map =>
                         {
+                            //var sw = System.Diagnostics.Stopwatch.StartNew();
                             map.InputSubGraph = new UndirectedGraph<string, Edge<string>>(false);
-                            var subgraphNodesInInputGraph = map.Function.Values.ToArray();
-                            for (i = 0; i < subgraphNodesInInputGraph.Length; i++)
+                            map.MapOnInputSubGraph = new UndirectedGraph<string, Edge<string>>(false);
+                            var subgraphNodesInInputGraph = map.Function.ToArray();
+                            for (int i = 0; i < subgraphNodesInInputGraph.Length; i++)
                             {
                                 for (int j = (i + 1); j < subgraphNodesInInputGraph.Length; j++)
                                 {
                                     Edge<string> edge;
-                                    if (inputGraph.TryGetEdge(subgraphNodesInInputGraph[i], subgraphNodesInInputGraph[j], out edge))
+                                    if (inputGraph.TryGetEdge(subgraphNodesInInputGraph[i].Value, subgraphNodesInInputGraph[j].Value, out edge))
                                     {
                                         map.InputSubGraph.AddVerticesAndEdge(edge);
                                     }
-                                }
-                            }
 
-                            //Now we've captured the subgrph on the input as it is, with all of its edges, it's time to
-                            //the exact edges mapped. 
-                            //Put differently, we've gotten the nodes mapped, now is time to get the edges mapped.
-                            map.MapOnInputSubGraph = new UndirectedGraph<string, Edge<string>>(false);
-                            subgraphNodesInInputGraph = map.Function.Keys.ToArray();
-                            for (i = 0; i < subgraphNodesInInputGraph.Length; i++)
-                            {
-                                for (int j = (i + 1); j < subgraphNodesInInputGraph.Length; j++)
-                                {
-                                    Edge<string> edge;
-                                    if (queryGraph.TryGetEdge(subgraphNodesInInputGraph[i], subgraphNodesInInputGraph[j], out edge))
+                                    //Now we've captured the subgrph on the input as it is, with all of its edges, it's time to
+                                    //the exact edges mapped. 
+                                    //Put differently, we've gotten the nodes mapped, now is time to get the edges mapped.
+                                    if (queryGraph.TryGetEdge(subgraphNodesInInputGraph[i].Key, subgraphNodesInInputGraph[j].Key, out edge))
                                     {
                                         map.MapOnInputSubGraph.AddVerticesAndEdge(new Edge<string>(map.Function[edge.Source], map.Function[edge.Target]));
                                     }
                                 }
                             }
-                            bool isAnyEqual = false;
-                            foreach (var x in theMappings)
+                            subgraphNodesInInputGraph = null;
+                            //lock (theMappings)
                             {
-                                if (x.Equals(map))
+                                //count--;
+                                bool isAnyEqual = false;
+
+                                foreach (var x in theMappings)
                                 {
-                                    isAnyEqual = true;
-                                    break;
+                                    if (x.Equals(map))
+                                    {
+                                        isAnyEqual = true;
+                                        break;
+                                    }
+                                }
+
+                                #region Commented Out
+                                //Parallel.ForEach(theMappings, () => new object[] { map, isAnyEqual }, (x, state, map_) =>
+                                //{
+                                //    if (x.Equals((map_[0] as Mapping)))
+                                //    {
+                                //        map_[1] = true;
+                                //        state.Break();
+                                //    }
+                                //    return map_;
+                                //}
+                                //, (finally_) =>
+                                //{
+                                //    if (!Convert.ToBoolean(finally_[1]))
+                                //    {
+                                //        theMappings.Add(finally_[0] as Mapping);
+                                //    }
+                                //}); 
+
+
+
+                                #endregion
+
+                                //Parallel.ForEach(theMappings, (x, state) =>
+                                //{
+                                //    if (x.Equals(map))
+                                //    {
+                                //        isAnyEqual = true;
+                                //        state.Break();
+                                //    }
+                                //});
+                                if (!isAnyEqual)
+                                {
+                                    theMappings.Add(map);
                                 }
                             }
-                            if (isAnyEqual)
-                            {
-                                continue;
-                            }
-                            theMappings.Add(map);
+                            //sw.Stop();
+                            //Console.WriteLine("Map: {0}:\tTime to set:\t{1:N}ms", count--, sw.ElapsedMilliseconds);
+                            //sw = null;
                         }
+                        //);
                         mappings = null;
                         function = null;
+                        Console.WriteLine("*****************************************\n");
+                        #endregion
                     }
                 }
+                //);
 
                 //Remove g
                 inputGraphClone.RemoveVertex(g);
+                counter++;
 
-                i++;
-                if (i == numberOfSamples) break;
+                if (counter == numberOfSamples) break;
+
             }
+
             inputGraphClone = null;
             return theMappings;
         }
@@ -126,12 +167,12 @@ namespace MODA.Impl
                     continue;
                 }
                 //It's not; so, let f' = f on D, and f'(m) = n.
-                var newPartialMap = new Dictionary<string, string>(partialMap.Count + 1);
+                var newPartialMap = new Dictionary<string, string>(partialMap.Count + 1) { { m, n } };
                 foreach (var item in partialMap)
                 {
                     newPartialMap.Add(item.Key, item.Value);
                 }
-                newPartialMap[m] = n;
+                //newPartialMap[m] = n;
 
                 //Find all isomorphic extensions of f'.
                 var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);

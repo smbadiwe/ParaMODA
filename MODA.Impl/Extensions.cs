@@ -79,6 +79,8 @@ namespace MODA.Impl
                 listToReturn[index] = item.Key;
                 index++;
             }
+            vertices = null;
+            tempList = null;
             return listToReturn;
         }
         

@@ -41,7 +41,7 @@ namespace MODA.Impl
                 index++;
             }
             var theNewEdge = new Edge<string>(newEdgeNodes[0], newEdgeNodes[1]);
-
+            newEdgeNodes = null;
             var theMappings = new HashSet<Mapping>();
             foreach (var map in mappings)
             {
