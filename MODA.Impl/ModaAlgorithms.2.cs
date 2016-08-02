@@ -14,89 +14,59 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size</param>
-        private HashSet<Mapping> Algorithm2(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
+        private List<Mapping> Algorithm2(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
         {
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3;
             int counter = 0;
             // Do we need this clone? Can't we just remove the node directly from the graph?
             var inputGraphClone = inputGraph.Clone();
-            var theMappings = new HashSet<Mapping>();
+            var theMappings = new List<Mapping>();
+            var queryGraphVertices = queryGraph.Vertices.ToList();
             foreach (var g in inputGraph.GetDegreeSequence())
             {
-                //var lockObj = new object();
-                foreach (var h in queryGraph.Vertices)
-                //Parallel.ForEach(queryGraph.Vertices, h =>
+                //foreach (var h in queryGraph.Vertices)
+                queryGraphVertices.ForEach(h =>
                 {
                     if (CanSupport(queryGraph, h, inputGraphClone, g))
                     {
                         #region Can Support
+                        var sw = System.Diagnostics.Stopwatch.StartNew();
                         //Remember: f(h) = g, so h is Domain and g is Range
                         var function = new Dictionary<string, string>(1) { { h, g } }; //function, f
                         var mappings = IsomorphicExtension(function, queryGraph, inputGraphClone);
+                        sw.Stop();
+                        Console.WriteLine("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}", sw.Elapsed.ToString(), h, g);
+                        sw.Restart();
+                        //theMappings.AddRange(mappings);
                         int count = mappings.Count;
-                        foreach (var map in mappings)
-                        //Parallel.ForEach(mappings, map =>
+                        //foreach (var map in mappings)
+                        if (theMappings.Count == 0)
                         {
-                            //var sw = System.Diagnostics.Stopwatch.StartNew();
-                            //lock (theMappings)
+                            theMappings.AddRange(mappings);
+                        }
+                        else
+                        {
+                            mappings.ForEach(map =>
                             {
-                                //count--;
-                                bool isAnyEqual = false;
+                                var existing = theMappings.Find(x => x.Equals(map));
 
-                                foreach (var x in theMappings)
-                                {
-                                    if (x.Equals(map))
-                                    {
-                                        isAnyEqual = true;
-                                        break;
-                                    }
-                                }
-
-                                #region Commented Out
-                                //Parallel.ForEach(theMappings, () => new object[] { map, isAnyEqual }, (x, state, map_) =>
-                                //{
-                                //    if (x.Equals((map_[0] as Mapping)))
-                                //    {
-                                //        map_[1] = true;
-                                //        state.Break();
-                                //    }
-                                //    return map_;
-                                //}
-                                //, (finally_) =>
-                                //{
-                                //    if (!Convert.ToBoolean(finally_[1]))
-                                //    {
-                                //        theMappings.Add(finally_[0] as Mapping);
-                                //    }
-                                //}); 
-
-                                //Parallel.ForEach(theMappings, (x, state) =>
-                                //{
-                                //    if (x.Equals(map))
-                                //    {
-                                //        isAnyEqual = true;
-                                //        state.Break();
-                                //    }
-                                //});
-                                #endregion
-
-                                if (!isAnyEqual)
+                                if (existing == null)
                                 {
                                     theMappings.Add(map);
                                 }
                             }
-                            //sw.Stop();
-                            //Console.WriteLine("Map: {0}:\tTime to set:\t{1:N}ms", count--, sw.ElapsedMilliseconds);
-                            //sw = null;
+                            );
                         }
-                        //);
                         mappings = null;
                         function = null;
+                        sw.Stop();
+                        Console.WriteLine("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}", count--, sw.Elapsed.ToString(), h, g);
+                        sw = null;
                         Console.WriteLine("*****************************************\n");
                         #endregion
                     }
                 }
-                //);
+                );
 
                 //Remove g
                 inputGraphClone.RemoveVertex(g);
@@ -105,7 +75,7 @@ namespace MODA.Impl
                 if (counter == numberOfSamples) break;
 
             }
-
+            queryGraphVertices = null;
             inputGraphClone = null;
             return theMappings;
         }
@@ -122,7 +92,7 @@ namespace MODA.Impl
         /// <param name="queryGraph">G</param>
         /// <param name="inputGraph">H</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
-        private HashSet<Mapping> IsomorphicExtension(Dictionary<string, string> partialMap, UndirectedGraph<string, Edge<string>> queryGraph
+        private List<Mapping> IsomorphicExtension(Dictionary<string, string> partialMap, UndirectedGraph<string, Edge<string>> queryGraph
             , UndirectedGraph<string, Edge<string>> inputGraph)
         {
             if (partialMap.Count == queryGraph.VertexCount)
@@ -132,7 +102,7 @@ namespace MODA.Impl
                 {
                     map.MapOnInputSubGraph.AddVerticesAndEdge(new Edge<string>(partialMap[qEdge.Source], partialMap[qEdge.Target]));
                 }
-                
+
                 var inputSubgraphKey = InputSubgraphs.Keys.FirstOrDefault(x => new HashSet<string>(x).SetEquals(partialMap.Values));
                 if (inputSubgraphKey == null || inputSubgraphKey.Length == 0)
                 {
@@ -153,7 +123,7 @@ namespace MODA.Impl
                 }
                 map.InputSubGraph = InputSubgraphs[inputSubgraphKey];
 
-                return new HashSet<Mapping> { map };
+                return new List<Mapping> { map };
             }
 
             //Remember: f(h) = g, so h is Domain and g is Range.
@@ -161,9 +131,9 @@ namespace MODA.Impl
 
             // get m, most constrained neighbor
             string m = GetMostConstrainedNeighbour(partialMap.Keys.ToArray(), queryGraph);
-            if (string.IsNullOrWhiteSpace(m)) return new HashSet<Mapping>();
+            if (string.IsNullOrWhiteSpace(m)) return new List<Mapping>();
 
-            var listOfIsomorphisms = new HashSet<Mapping>();
+            var listOfIsomorphisms = new List<Mapping>();
 
             var neighbourRange = ChooseNeighboursOfRange(partialMap.Values.ToArray(), inputGraph);
             foreach (var n in neighbourRange) //foreach neighbour n of f(D)
@@ -173,21 +143,33 @@ namespace MODA.Impl
                     continue;
                 }
                 //It's not; so, let f' = f on D, and f'(m) = n.
-                var newPartialMap = new Dictionary<string, string>(partialMap.Count + 1) { { m, n } };
+                var newPartialMap = new Dictionary<string, string>(partialMap.Count + 1);
                 foreach (var item in partialMap)
                 {
                     newPartialMap.Add(item.Key, item.Value);
                 }
+                newPartialMap[m] = n;
 
                 //Find all isomorphic extensions of f'.
                 var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);
-                foreach (var item in subList)
+                if (listOfIsomorphisms.Count == 0)
                 {
-                    if (new HashSet<string>(item.Function.Values).Count != item.Function.Count)
+                    listOfIsomorphisms.AddRange(subList);
+                }
+                else
+                {
+                    subList.ForEach(item =>
                     {
-                        continue;
-                    }
-                    listOfIsomorphisms.Add(item);
+                        if (new HashSet<string>(item.Function.Values).Count == item.Function.Count)
+                        {
+                            var existing = listOfIsomorphisms.Find(x => x.Equals(item));
+
+                            if (existing == null)
+                            {
+                                listOfIsomorphisms.Add(item);
+                            }
+                        }
+                    });
                 }
                 newPartialMap = null;
             }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace MODA.Impl
 {
@@ -24,7 +25,7 @@ namespace MODA.Impl
         /// The subgraph (with mapped edges) in the input graph G that fit the query graph (---Function.Keys)
         /// </summary>
         public UndirectedGraph<string, Edge<string>> MapOnInputSubGraph { get; set; } = new UndirectedGraph<string, Edge<string>>(false);
-        
+
         public override bool Equals(object obj)
         {
             //Test 0 - basic object test
@@ -50,13 +51,19 @@ namespace MODA.Impl
             //Test 3 - Node degrees. 
             //  This seems to be giving us isomorphic graphs; as in, same graph cast as diferent.
             //  So it may be nice to take it out.
-            foreach (var node in MapOnInputSubGraph.Vertices)
-            {
-                if (this.MapOnInputSubGraph.AdjacentDegree(node) != other.MapOnInputSubGraph.AdjacentDegree(node))
-                {
-                    return false;
-                }
-            }
+
+            //var any = MapOnInputSubGraph.Vertices.ToList().Find(node =>
+            //        this.MapOnInputSubGraph.AdjacentDegree(node) != other.MapOnInputSubGraph.AdjacentDegree(node));
+            
+            //if (any != null) return false;
+            //foreach (var node in MapOnInputSubGraph.Vertices)
+            //{
+            //    if (this.MapOnInputSubGraph.AdjacentDegree(node) != other.MapOnInputSubGraph.AdjacentDegree(node))
+            //    {
+            //        return false;
+            //    }
+            //}
+
             return true;
         }
 

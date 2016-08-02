@@ -15,7 +15,7 @@ namespace MODA.Impl
         /// <param name="queryGraph"></param>
         /// <param name="inputGraph"></param>
         /// <param name="expansionTree"></param>
-        private HashSet<Mapping> Algorithm3(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph,
+        private List<Mapping> Algorithm3(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph,
             AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree)
             //, Dictionary<UndirectedGraph<string, Edge<string>>, HashSet<Mapping>> foundMappings
         {
@@ -23,7 +23,7 @@ namespace MODA.Impl
             var file = Path.Combine(MapFolder, parentQueryGraph.AsString().Replace(">", "&lt;") + ".map");
             var mapObject = MyXmlSerializer.DeSerialize<Map>(File.ReadAllBytes(file));
             var mappings = mapObject.Mappings; // foundMappings[parentQueryGraph]; //It's guaranteed to be there. If it's not, there's a prolem
-            if (mappings.Count == 0) return new HashSet<Mapping>();
+            if (mappings.Count == 0) return new List<Mapping>();
 
             // Get the new edge in the queryGraph
             // New Edge = E(G') - E(H)
@@ -42,7 +42,7 @@ namespace MODA.Impl
             }
             var theNewEdge = new Edge<string>(newEdgeNodes[0], newEdgeNodes[1]);
             newEdgeNodes = null;
-            var theMappings = new HashSet<Mapping>();
+            var theMappings = new List<Mapping>();
             foreach (var map in mappings)
             {
                 if (map.Function.Count != map.MapOnInputSubGraph.VertexCount) continue;

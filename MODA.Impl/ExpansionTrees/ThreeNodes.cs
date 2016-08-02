@@ -20,8 +20,8 @@ namespace MODA.Impl
             //Level 1
             var qGraphL1_1 = new Edge<string>[]
             {
-                new Edge<string>("0","1"),
-                new Edge<string>("1","2")
+                new Edge<string>("A","B"),
+                new Edge<string>("B","C")
             }
             .ToUndirectedGraph<string, Edge<string>>(false);
             var nodeL1_1 = new ExpansionTreeNode<Edge<string>>
@@ -35,9 +35,9 @@ namespace MODA.Impl
             //Level 2
             var qGraphL2_1 = new Edge<string>[]
             {
-                new Edge<string>("0","1"),
-                new Edge<string>("1","2"),
-                new Edge<string>("0","2") //New Add;
+                new Edge<string>("A","B"),
+                new Edge<string>("B","C"),
+                new Edge<string>("A","C") //New Add;
             }
             .ToUndirectedGraph<string, Edge<string>>(false);
             var nodeL2_1 = new ExpansionTreeNode<Edge<string>>

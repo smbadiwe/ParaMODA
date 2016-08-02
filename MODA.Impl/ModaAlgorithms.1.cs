@@ -24,7 +24,7 @@ namespace MODA.Impl
             do
             {
                 var qGraph = GetNextNode(builder.VerticesSorted).QueryGraph;
-                HashSet<Mapping> mappings;
+                List<Mapping> mappings;
                 if (qGraph.EdgeCount == (subgraphSize - 1))
                 {
                     //TODO: Mapping module - MODA and Grockow & Kellis
@@ -60,6 +60,7 @@ namespace MODA.Impl
             }
             while (true);
 
+            builder = null;
             return allMappings;
         }
 

@@ -62,22 +62,25 @@ namespace MODA.Impl
         /// <typeparam name="string"></typeparam>
         /// <param name="graph"></param>
         /// <returns></returns>
-        public static string[] GetDegreeSequence(this UndirectedGraph<string, Edge<string>> graph)
+        public static List<string> GetDegreeSequence(this UndirectedGraph<string, Edge<string>> graph)
         {
-            if (graph.IsVerticesEmpty) return new string[0];
+            if (graph.IsVerticesEmpty) return new List<string>(0);
 
-            var vertices = graph.Vertices.ToArray();
-            var listToReturn = new string[vertices.Length];
-            var tempList = new Dictionary<string, int>(vertices.Length);
-            foreach (var node in vertices)
+            var vertices = graph.Vertices.ToList();
+            var tempList = new Dictionary<string, int>(vertices.Count);
+            //foreach (var node in vertices)
+            vertices.ForEach(node =>
             {
                 tempList.Add(node, graph.AdjacentDegree(node));
             }
-            int index = 0;
+            );
+            var listToReturn = new List<string>(vertices.Count);
+            //int index = 0;
             foreach (var item in tempList.OrderByDescending(x => x.Value))
             {
-                listToReturn[index] = item.Key;
-                index++;
+                //listToReturn[index] = item.Key;
+                //index++;
+                listToReturn.Add(item.Key);
             }
             vertices = null;
             tempList = null;

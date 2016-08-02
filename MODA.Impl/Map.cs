@@ -10,7 +10,7 @@ namespace MODA.Impl
     [Serializable]
     public class Map
     {
-        public HashSet<Mapping> Mappings { get; set; }
+        public List<Mapping> Mappings { get; set; }
         public UndirectedGraph<string, Edge<string>> QueryGraph { get; set; }
     }
 }
