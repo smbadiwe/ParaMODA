@@ -45,7 +45,7 @@ namespace MODA.Impl
             var theMappings = new HashSet<Mapping>();
             foreach (var map in mappings)
             {
-                if (map.Function.Count != map.InputSubGraph.VertexCount) continue;
+                if (map.Function.Count != map.MapOnInputSubGraph.VertexCount) continue;
 
                 // Reember, f(h) = g
                 // Remember, map.InputSubGraph is a subgraph of inputGraph

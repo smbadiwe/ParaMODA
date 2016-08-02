@@ -38,29 +38,6 @@ namespace MODA.Impl
                         //Parallel.ForEach(mappings, map =>
                         {
                             //var sw = System.Diagnostics.Stopwatch.StartNew();
-                            map.InputSubGraph = new UndirectedGraph<string, Edge<string>>(false);
-                            map.MapOnInputSubGraph = new UndirectedGraph<string, Edge<string>>(false);
-                            var subgraphNodesInInputGraph = map.Function.ToArray();
-                            for (int i = 0; i < subgraphNodesInInputGraph.Length; i++)
-                            {
-                                for (int j = (i + 1); j < subgraphNodesInInputGraph.Length; j++)
-                                {
-                                    Edge<string> edge;
-                                    if (inputGraph.TryGetEdge(subgraphNodesInInputGraph[i].Value, subgraphNodesInInputGraph[j].Value, out edge))
-                                    {
-                                        map.InputSubGraph.AddVerticesAndEdge(edge);
-                                    }
-
-                                    //Now we've captured the subgrph on the input as it is, with all of its edges, it's time to
-                                    //the exact edges mapped. 
-                                    //Put differently, we've gotten the nodes mapped, now is time to get the edges mapped.
-                                    if (queryGraph.TryGetEdge(subgraphNodesInInputGraph[i].Key, subgraphNodesInInputGraph[j].Key, out edge))
-                                    {
-                                        map.MapOnInputSubGraph.AddVerticesAndEdge(new Edge<string>(map.Function[edge.Source], map.Function[edge.Target]));
-                                    }
-                                }
-                            }
-                            subgraphNodesInInputGraph = null;
                             //lock (theMappings)
                             {
                                 //count--;
@@ -93,10 +70,6 @@ namespace MODA.Impl
                                 //    }
                                 //}); 
 
-
-
-                                #endregion
-
                                 //Parallel.ForEach(theMappings, (x, state) =>
                                 //{
                                 //    if (x.Equals(map))
@@ -105,6 +78,8 @@ namespace MODA.Impl
                                 //        state.Break();
                                 //    }
                                 //});
+                                #endregion
+
                                 if (!isAnyEqual)
                                 {
                                     theMappings.Add(map);
@@ -136,9 +111,14 @@ namespace MODA.Impl
         }
 
         /// <summary>
+        /// Given a set of nodes(the Key), we find the subgraph in the input graph G that has those nodes.
+        /// </summary>
+        private static readonly Dictionary<string[], UndirectedGraph<string, Edge<string>>> InputSubgraphs = new Dictionary<string[], UndirectedGraph<string, Edge<string>>>();
+
+        /// <summary>
         /// Algorithm taken from Grochow and Kellis. This is failing at the moment
         /// </summary>
-        /// <param name="partialMap">f; Map is represented as a dictionary, with the Key as h and the Valuw as g</param>
+        /// <param name="partialMap">f; Map is represented as a dictionary, with the Key as h and the Value as g</param>
         /// <param name="queryGraph">G</param>
         /// <param name="inputGraph">H</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
@@ -147,7 +127,33 @@ namespace MODA.Impl
         {
             if (partialMap.Count == queryGraph.VertexCount)
             {
-                return new HashSet<Mapping> { new Mapping(partialMap) };
+                var map = new Mapping(partialMap);
+                foreach (var qEdge in queryGraph.Edges)
+                {
+                    map.MapOnInputSubGraph.AddVerticesAndEdge(new Edge<string>(partialMap[qEdge.Source], partialMap[qEdge.Target]));
+                }
+                
+                var inputSubgraphKey = InputSubgraphs.Keys.FirstOrDefault(x => new HashSet<string>(x).SetEquals(partialMap.Values));
+                if (inputSubgraphKey == null || inputSubgraphKey.Length == 0)
+                {
+                    var newInputSubgraph = new UndirectedGraph<string, Edge<string>>(false);
+                    inputSubgraphKey = partialMap.Values.ToArray();
+                    for (int i = 0; i < inputSubgraphKey.Length; i++)
+                    {
+                        for (int j = (i + 1); j < inputSubgraphKey.Length; j++)
+                        {
+                            Edge<string> edge;
+                            if (inputGraph.TryGetEdge(inputSubgraphKey[i], inputSubgraphKey[j], out edge))
+                            {
+                                newInputSubgraph.AddVerticesAndEdge(edge);
+                            }
+                        }
+                    }
+                    InputSubgraphs.Add(inputSubgraphKey, newInputSubgraph);
+                }
+                map.InputSubGraph = InputSubgraphs[inputSubgraphKey];
+
+                return new HashSet<Mapping> { map };
             }
 
             //Remember: f(h) = g, so h is Domain and g is Range.
@@ -172,7 +178,6 @@ namespace MODA.Impl
                 {
                     newPartialMap.Add(item.Key, item.Value);
                 }
-                //newPartialMap[m] = n;
 
                 //Find all isomorphic extensions of f'.
                 var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);

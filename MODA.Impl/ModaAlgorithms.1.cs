@@ -35,8 +35,11 @@ namespace MODA.Impl
                     //TODO: Enumeration moodule - MODA
                     mappings = Algorithm3(qGraph, inputGraph, builder.ExpansionTree); //, allMappings
                 }
-                if (mappings.Count == 0) continue;
-
+                if (mappings.Count == 0)
+                {
+                    mappings = null;
+                    continue;
+                }
                 //Save mappings. Do we need to save to disk?
                 allMappings.Add(qGraph, mappings.Count);
                 File.WriteAllBytes(Path.Combine(MapFolder, qGraph.AsString().Replace(">", "&lt;") + ".map"), MyXmlSerializer.Serialize(new Map

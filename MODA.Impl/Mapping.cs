@@ -18,12 +18,12 @@ namespace MODA.Impl
         /// <summary>
         /// The subgraph (with all edges) in the input graph G that fit the query graph (---Function.Values)
         /// </summary>
-        public UndirectedGraph<string, Edge<string>> InputSubGraph { get; set; }
+        public UndirectedGraph<string, Edge<string>> InputSubGraph { get; set; } = new UndirectedGraph<string, Edge<string>>(false);
 
         /// <summary>
         /// The subgraph (with mapped edges) in the input graph G that fit the query graph (---Function.Keys)
         /// </summary>
-        public UndirectedGraph<string, Edge<string>> MapOnInputSubGraph { get; set; }
+        public UndirectedGraph<string, Edge<string>> MapOnInputSubGraph { get; set; } = new UndirectedGraph<string, Edge<string>>(false);
         
         public override bool Equals(object obj)
         {
@@ -50,7 +50,7 @@ namespace MODA.Impl
             //Test 3 - Node degrees. 
             //  This seems to be giving us isomorphic graphs; as in, same graph cast as diferent.
             //  So it may be nice to take it out.
-            foreach (var node in InputSubGraph.Vertices)
+            foreach (var node in MapOnInputSubGraph.Vertices)
             {
                 if (this.MapOnInputSubGraph.AdjacentDegree(node) != other.MapOnInputSubGraph.AdjacentDegree(node))
                 {
