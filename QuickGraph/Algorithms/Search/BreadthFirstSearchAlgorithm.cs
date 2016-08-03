@@ -5,6 +5,7 @@ using QuickGraph.Collections;
 using QuickGraph.Algorithms.Observers;
 using QuickGraph.Algorithms.Services;
 using System.Diagnostics.Contracts;
+using System.Diagnostics;
 
 namespace QuickGraph.Algorithms.Search
 {
@@ -188,7 +189,7 @@ namespace QuickGraph.Algorithms.Search
             if (!this.TryGetRootVertex(out rootVertex))
             {
                 // enqueue roots
-                foreach (var root in AlgorithmExtensions.Roots(this.VisitedGraph))
+                foreach (var root in AlgoExt.Roots(this.VisitedGraph))
                     this.EnqueueRoot(root);
             }
             else // enqueue select root only
@@ -251,5 +252,46 @@ namespace QuickGraph.Algorithms.Search
                 this.OnFinishVertex(u);
             }
         }
+    }
+
+    public static class AlgoExt
+    {
+
+        /// <summary>
+        /// Gets the list of roots
+        /// </summary>
+        /// <typeparam name="TVertex">type of the vertices</typeparam>
+        /// <typeparam name="TEdge">type of the edges</typeparam>
+        /// <param name="visitedGraph"></param>
+        /// <returns></returns>
+        public static IEnumerable<TVertex> Roots<TVertex, TEdge>(
+#if !NET20
+this
+#endif
+            IVertexListGraph<TVertex, TEdge> visitedGraph)
+            where TEdge : IEdge<TVertex>
+        {
+            Contract.Requires(visitedGraph != null);
+            return RootsIterator<TVertex, TEdge>(visitedGraph);
+        }
+
+        [DebuggerHidden]
+        private static IEnumerable<TVertex> RootsIterator<TVertex, TEdge>(
+            IVertexListGraph<TVertex, TEdge> visitedGraph)
+            where TEdge : IEdge<TVertex>
+        {
+            var notRoots = new Dictionary<TVertex, bool>(visitedGraph.VertexCount);
+            var dfs = new DepthFirstSearchAlgorithm<TVertex, TEdge>(visitedGraph);
+            dfs.ExamineEdge += e => notRoots[e.Target] = false;
+            dfs.Compute();
+
+            foreach (var vertex in visitedGraph.Vertices)
+            {
+                bool value;
+                if (!notRoots.TryGetValue(vertex, out value))
+                    yield return vertex;
+            }
+        }
+
     }
 }

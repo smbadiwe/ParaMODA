@@ -197,26 +197,26 @@ this
             return true;
         }
 
-        /// <summary>
-        /// Creates a vertex pair (source, target) from the edge
-        /// </summary>
-        /// <typeparam name="TVertex">type of the vertices</typeparam>
-        /// <typeparam name="TEdge">type of the edges</typeparam>
-        /// <param name="edge"></param>
-        /// <returns></returns>
-        public static SEquatableEdge<TVertex> ToVertexPair<TVertex, TEdge>(
-#if !NET20
-this 
-#endif            
-            TEdge edge)
-            where TEdge : IEdge<TVertex>
-        {
-            Contract.Requires(edge != null);
-            Contract.Ensures(Contract.Result<SEquatableEdge<TVertex>>().Source.Equals(edge.Source));
-            Contract.Ensures(Contract.Result<SEquatableEdge<TVertex>>().Target.Equals(edge.Target));
+//        /// <summary>
+//        /// Creates a vertex pair (source, target) from the edge
+//        /// </summary>
+//        /// <typeparam name="TVertex">type of the vertices</typeparam>
+//        /// <typeparam name="TEdge">type of the edges</typeparam>
+//        /// <param name="edge"></param>
+//        /// <returns></returns>
+//        public static SEquatableEdge<TVertex> ToVertexPair<TVertex, TEdge>(
+//#if !NET20
+//this 
+//#endif            
+//            TEdge edge)
+//            where TEdge : IEdge<TVertex>
+//        {
+//            Contract.Requires(edge != null);
+//            Contract.Ensures(Contract.Result<SEquatableEdge<TVertex>>().Source.Equals(edge.Source));
+//            Contract.Ensures(Contract.Result<SEquatableEdge<TVertex>>().Target.Equals(edge.Target));
 
-            return new SEquatableEdge<TVertex>(edge.Source, edge.Target);
-        }
+//            return new SEquatableEdge<TVertex>(edge.Source, edge.Target);
+//        }
 
         /// <summary>
         /// Checks that <paramref name="root"/> is a predecessor of <paramref name="vertex"/>
@@ -387,21 +387,21 @@ TEdge edge,
             return edge.Source.Equals(source) && edge.Target.Equals(target);
         }
 
-        /// <summary>
-        /// Returns a reversed edge enumeration
-        /// </summary>
-        /// <param name="edges"></param>
-        /// <returns></returns>
-        public static IEnumerable<SReversedEdge<TVertex, TEdge>> ReverseEdges<TVertex, TEdge>(IEnumerable<TEdge> edges)
-            where TEdge : IEdge<TVertex>
-        {
-            Contract.Requires(edges != null);
-            Contract.Requires(Enumerable.All(edges, e => e != null));
-            Contract.Ensures(Contract.Result<IEnumerable<SReversedEdge<TVertex, TEdge>>>() != null);
+        ///// <summary>
+        ///// Returns a reversed edge enumeration
+        ///// </summary>
+        ///// <param name="edges"></param>
+        ///// <returns></returns>
+        //public static IEnumerable<SReversedEdge<TVertex, TEdge>> ReverseEdges<TVertex, TEdge>(IEnumerable<TEdge> edges)
+        //    where TEdge : IEdge<TVertex>
+        //{
+        //    Contract.Requires(edges != null);
+        //    Contract.Requires(Enumerable.All(edges, e => e != null));
+        //    Contract.Ensures(Contract.Result<IEnumerable<SReversedEdge<TVertex, TEdge>>>() != null);
 
-            foreach (var edge in edges)
-                yield return new SReversedEdge<TVertex, TEdge>(edge);
-        }
+        //    foreach (var edge in edges)
+        //        yield return new SReversedEdge<TVertex, TEdge>(edge);
+        //}
 
     }
 }

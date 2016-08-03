@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace MODA.Impl
 {
@@ -17,11 +18,11 @@ namespace MODA.Impl
         /// <param name="expansionTree"></param>
         private List<Mapping> Algorithm3(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph,
             AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree)
-            //, Dictionary<UndirectedGraph<string, Edge<string>>, HashSet<Mapping>> foundMappings
         {
+            var timer = System.Diagnostics.Stopwatch.StartNew();
             var parentQueryGraph = GetParent(queryGraph, expansionTree); // H
             var file = Path.Combine(MapFolder, parentQueryGraph.AsString().Replace(">", "&lt;") + ".map");
-            var mapObject = MyXmlSerializer.DeSerialize<Map>(File.ReadAllBytes(file));
+            var mapObject = MySerializer.DeSerialize<Map>(File.ReadAllBytes(file));
             var mappings = mapObject.Mappings; // foundMappings[parentQueryGraph]; //It's guaranteed to be there. If it's not, there's a prolem
             if (mappings.Count == 0) return new List<Mapping>();
 
@@ -43,28 +44,58 @@ namespace MODA.Impl
             var theNewEdge = new Edge<string>(newEdgeNodes[0], newEdgeNodes[1]);
             newEdgeNodes = null;
             var theMappings = new List<Mapping>();
-            foreach (var map in mappings)
+
+            var tasks = new List<Task>();
+            List<Mapping>[] chunks = new List<Mapping>[mappings.Count < 40 ? 1 : mappings.Count / 40];
+            for (int i = 0; i < chunks.Length; i++)
             {
-                if (map.Function.Count != map.MapOnInputSubGraph.VertexCount) continue;
-
-                // Reember, f(h) = g
-                // Remember, map.InputSubGraph is a subgraph of inputGraph
-                Edge<string> edge;
-                if (map.InputSubGraph.TryGetEdge(map.Function[theNewEdge.Source], map.Function[theNewEdge.Target], out edge))
-                {
-                    var newMap = new Mapping(map.Function)
-                    {
-                        InputSubGraph = map.InputSubGraph,
-                        MapOnInputSubGraph = map.InputSubGraph
-                    };
-                    if (theMappings.Any(x => x.Equals(newMap)))
-                    {
-                        continue;
-                    }
-                    theMappings.Add(newMap);
-                }
+                chunks[i] = new List<Mapping>();
             }
+            int iter = 0;
+            foreach (var v in mappings)
+            {
+                chunks[iter % chunks.Length].Add(v);
+                iter++;
+            }
+            iter = 0;
+            foreach (var mappingsChunk in chunks)
+            {
+                tasks.Add(Task.Factory.StartNew((objects) =>
+                {
+                    var objectsSet = objects as object[];
+                    var mappingsChunk_ = objectsSet[0] as Mapping[];
+                    var theNewEdge_ = objectsSet[1] as Edge<string>;
+                    for (int i = 0; i < mappingsChunk_.Length; i++)
+                    {
+                        var map = mappingsChunk_[i];
+                        if (map.Function.Count == map.MapOnInputSubGraph.VertexCount)
+                        {
+                            // Reember, f(h) = g
+                            // Remember, map.InputSubGraph is a subgraph of inputGraph
+                            Edge<string> edge;
+                            if (map.InputSubGraph.TryGetEdge(map.Function[theNewEdge_.Source], map.Function[theNewEdge_.Target], out edge))
+                            {
+                                var newMap = new Mapping(map.Function)
+                                {
+                                    InputSubGraph = map.InputSubGraph,
+                                    MapOnInputSubGraph = map.InputSubGraph
+                                };
+                                lock (theMappings)
+                                {
+                                    if (!theMappings.Any(x => x.Equals(newMap)))
+                                    {
+                                        theMappings.Add(newMap);
+                                    } 
+                                }
+                            }
+                        }
+                    }
+                }, new object[] { mappingsChunk.ToArray(), theNewEdge }));
+            }
+            Task.WaitAll(tasks.ToArray());
+            Console.WriteLine("Algorithm 3: All {2} tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", theMappings.Count, timer.Elapsed.ToString(), tasks.Count);
 
+            tasks = null;
             return theMappings;
         }
 

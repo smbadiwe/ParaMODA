@@ -1,4 +1,5 @@
 ﻿using QuickGraph;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,11 +9,11 @@ namespace MODA.Impl
 {
     public static class Extensions
     {
-        public static List<string> GetNonNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, List<string> neighboursOfVertex = null)
+        public static List<string> GetNonNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG = true, List<string> neighboursOfVertex = null)
         {
             if (neighboursOfVertex == null)
             {
-                neighboursOfVertex = GetNeighbors(graph, vertex);
+                neighboursOfVertex = GetNeighbors(graph, vertex, isG);
             }
             var nonNeighbors = new List<string>();
 
@@ -27,13 +28,42 @@ namespace MODA.Impl
             return nonNeighbors;
         }
 
-        public static List<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex)
+        public static List<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG = true)
         {
-            var adjEdges = graph.AdjacentEdges(vertex);
-            var set = new HashSet<string>(adjEdges.Select(x => x.Source).Union(adjEdges.Select(x => x.Target)));
-            set.Remove(vertex);
-            adjEdges = null;
-            return set.ToList();
+            List<string> neighbors;
+            if (isG)
+            {
+                if (ModaAlgorithms.G_NodeNeighbours.TryGetValue(vertex, out neighbors))
+                {
+                    return neighbors;
+                }
+                else
+                {
+                    var adjEdges = graph.AdjacentEdges(vertex);
+                    var set = new HashSet<string>(adjEdges.Select(x => x.Source).Union(adjEdges.Select(x => x.Target)));
+                    set.Remove(vertex);
+                    adjEdges = null;
+                    ModaAlgorithms.G_NodeNeighbours[vertex] = neighbors = set.ToList();
+                    return neighbors;
+                }
+            }
+            else
+            {
+                if (ModaAlgorithms.H_NodeNeighbours.TryGetValue(vertex, out neighbors))
+                {
+                    return neighbors;
+                }
+                else
+                {
+                    var adjEdges = graph.AdjacentEdges(vertex);
+                    var set = new HashSet<string>(adjEdges.Select(x => x.Source).Union(adjEdges.Select(x => x.Target)));
+                    set.Remove(vertex);
+                    adjEdges = null;
+                    ModaAlgorithms.H_NodeNeighbours[vertex] = neighbors = set.ToList();
+                    return neighbors;
+                }
+            }
+            
         }
         
         public static string AsString(this UndirectedGraph<string, Edge<string>> graph)
@@ -68,7 +98,7 @@ namespace MODA.Impl
 
             var vertices = graph.Vertices.ToList();
             var tempList = new Dictionary<string, int>(vertices.Count);
-            //foreach (var node in vertices)
+
             vertices.ForEach(node =>
             {
                 tempList.Add(node, graph.AdjacentDegree(node));

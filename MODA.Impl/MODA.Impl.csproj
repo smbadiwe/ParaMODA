@@ -60,10 +60,11 @@
     <Compile Include="GraphProcessor.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Mapping.cs" />
-    <Compile Include="ModaAlgorithms.3.cs" />
     <Compile Include="ModaAlgorithms.2.cs" />
+    <Compile Include="ModaAlgorithms.3.cs" />
+    <Compile Include="ModaAlgorithms.2.Modified.cs" />
     <Compile Include="ModaAlgorithms.1.cs" />
-    <Compile Include="MyXmlSerializer.cs" />
+    <Compile Include="MySerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

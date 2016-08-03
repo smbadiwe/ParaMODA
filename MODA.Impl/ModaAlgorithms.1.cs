@@ -28,35 +28,33 @@ namespace MODA.Impl
                 if (qGraph.EdgeCount == (subgraphSize - 1))
                 {
                     //TODO: Mapping module - MODA and Grockow & Kellis
-                    mappings = Algorithm2(qGraph, inputGraph);
+                    mappings = Algorithm2_Modified(qGraph, inputGraph); //Algorithm2_Original
                 }
                 else
                 {
                     //TODO: Enumeration moodule - MODA
-                    mappings = Algorithm3(qGraph, inputGraph, builder.ExpansionTree); //, allMappings
+                    mappings = Algorithm3(qGraph, inputGraph, builder.ExpansionTree);
                 }
-                if (mappings.Count == 0)
+                if (mappings.Count > 0)
                 {
+                    //Save mappings. Do we need to save to disk?
+                    allMappings.Add(qGraph, mappings.Count);
+                    File.WriteAllBytes(Path.Combine(MapFolder, qGraph.AsString().Replace(">", "&lt;") + ".map"), MySerializer.Serialize(new Map
+                    {
+                        QueryGraph = qGraph,
+                        Mappings = mappings,
+                    }));
                     mappings = null;
-                    continue;
-                }
-                //Save mappings. Do we need to save to disk?
-                allMappings.Add(qGraph, mappings.Count);
-                File.WriteAllBytes(Path.Combine(MapFolder, qGraph.AsString().Replace(">", "&lt;") + ".map"), MyXmlSerializer.Serialize(new Map
-                {
-                    QueryGraph = qGraph,
-                    Mappings = mappings,
-                }));
-                mappings = null;
-                
-                //Check for complete-ness; if complete, break
-                //  A Complete graph of n nodes has n(n-1)/2 edges
-                if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))
-                {
+
+                    //Check for complete-ness; if complete, break
+                    //  A Complete graph of n nodes has n(n-1)/2 edges
+                    if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))
+                    {
+                        qGraph = null;
+                        break;
+                    }
                     qGraph = null;
-                    break;
                 }
-                qGraph = null;
             }
             while (true);
 

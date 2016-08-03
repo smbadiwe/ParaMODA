@@ -11,7 +11,7 @@ using System.Xml.Serialization;
 
 namespace MODA.Impl
 {
-    public class MyXmlSerializer
+    public class MySerializer
     {
         /// <summary>
         /// Serializes the object.

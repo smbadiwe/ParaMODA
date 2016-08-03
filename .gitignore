@@ -243,3 +243,4 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/MODA.Impl/ModaAlgorithms.2 - Faithful.cs
