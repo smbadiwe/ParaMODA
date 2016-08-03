@@ -28,7 +28,7 @@ namespace MODA.Impl
             var h_ = queryGraph.Vertices.First(); // var queryGraphVertices = queryGraph.Vertices.ToList();
             var degSeq = inputGraph.GetDegreeSequence();
             var tasks = new List<Task>();
-            List<string>[] chunks = new List<string>[numberOfSamples < 20 ? 1 : numberOfSamples / 20];
+            List<string>[] chunks = new List<string>[numberOfSamples < 20 ? 1 : Math.Min(numberOfSamples / 20, 25)];
             for (int i = 0; i < chunks.Length; i++)
             {
                 chunks[i] = new List<string>();
@@ -284,6 +284,7 @@ namespace MODA.Impl
             //        return false;
             //    }
             //}
+
             neighborsOfM = null;
             neighboursOfN = null;
             return false;
@@ -325,15 +326,15 @@ namespace MODA.Impl
                             try
                             {
                                 local.Remove(local[j - counter]);
-                                if (local.Count == 0)
-                                {
-                                    break;
-                                }
                                 counter++;
                             }
                             catch (Exception ex)
                             {
-                                throw new ArgumentOutOfRangeException(string.Format("ERROR in 'ChooseNeighboursOfRange' trying to remove from local:\n\t in Index (j - counter) = {0}; j = {1}; counter = {2}; local.Count = {3}.", (j - counter), j, counter, local.Count), ex);
+                                //throw new ArgumentOutOfRangeException(string.Format("ERROR in 'ChooseNeighboursOfRange' trying to remove from local:\n\t in Index (j - counter) = {0}; j = {1}; counter = {2}; local.Count = {3}.", (j - counter), j, counter, local.Count), ex);
+                            }
+                            if (local.Count == 0)
+                            {
+                                break;
                             }
                         }
                     }
@@ -401,15 +402,15 @@ namespace MODA.Impl
                             try
                             {
                                 local.Remove(local[j - counter]);
-                                if (local.Count == 0)
-                                {
-                                    break;
-                                }
                                 counter++;
                             }
                             catch (Exception ex)
                             {
-                                throw new ArgumentOutOfRangeException(string.Format("ERROR in 'GetMostConstrainedNeighbour' trying to remove from local:\n\t in Index (j - counter) = {0}; j = {1}; counter = {2}; local.Count = {3}.", (j - counter), j, counter, local.Count), ex);
+                                //throw new ArgumentOutOfRangeException(string.Format("ERROR in 'GetMostConstrainedNeighbour' trying to remove from local:\n\t in Index (j - counter) = {0}; j = {1}; counter = {2}; local.Count = {3}.", (j - counter), j, counter, local.Count), ex);
+                            }
+                            if (local.Count == 0)
+                            {
+                                break;
                             }
                         }
                     }
@@ -451,7 +452,7 @@ namespace MODA.Impl
 
             //So, deg(g) >= deg(h).
             //2. Based on the degree of their neighbors
-            var gNeighbors = inputGraph.GetNeighbors(node_G); 
+            var gNeighbors = inputGraph.GetNeighbors(node_G);
             var hNeighbors = queryGraph.GetNeighbors(node_H);
             for (int i = 0; i < hNeighbors.Count; i++)
             {

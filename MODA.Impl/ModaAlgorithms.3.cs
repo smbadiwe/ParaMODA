@@ -46,7 +46,7 @@ namespace MODA.Impl
             var theMappings = new List<Mapping>();
 
             var tasks = new List<Task>();
-            List<Mapping>[] chunks = new List<Mapping>[mappings.Count < 40 ? 1 : mappings.Count / 40];
+            List<Mapping>[] chunks = new List<Mapping>[mappings.Count < 40 ? 1 : Math.Min(mappings.Count / 40, 25)];
             for (int i = 0; i < chunks.Length; i++)
             {
                 chunks[i] = new List<Mapping>();
