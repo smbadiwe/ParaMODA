@@ -66,7 +66,8 @@ namespace MODA.Impl
                                //function, f = new Dictionary<string, string>(1) { { h, g } }
                                var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { h, g } }, queryGraph_, inputGraph_);
                                sw.Stop();
-                               Console.WriteLine("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}", sw.Elapsed.ToString(), h, g);
+                               var logGist = new StringBuilder();
+                               logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}\n", sw.Elapsed.ToString(), h, g);
                                sw.Restart();
 
                                lock (theMappings)
@@ -101,10 +102,12 @@ namespace MODA.Impl
                                    }
                                }
                                sw.Stop();
-                               Console.WriteLine("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}", mappings.Count, sw.Elapsed.ToString(), h, g);
+                               logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
                                mappings = null;
                                sw = null;
-                               Console.WriteLine("*****************************************\n");
+                               logGist.AppendFormat("*****************************************\n");
+                               Console.WriteLine(logGist);
+                               logGist = null;
                                #endregion
                            }
                        }
@@ -176,7 +179,7 @@ namespace MODA.Impl
                 }
                 map.InputSubGraph = InputSubgraphs[inputSubgraphKey];
 
-                return new List<Mapping> { map }; 
+                return new List<Mapping> { map };
                 #endregion
             }
 
@@ -253,16 +256,16 @@ namespace MODA.Impl
             //  RECALL: m is for Domain, the Key => the query graph
 
             //A: If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d)...
-            var neighboursOfN = inputGraph.GetNeighbors(n);
-            //var neighborsOfM = queryGraph.GetNeighbors(m);
-            foreach (var d in queryGraph.GetNeighbors(m, false)) // neighborsOfM)
+            var neighboursOfN = inputGraph.GetNeighbors(n).ToArray();
+            var neighborsOfM = queryGraph.GetNeighbors(m, false).ToArray();
+            for (int i = 0; i < neighborsOfM.Length; i++)
             {
-                if (!partialMap.ContainsKey(d))
+                if (!partialMap.ContainsKey(neighborsOfM[i]))
                 {
                     neighboursOfN = null;
                     return false; // continue;
                 }
-                if (!neighboursOfN.Contains(partialMap[d]))
+                if (!neighboursOfN.Contains(partialMap[neighborsOfM[i]]))
                 {
                     neighboursOfN = null;
                     return true;
@@ -280,6 +283,7 @@ namespace MODA.Impl
             //        return false;
             //    }
             //}
+            neighborsOfM = null;
             neighboursOfN = null;
             return false;
         }
@@ -294,26 +298,26 @@ namespace MODA.Impl
                 var result = new HashSet<string>();
                 for (int i = 0; i < used_range.Length; i++)
                 {
-                    var local = inputGraph.GetNeighbors(used_range[i]);
-                    if (local.Count == 0) continue; // return result;
-
-                    int counter = 0;
-                    for (int j = 0; j < local.Count + counter; j++)
+                    var local = inputGraph.GetNeighbors(used_range[i]).ToArray();
+                    if (local.Length == 0)
                     {
-                        if (used_range.Contains(local[j - counter]))
+                        local = null;
+                        continue; 
+                    }
+                    for (int j = 0; j < local.Length; j++)
+                    {
+                        if (!used_range.Contains(local[j]))
                         {
-                            local.Remove(local[j - counter]);
-                            counter++;
+                            result.Add(local[j]);
                         }
                     }
-                    foreach (var item in local)
-                    {
-                        result.Add(item);
-                    }
+
                     local = null;
                 }
                 cachedData = used_range;
                 NeighboursOfRange[cachedData] = result;
+
+                result = null;
             }
 
             return NeighboursOfRange[cachedData];
@@ -341,20 +345,21 @@ namespace MODA.Impl
                 HashSet<string> result = new HashSet<string>();
                 for (int i = 0; i < domain.Length; i++)
                 {
-                    var local = queryGraph.GetNeighbors(domain[i], false);
-                    int local_counter = 0;
-                    for (int j = 0; j < local.Count + local_counter; j++)
+                    //var local = new List<string>(queryGraph.GetNeighbors(domain[i], false));
+                    var local = queryGraph.GetNeighbors(domain[i], false).ToArray();
+                    if (local.Length < 1)
                     {
-                        if (domain.Contains(local[j - local_counter]))
+                        local = null;
+                        continue;
+                    }
+                    for (int j = 0; j < local.Length; j++)
+                    {
+                        if (!domain.Contains(local[j]))
                         {
-                            local.Remove(local[j - local_counter]);
-                            local_counter++;
+                            result.Add(local[j]);
                         }
                     }
-                    foreach (var item in local)
-                    {
-                        result.Add(item);
-                    }
+                    
                     local = null;
                 }
                 cachedData = domain;
@@ -388,18 +393,22 @@ namespace MODA.Impl
 
             //So, deg(g) >= deg(h).
             //2. Based on the degree of their neighbors
-            var gNeighbors = inputGraph.GetNeighbors(node_G);
-            foreach (var hNeighbor in queryGraph.GetNeighbors(node_H))
+            var gNeighbors = inputGraph.GetNeighbors(node_G).ToArray();
+            var hNeighbors = queryGraph.GetNeighbors(node_H).ToArray();
+            for (int i = 0; i < hNeighbors.Length; i++)
             {
-                foreach (var x in gNeighbors)
+                for (int j = 0; j < gNeighbors.Length; j++)
                 {
-                    if (inputGraph.AdjacentDegree(x) >= queryGraph.AdjacentDegree(hNeighbor))
+                    if (inputGraph.AdjacentDegree(gNeighbors[j]) >= queryGraph.AdjacentDegree(hNeighbors[i]))
                     {
+                        gNeighbors = null;
+                        hNeighbors = null;
                         return true;
                     }
                 }
             }
             gNeighbors = null;
+            hNeighbors = null;
             return false;
         }
 

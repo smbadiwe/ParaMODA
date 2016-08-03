@@ -23,16 +23,17 @@ namespace MODA.Impl
             var allMappings = new Dictionary<UndirectedGraph<string, Edge<string>>, int>();
             do
             {
-                var qGraph = GetNextNode(builder.VerticesSorted).QueryGraph;
+                var qGraph = GetNextNode(builder.VerticesSorted)?.QueryGraph;
+                if (qGraph == null) break;
                 List<Mapping> mappings;
                 if (qGraph.EdgeCount == (subgraphSize - 1))
                 {
-                    //TODO: Mapping module - MODA and Grockow & Kellis
+                    // Modified Mapping module - MODA and Grockow & Kellis
                     mappings = Algorithm2_Modified(qGraph, inputGraph); //Algorithm2_Original
                 }
                 else
                 {
-                    //TODO: Enumeration moodule - MODA
+                    // Enumeration moodule - MODA
                     mappings = Algorithm3(qGraph, inputGraph, builder.ExpansionTree);
                 }
                 if (mappings.Count > 0)
