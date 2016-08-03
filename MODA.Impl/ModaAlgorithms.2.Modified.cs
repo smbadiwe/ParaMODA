@@ -1,4 +1,5 @@
-﻿using QuickGraph;
+﻿//This is the one that has gone bad
+using QuickGraph;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -49,69 +50,69 @@ namespace MODA.Impl
             foreach (var degSeqChunk in chunks)
             {
                 tasks.Add(Task.Factory.StartNew((objects) =>
-                   {
-                       var objectsSet = objects as object[];
-                       var degSeqChunk_ = objectsSet[0] as string[];
-                       var queryGraph_ = objectsSet[1] as UndirectedGraph<string, Edge<string>>;
-                       var h = objectsSet[2] as string;
-                       var inputGraph_ = objectsSet[3] as UndirectedGraph<string, Edge<string>>;
-                       for (int i = 0; i < degSeqChunk_.Length; i++)
-                       {
-                           var g = degSeqChunk_[i];
-                           if (CanSupport(queryGraph_, h, inputGraph_, g))
-                           {
-                               #region Can Support
-                               var sw = System.Diagnostics.Stopwatch.StartNew();
-                               //Remember: f(h) = g, so h is Domain and g is Range
-                               //function, f = new Dictionary<string, string>(1) { { h, g } }
-                               var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { h, g } }, queryGraph_, inputGraph_);
-                               sw.Stop();
-                               var logGist = new StringBuilder();
-                               logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}\n", sw.Elapsed.ToString(), h, g);
-                               sw.Restart();
+                {
+                    var objectsSet = objects as object[];
+                    var degSeqChunk_ = objectsSet[0] as string[];
+                    var queryGraph_ = objectsSet[1] as UndirectedGraph<string, Edge<string>>;
+                    var h = objectsSet[2] as string;
+                    var inputGraph_ = objectsSet[3] as UndirectedGraph<string, Edge<string>>;
+                    for (int i = 0; i < degSeqChunk_.Length; i++)
+                    {
+                        var g = degSeqChunk_[i];
+                        if (CanSupport(queryGraph_, h, inputGraph_, g))
+                        {
+                            #region Can Support
+                            var sw = System.Diagnostics.Stopwatch.StartNew();
+                            //Remember: f(h) = g, so h is Domain and g is Range
+                            //function, f = new Dictionary<string, string>(1) { { h, g } }
+                            var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { h, g } }, queryGraph_, inputGraph_);
+                            sw.Stop();
+                            var logGist = new StringBuilder();
+                            logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}\n", sw.Elapsed.ToString(), h, g);
+                            sw.Restart();
 
-                               lock (theMappings)
-                               {
-                                   if (theMappings.Count == 0)
-                                   {
-                                       theMappings.Add(g, mappings);
-                                   }
-                                   else
-                                   {
-                                       List<Mapping> newMappings = new List<Mapping>();
-                                       foreach (var map in mappings)
-                                       {
-                                           List<Mapping> mappingsToSearch;
-                                           if (theMappings.TryGetValue(map.Function.Last().Value, out mappingsToSearch))
-                                           {
-                                               var existing = mappingsToSearch.Find(x => x.Equals(map));
+                            lock (theMappings)
+                            {
+                                if (theMappings.Count == 0)
+                                {
+                                    theMappings.Add(g, mappings);
+                                }
+                                else
+                                {
+                                    List<Mapping> newMappings = new List<Mapping>();
+                                    foreach (var map in mappings)
+                                    {
+                                        List<Mapping> mappingsToSearch;
+                                        if (theMappings.TryGetValue(map.Function.Last().Value, out mappingsToSearch))
+                                        {
+                                            var existing = mappingsToSearch.Find(x => x.Equals(map));
 
-                                               if (existing == null)
-                                               {
-                                                   newMappings.Add(map);
-                                               }
-                                           }
-                                           else
-                                           {
-                                               newMappings.Add(map);
-                                           }
-                                       }
+                                            if (existing == null)
+                                            {
+                                                newMappings.Add(map);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            newMappings.Add(map);
+                                        }
+                                    }
 
-                                       theMappings.Add(g, newMappings);
-                                       newMappings = null;
-                                   }
-                               }
-                               sw.Stop();
-                               logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
-                               mappings = null;
-                               sw = null;
-                               logGist.AppendFormat("*****************************************\n");
-                               Console.WriteLine(logGist);
-                               logGist = null;
-                               #endregion
-                           }
-                       }
-                   }, new object[] { degSeqChunk.ToArray(), queryGraph, h_, inputGraph })
+                                    theMappings.Add(g, newMappings);
+                                    newMappings = null;
+                                }
+                            }
+                            sw.Stop();
+                            logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
+                            mappings = null;
+                            sw = null;
+                            logGist.AppendFormat("*****************************************\n");
+                            Console.WriteLine(logGist);
+                            logGist = null;
+                            #endregion
+                        }
+                    }
+                }, new object[] { degSeqChunk.ToArray(), queryGraph, h_, inputGraph })
                 );
                 sBuilder.AppendFormat("\tChunk {0} loaded. Number of items in chunk: {1}\n", ++iter, degSeqChunk.Count);
 
@@ -256,14 +257,14 @@ namespace MODA.Impl
             //  RECALL: m is for Domain, the Key => the query graph
 
             //A: If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d)...
-            var neighboursOfN = inputGraph.GetNeighbors(n).ToArray();
-            var neighborsOfM = queryGraph.GetNeighbors(m, false).ToArray();
-            for (int i = 0; i < neighborsOfM.Length; i++)
+            var neighboursOfN = inputGraph.GetNeighbors(n);
+            var neighborsOfM = queryGraph.GetNeighbors(m, false);
+            for (int i = 0; i < neighborsOfM.Count; i++)
             {
                 if (!partialMap.ContainsKey(neighborsOfM[i]))
                 {
                     neighboursOfN = null;
-                    return false; // continue;
+                    return false;
                 }
                 if (!neighboursOfN.Contains(partialMap[neighborsOfM[i]]))
                 {
@@ -292,24 +293,53 @@ namespace MODA.Impl
 
         private HashSet<string> ChooseNeighboursOfRange(string[] used_range, UndirectedGraph<string, Edge<string>> inputGraph)
         {
-            var cachedData = NeighboursOfRange.Keys.FirstOrDefault(x => new HashSet<string>(x).SetEquals(used_range));
+            var cachedData = NeighboursOfRange.FirstOrDefault(x => new HashSet<string>(x.Key).SetEquals(used_range)).Key;
             if (cachedData == null || cachedData.Length == 0)
             {
                 var result = new HashSet<string>();
                 for (int i = 0; i < used_range.Length; i++)
                 {
-                    var local = inputGraph.GetNeighbors(used_range[i]).ToArray();
-                    if (local.Length == 0)
+                    var local = inputGraph.GetNeighbors(used_range[i]);
+                    if (local.Count == 0)
                     {
                         local = null;
-                        continue; 
+                        continue;
                     }
-                    for (int j = 0; j < local.Length; j++)
-                    {
-                        if (!used_range.Contains(local[j]))
+                    /* You'd wonder why I didn't just do this:
+                     * for (int j = 0; j < local.Count; j++)
                         {
-                            result.Add(local[j]);
+                            if (!used_range.Contains(local[j]))
+                            {
+                                result.Add(local[j]);
+                            }
                         }
+                     * instead of the creepy thing below.
+                     * Well, it turns out that, for whatever reason only the compiler knows, the above code
+                     * makes the program incredibly slow. Code that runs in 15secs suddenly started taking over 3hours. 
+                     * */
+                    int counter = 0;
+                    for (int j = 0; j < local.Count + counter; j++)
+                    {
+                        if (used_range.Contains(local[j - counter]))
+                        {
+                            try
+                            {
+                                local.Remove(local[j - counter]);
+                                if (local.Count == 0)
+                                {
+                                    break;
+                                }
+                                counter++;
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new ArgumentOutOfRangeException(string.Format("ERROR in 'ChooseNeighboursOfRange' trying to remove from local:\n\t in Index (j - counter) = {0}; j = {1}; counter = {2}; local.Count = {3}.", (j - counter), j, counter, local.Count), ex);
+                            }
+                        }
+                    }
+                    foreach (var item in local)
+                    {
+                        result.Add(item);
                     }
 
                     local = null;
@@ -339,27 +369,55 @@ namespace MODA.Impl
              * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
              * the highest degree and largest neighbor degree sequence.
              * */
-            var cachedData = MostConstrainedNeighbours.Keys.FirstOrDefault(x => new HashSet<string>(x).SetEquals(domain));
+            var cachedData = MostConstrainedNeighbours.FirstOrDefault(x => new HashSet<string>(x.Key).SetEquals(domain)).Key;
             if (cachedData == null || cachedData.Length == 0)
             {
                 HashSet<string> result = new HashSet<string>();
                 for (int i = 0; i < domain.Length; i++)
                 {
-                    //var local = new List<string>(queryGraph.GetNeighbors(domain[i], false));
-                    var local = queryGraph.GetNeighbors(domain[i], false).ToArray();
-                    if (local.Length < 1)
+                    var local = queryGraph.GetNeighbors(domain[i], false);
+                    if (local.Count == 0)
                     {
                         local = null;
                         continue;
                     }
-                    for (int j = 0; j < local.Length; j++)
-                    {
-                        if (!domain.Contains(local[j]))
+                    /* You'd wonder why I didn't just do this:
+                     * for (int j = 0; j < local.Count; j++)
                         {
-                            result.Add(local[j]);
+                            if (!domain.Contains(local[j]))
+                            {
+                                result.Add(local[j]);
+                            }
+                        }
+                     * instead of the creepy thing below.
+                     * Well, it turns out that, for whatever reason only the compiler knows, the above code
+                     * makes the program incredibly slow. Code that runs in 15secs suddenly started taking over 3hours. 
+                     * */
+                    int counter = 0;
+                    for (int j = 0; j < local.Count + counter; j++)
+                    {
+                        if (domain.Contains(local[j - counter]))
+                        {
+                            try
+                            {
+                                local.Remove(local[j - counter]);
+                                if (local.Count == 0)
+                                {
+                                    break;
+                                }
+                                counter++;
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new ArgumentOutOfRangeException(string.Format("ERROR in 'GetMostConstrainedNeighbour' trying to remove from local:\n\t in Index (j - counter) = {0}; j = {1}; counter = {2}; local.Count = {3}.", (j - counter), j, counter, local.Count), ex);
+                            }
                         }
                     }
-                    
+                    foreach (var item in local)
+                    {
+                        result.Add(item);
+                    }
+
                     local = null;
                 }
                 cachedData = domain;
@@ -393,11 +451,11 @@ namespace MODA.Impl
 
             //So, deg(g) >= deg(h).
             //2. Based on the degree of their neighbors
-            var gNeighbors = inputGraph.GetNeighbors(node_G).ToArray();
-            var hNeighbors = queryGraph.GetNeighbors(node_H).ToArray();
-            for (int i = 0; i < hNeighbors.Length; i++)
+            var gNeighbors = inputGraph.GetNeighbors(node_G); 
+            var hNeighbors = queryGraph.GetNeighbors(node_H);
+            for (int i = 0; i < hNeighbors.Count; i++)
             {
-                for (int j = 0; j < gNeighbors.Length; j++)
+                for (int j = 0; j < gNeighbors.Count; j++)
                 {
                     if (inputGraph.AdjacentDegree(gNeighbors[j]) >= queryGraph.AdjacentDegree(hNeighbors[i]))
                     {
