@@ -1,9 +1,8 @@
 namespace QuickGraph.Graphviz.Dot
 {
     using System;
-    using System.Collections;
-    using System.IO;
     using System.Collections.Generic;
+    using System.IO;
 
     public class GraphvizEdge
     {

@@ -1,7 +1,5 @@
 namespace QuickGraph.Graphviz.Dot
 {
-    using System;
-    using System.Collections;
     using System.Collections.Generic;
 
     public class GraphvizEdgeLabel

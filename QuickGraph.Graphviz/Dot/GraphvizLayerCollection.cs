@@ -1,10 +1,9 @@
 namespace QuickGraph.Graphviz.Dot
 {
     using System;
-    using System.IO;
-    using System.Reflection;
     using System.Collections.ObjectModel;
     using System.Diagnostics.Contracts;
+    using System.IO;
 
     public class GraphvizLayerCollection : Collection<GraphvizLayer>
     {

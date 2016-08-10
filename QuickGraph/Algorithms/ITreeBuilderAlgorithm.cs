@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace QuickGraph.Algorithms
+﻿namespace QuickGraph.Algorithms
 {
     public interface ITreeBuilderAlgorithm<TVertex,TEdge>
         where TEdge : IEdge<TVertex>

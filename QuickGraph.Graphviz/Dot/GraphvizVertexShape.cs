@@ -1,7 +1,5 @@
 namespace QuickGraph.Graphviz.Dot
 {
-    using System;
-
     public enum GraphvizVertexShape
     {
         Unspecified,

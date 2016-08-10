@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using QuickGraph.Contracts;
 using System.Diagnostics.Contracts;
-using QuickGraph.Contracts;
 
 namespace QuickGraph
 {
@@ -10,7 +8,7 @@ namespace QuickGraph
     /// </summary>
     /// <typeparam name="TVertex"></typeparam>
     /// <typeparam name="TEdge"></typeparam>
-   [ContractClass(typeof(IMutableVertexListGraphContract<,>))]
+    [ContractClass(typeof(IMutableVertexListGraphContract<,>))]
    public interface IMutableVertexListGraph<TVertex, TEdge> : 
         IMutableIncidenceGraph<TVertex, TEdge>,
         IMutableVertexSet<TVertex>

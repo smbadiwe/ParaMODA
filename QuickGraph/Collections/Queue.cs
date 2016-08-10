@@ -1,7 +1,6 @@
 ﻿namespace QuickGraph.Collections
 {
     using System;
-    using System.Collections.Generic;
 
 #if !SILVERLIGHT
     [Serializable]

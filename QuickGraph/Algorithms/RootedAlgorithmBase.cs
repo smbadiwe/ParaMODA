@@ -1,7 +1,7 @@
-﻿using System;
-using QuickGraph.Algorithms.Services;
-using System.Diagnostics.Contracts;
+﻿using QuickGraph.Algorithms.Services;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 
 namespace QuickGraph.Algorithms
 {

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using QuickGraph.Graphviz.Dot;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
-using QuickGraph.Graphviz.Dot;
-using System.Diagnostics.Contracts;
 
 namespace QuickGraph.Graphviz
 {

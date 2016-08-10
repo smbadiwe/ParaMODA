@@ -65,6 +65,7 @@
     <Compile Include="ModaAlgorithms.1.cs" />
     <Compile Include="MySerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RecursionHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj">

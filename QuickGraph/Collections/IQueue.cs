@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace QuickGraph.Collections
+﻿namespace QuickGraph.Collections
 {
     public interface IQueue<T> 
     {

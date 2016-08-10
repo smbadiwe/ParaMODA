@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 #if !SILVERLIGHT
-using System.Runtime.Serialization;
 #endif
 
 namespace QuickGraph.Collections

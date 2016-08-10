@@ -1,7 +1,5 @@
 namespace QuickGraph.Graphviz.Dot
 {
-    using System;
-    using System.Reflection;
     using System.Collections.ObjectModel;
 
     public sealed class GraphvizRecordCellCollection : Collection<GraphvizRecordCell>

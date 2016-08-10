@@ -1,8 +1,7 @@
 namespace QuickGraph.Graphviz.Dot
 {
-    using System;
-    using System.Text.RegularExpressions;
     using System.Diagnostics.Contracts;
+    using System.Text.RegularExpressions;
 
     public sealed class GraphvizRecordEscaper
     {

@@ -1,9 +1,8 @@
-﻿using System;
+﻿using QuickGraph.Collections;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
-using QuickGraph.Contracts;
-using QuickGraph.Collections;
 
 namespace QuickGraph
 {

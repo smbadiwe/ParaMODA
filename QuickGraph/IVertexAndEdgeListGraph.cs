@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace QuickGraph
+﻿namespace QuickGraph
 {
     /// <summary>
     /// A directed graph where vertices and edges can be enumerated efficiently.

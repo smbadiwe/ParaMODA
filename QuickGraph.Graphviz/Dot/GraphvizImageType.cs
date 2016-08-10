@@ -1,8 +1,5 @@
 namespace QuickGraph.Graphviz.Dot
 {
-    using System;
-    using System.ComponentModel;
-
     public enum GraphvizImageType
     {
         /// <summary>

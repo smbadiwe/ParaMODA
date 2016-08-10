@@ -36,6 +36,9 @@ namespace MODA.Impl
                 case 3:
                     rootNode = ExpansionTree.BuildThreeNodesTree();
                     break;
+                case 5:
+                    rootNode = ExpansionTree.BuildFiveNodesTree();
+                    break;
                 case 4:
                 default:
                     rootNode = ExpansionTree.BuildFourNodesTree();
@@ -53,6 +56,7 @@ namespace MODA.Impl
 
                 VerticesSorted = bfs.VertexColors;
                 Graph = bfs.VisitedGraph;
+                bfs = null;
             }
             else
             {
@@ -62,6 +66,7 @@ namespace MODA.Impl
 
                 VerticesSorted = dfs.VertexColors;
                 Graph = dfs.VisitedGraph;
+                dfs = null;
             }
             VerticesSorted[rootNode] = GraphColor.White;
         }

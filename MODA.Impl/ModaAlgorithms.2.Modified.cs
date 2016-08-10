@@ -66,6 +66,8 @@ namespace MODA.Impl
                             //Remember: f(h) = g, so h is Domain and g is Range
                             //function, f = new Dictionary<string, string>(1) { { h, g } }
                             var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { h, g } }, queryGraph_, inputGraph_);
+                            if (mappings.Count == 0) continue;
+
                             sw.Stop();
                             var logGist = new StringBuilder();
                             logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}\n", sw.Elapsed.ToString(), h, g);
@@ -118,6 +120,7 @@ namespace MODA.Impl
 
             }
             Console.WriteLine(sBuilder);
+            sBuilder = null;
             Task.WaitAll(tasks.ToArray());
 
             var toReturn = theMappings.SelectMany(x => x.Value).ToList();
@@ -328,10 +331,7 @@ namespace MODA.Impl
                                 local.Remove(local[j - counter]);
                                 counter++;
                             }
-                            catch (Exception ex)
-                            {
-                                //throw new ArgumentOutOfRangeException(string.Format("ERROR in 'ChooseNeighboursOfRange' trying to remove from local:\n\t in Index (j - counter) = {0}; j = {1}; counter = {2}; local.Count = {3}.", (j - counter), j, counter, local.Count), ex);
-                            }
+                            catch { }
                             if (local.Count == 0)
                             {
                                 break;
@@ -404,10 +404,7 @@ namespace MODA.Impl
                                 local.Remove(local[j - counter]);
                                 counter++;
                             }
-                            catch (Exception ex)
-                            {
-                                //throw new ArgumentOutOfRangeException(string.Format("ERROR in 'GetMostConstrainedNeighbour' trying to remove from local:\n\t in Index (j - counter) = {0}; j = {1}; counter = {2}; local.Count = {3}.", (j - counter), j, counter, local.Count), ex);
-                            }
+                            catch { }
                             if (local.Count == 0)
                             {
                                 break;

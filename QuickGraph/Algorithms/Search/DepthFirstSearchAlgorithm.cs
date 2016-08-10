@@ -1,6 +1,6 @@
-﻿using System;
+﻿using QuickGraph.Algorithms.Services;
+using System;
 using System.Collections.Generic;
-using QuickGraph.Algorithms.Services;
 using System.Diagnostics.Contracts;
 
 namespace QuickGraph.Algorithms.Search

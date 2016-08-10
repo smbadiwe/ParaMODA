@@ -1,6 +1,5 @@
-﻿using System;
+﻿using QuickGraph.Contracts;
 using System.Diagnostics.Contracts;
-using QuickGraph.Contracts;
 
 namespace QuickGraph
 {

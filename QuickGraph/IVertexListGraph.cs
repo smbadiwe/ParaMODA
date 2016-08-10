@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace QuickGraph
+﻿namespace QuickGraph
 {
     /// <summary>
     /// A directed graph datastructure where out-edges can be traversed,
