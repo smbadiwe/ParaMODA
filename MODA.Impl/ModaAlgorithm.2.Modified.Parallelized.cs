@@ -10,19 +10,9 @@ using System.Threading.Tasks;
 
 namespace MODA.Impl
 {
-    public partial class ModaAlgorithms
+    public class ModaAlgorithm2Parallelized
     {
-        /// <summary>
-        /// Given a set of nodes(the Key), we find the subgraph in the input graph G that has those nodes.
-        /// </summary>
-        private static Dictionary<string[], UndirectedGraph<string, Edge<string>>> InputSubgraphs;
-
-        internal static Dictionary<string, List<string>> G_NodeNeighbours;
-        internal static Dictionary<string, List<string>> H_NodeNeighbours;
-
-        private static Dictionary<string[], HashSet<string>> NeighboursOfRange;
-        private static Dictionary<string[], string> MostConstrainedNeighbours;
-        
+        public static int VertexCountDividend { get; set; }
         /// <summary>
         /// Mapping module (aka FindSubgraphInstances in Grochow & Kellis) modified
         /// The modification:
@@ -40,67 +30,103 @@ namespace MODA.Impl
             var timer = System.Diagnostics.Stopwatch.StartNew();
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / VertexCountDividend;
 
+            var h_ = queryGraph.Vertices.First();
+
+            List<string>[] chunks = new List<string>[numberOfSamples < 20 ? 1 : Math.Min(numberOfSamples / 20, 25)];
+            for (int i = 0; i < chunks.Length; i++)
+            {
+                chunks[i] = new List<string>();
+            }
+
+            var nodesToWorkWith = inputGraph.GetDegreeSequence(numberOfSamples);
+            for (int i = nodesToWorkWith.Length - 1; i >= 0; i--)
+            {
+                chunks[i % chunks.Length].Add(nodesToWorkWith[i]);
+            }
+
+            var sBuilder = new StringBuilder();
+            sBuilder.AppendFormat("Calling Algo 2-Modified: Number of Iterations: {0}. Number of chunks to parallelize: {1}\n", numberOfSamples, chunks.Length);
+
             var comparer = new MappingNodesComparer();
-            InputSubgraphs = new Dictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
-            MostConstrainedNeighbours = new Dictionary<string[], string>(comparer);
-            NeighboursOfRange = new Dictionary<string[], HashSet<string>>(comparer);
+            InputSubgraphs = new ConcurrentDictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
+            MostConstrainedNeighbours = new ConcurrentDictionary<string[], string>(comparer);
+            NeighboursOfRange = new ConcurrentDictionary<string[], HashSet<string>>(comparer);
             comparer = null;
 
-            G_NodeNeighbours = new Dictionary<string, List<string>>();
-            H_NodeNeighbours = new Dictionary<string, List<string>>();
-            var theMappings = new Dictionary<string, List<Mapping>>();
-
-            var logGist = new StringBuilder();
-            logGist.AppendFormat("Calling Algo 2-Modified: Number of Iterations: {0}.\n", numberOfSamples);
-
-            var h = queryGraph.Vertices.First();
-
-            foreach (var g in inputGraph.GetDegreeSequence(numberOfSamples))
+            G_NodeNeighbours = new ConcurrentDictionary<string, List<string>>();
+            H_NodeNeighbours = new ConcurrentDictionary<string, List<string>>();
+            int counter = 0;
+            var tasks = new List<Task>(chunks.Length);
+            var theMappings = new ConcurrentDictionary<string, List<Mapping>>();
+            foreach (var degSeqChunk in chunks)
             {
-                if (CanSupport(queryGraph, h, inputGraph, g))
+                tasks.Add(Task.Factory.StartNew((objects) =>
                 {
-                    #region Can Support
-                    var sw = System.Diagnostics.Stopwatch.StartNew();
-                    //Remember: f(h) = g, so h is Domain and g is Range
-                    //function, f = new Dictionary<string, string>(1) { { h, g } }
-                    var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { h, g } }, queryGraph, inputGraph);
-                    if (mappings.Count == 0) continue;
-
-                    sw.Stop();
-
-                    logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}\n", sw.Elapsed.ToString(), h, g);
-                    sw.Restart();
-
-                    foreach (Mapping mapping in mappings)
+                    var objectsSet = objects as object[];
+                    var degSeqChunk_ = objectsSet[0] as string[];
+                    var queryGraph_ = objectsSet[1] as UndirectedGraph<string, Edge<string>>;
+                    var h = objectsSet[2] as string;
+                    var inputGraph_ = objectsSet[3] as UndirectedGraph<string, Edge<string>>;
+                    for (int i = 0; i < degSeqChunk_.Length; i++)
                     {
-                        List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                        var g_key = mapping.Function.Last().Value;
-                        if (theMappings.TryGetValue(g_key, out mappingsToSearch))
+                        var g = degSeqChunk_[i];
+                        if (CanSupport(queryGraph_, h, inputGraph_, g))
                         {
-                            var existing = mappingsToSearch.Find(x => x.Equals(mapping));
+                            #region Can Support
+                            var sw = System.Diagnostics.Stopwatch.StartNew();
+                            //Remember: f(h) = g, so h is Domain and g is Range
+                            //function, f = new Dictionary<string, string>(1) { { h, g } }
+                            var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { h, g } }, queryGraph_, inputGraph_);
+                            if (mappings.Count == 0) continue;
 
-                            if (existing == null)
+                            sw.Stop();
+                            var logGist = new StringBuilder();
+                            logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}\n", sw.Elapsed.ToString(), h, g);
+                            sw.Restart();
+
+                            foreach (Mapping mapping in mappings)
                             {
-                                theMappings[g_key].Add(mapping);
-                            }
-                        }
-                        else
-                        {
-                            theMappings[g_key] = new List<Mapping> { mapping };
-                        }
-                        mappingsToSearch = null;
-                    }
+                                List<Mapping> mappingsToSearch; //Recall: f(h) = g
+                                var g_key = mapping.Function.Last().Value;
+                                if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
+                                {
+                                    var existing = mappingsToSearch.Find(x => x != null && x.Equals(mapping));
 
-                    sw.Stop();
-                    logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
-                    mappings = null;
-                    sw = null;
-                    logGist.AppendFormat("*****************************************\n");
-                    Console.WriteLine(logGist);
-                    logGist.Clear();
-                    #endregion
-                }
+                                    if (existing == null)
+                                    {
+                                        theMappings[g_key].Add(mapping);
+                                    }
+                                }
+                                else
+                                {
+                                    theMappings[g_key] = new List<Mapping> { mapping };
+                                }
+                                mappingsToSearch = null;
+                            }
+
+                            sw.Stop();
+                            logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
+                            mappings = null;
+                            sw = null;
+                            logGist.AppendFormat("*****************************************\n");
+                            Console.WriteLine(logGist);
+                            logGist = null;
+                            #endregion
+                        }
+                    }
+                    objectsSet = null;
+                    degSeqChunk_ = null;
+                    queryGraph_ = null;
+                    inputGraph_ = null;
+
+                }, new object[] { degSeqChunk.ToArray(), queryGraph, h_, inputGraph })
+                );
+                sBuilder.AppendFormat("\tChunk {0} loaded. Number of items in chunk: {1}\n", ++counter, degSeqChunk.Count);
+
             }
+            Console.WriteLine(sBuilder);
+            sBuilder = null;
+            Task.WaitAll(tasks.ToArray());
 
             var toReturn = new List<Mapping>();
             foreach (var mapping in theMappings)
@@ -108,17 +134,22 @@ namespace MODA.Impl
                 toReturn.AddRange(mapping.Value);
             }
             timer.Stop();
-            logGist = null;
             theMappings = null;
             InputSubgraphs = null;
             MostConstrainedNeighbours = null;
             NeighboursOfRange = null;
             G_NodeNeighbours = null;
             H_NodeNeighbours = null;
-            Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.\n", toReturn.Count, timer.Elapsed.ToString());
+            Console.WriteLine("Algorithm 2: All {2} tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", toReturn.Count, timer.Elapsed.ToString(), tasks.Count);
+            tasks = null;
             timer = null;
             return toReturn;
         }
+
+        /// <summary>
+        /// Given a set of nodes(the Key), we find the subgraph in the input graph G that has those nodes.
+        /// </summary>
+        private static ConcurrentDictionary<string[], UndirectedGraph<string, Edge<string>>> InputSubgraphs;
 
         /// <summary>
         /// Algorithm taken from Grochow and Kellis. This is failing at the moment
@@ -140,7 +171,9 @@ namespace MODA.Impl
                 }
 
                 string[] inputSubgraphKey = partialMap.Values.ToArray();
-                var exists = InputSubgraphs.ContainsKey(inputSubgraphKey);
+                var keys = InputSubgraphs.Select(x => x.Key).ToArray();
+                bool exists = keys.Any(x => new HashSet<string>(x).SetEquals(inputSubgraphKey));
+                keys = null;
                 if (!exists)
                 {
                     var newInputSubgraph = new UndirectedGraph<string, Edge<string>>(false);
@@ -216,6 +249,9 @@ namespace MODA.Impl
             return listOfIsomorphisms;
         }
 
+        internal static ConcurrentDictionary<string, List<string>> G_NodeNeighbours;
+        internal static ConcurrentDictionary<string, List<string>> H_NodeNeighbours;
+
         /// <summary>
         /// If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
         /// or if there is a NON-neighbor d ∈ D of m such that n is neighbors with f(d) 
@@ -268,11 +304,14 @@ namespace MODA.Impl
             return false;
         }
 
+        private static ConcurrentDictionary<string[], HashSet<string>> NeighboursOfRange;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static HashSet<string> ChooseNeighboursOfRange(string[] used_range, UndirectedGraph<string, Edge<string>> inputGraph)
         {
-            var exists = NeighboursOfRange.ContainsKey(used_range);
+            var keys = NeighboursOfRange.Select(x => x.Key).ToArray();
+            var exists = keys.Any(x => new HashSet<string>(x).SetEquals(used_range));
+            keys = null;
             if (!exists)
             {
                 var result = new HashSet<string>();
@@ -328,6 +367,8 @@ namespace MODA.Impl
             return NeighboursOfRange[used_range];
         }
 
+        private static ConcurrentDictionary<string[], string> MostConstrainedNeighbours;
+
         /// <summary>
         /// 
         /// </summary>
@@ -343,7 +384,9 @@ namespace MODA.Impl
              * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
              * the highest degree and largest neighbor degree sequence.
              * */
-            var exists = MostConstrainedNeighbours.ContainsKey(domain);
+            var keys = MostConstrainedNeighbours.Select(x => x.Key).ToArray();
+            bool exists = keys.Any(x => new HashSet<string>(x).SetEquals(domain));
+            keys = null;
             if (!exists)
             {
                 var result = new List<string>();

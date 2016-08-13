@@ -26,14 +26,14 @@ namespace MODA.Impl
             var inputGraphClone = inputGraph.Clone();
 
             var comparer = new MappingNodesComparer();
-            InputSubgraphs = new ConcurrentDictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
-            MostConstrainedNeighbours = new ConcurrentDictionary<string[], string>(comparer);
-            NeighboursOfRange = new ConcurrentDictionary<string[], HashSet<string>>(comparer);
+            InputSubgraphs = new Dictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
+            MostConstrainedNeighbours = new Dictionary<string[], string>(comparer);
+            NeighboursOfRange = new Dictionary<string[], HashSet<string>>(comparer);
             comparer = null;
 
-            G_NodeNeighbours = new ConcurrentDictionary<string, List<string>>();
-            H_NodeNeighbours = new ConcurrentDictionary<string, List<string>>();
-            
+            G_NodeNeighbours = new Dictionary<string, List<string>>();
+            H_NodeNeighbours = new Dictionary<string, List<string>>();
+
             var theMappings = new Dictionary<string, List<Mapping>>();
             var queryGraphVertices = queryGraph.Vertices.ToList();
             foreach (var g in inputGraph.GetDegreeSequence(numberOfSamples))
@@ -58,7 +58,7 @@ namespace MODA.Impl
                         {
                             List<Mapping> mappingsToSearch; //Recall: f(h) = g
                             var g_key = mapping.Function.Last().Value;
-                            if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
+                            if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                             {
                                 var existing = mappingsToSearch.Find(x => x.Equals(mapping));
 
@@ -96,13 +96,10 @@ namespace MODA.Impl
                 toReturn.AddRange(mapping.Value);
             }
             timer.Stop();
-
-            InputSubgraphs = null;
-            MostConstrainedNeighbours = null;
-            NeighboursOfRange = null;
+            
+            queryGraphVertices = null;
             G_NodeNeighbours = null;
             H_NodeNeighbours = null;
-            queryGraphVertices = null;
             inputGraphClone = null;
             Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", toReturn.Count, timer.Elapsed.ToString());
             timer = null;

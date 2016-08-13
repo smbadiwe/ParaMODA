@@ -32,37 +32,19 @@ namespace MODA.Impl
             var other = obj as Mapping;
             if (other == null) return false;
 
-            try
+            //Test 1 - Vertices
+            var test = (new HashSet<string>(this.Function.Keys).SetEquals(other.Function.Keys)
+                && new HashSet<string>(this.Function.Values).SetEquals(other.Function.Values));
+            if (test == false)
             {
-                //Test 1 - Vertices
-                var test = (new HashSet<string>(this.Function.Keys).SetEquals(other.Function.Keys)
-                    && new HashSet<string>(this.Function.Values).SetEquals(other.Function.Values));
-                if (test == false)
-                {
-                    return false;
-                }
-
-                //Test 2 - Edge count
-                test = this.MapOnInputSubGraph.EdgeCount == other.MapOnInputSubGraph.EdgeCount;
-                if (test == false)
-                {
-                    return false;
-                }
+                return false;
             }
-            catch //(Exception ex)
+
+            //Test 2 - Edge count
+            test = this.MapOnInputSubGraph.EdgeCount == other.MapOnInputSubGraph.EdgeCount;
+            if (test == false)
             {
-                var sb = new StringBuilder("Somebody's Function or MapOnInputSubGraph is null here!\n");
-                sb.AppendFormat("\tthis.Function == null? {0}\n", this.Function == null);
-                sb.AppendFormat("\tthis.MapOnInputSubGraph == null? {0}\n", this.MapOnInputSubGraph == null);
-                sb.AppendFormat("\tother.Function == null? {0}\n", other.Function == null);
-                sb.AppendFormat("\tother.MapOnInputSubGraph == null? {0}\n", other.MapOnInputSubGraph == null);
-
-                var defaultColor = Console.ForegroundColor;
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine(sb.ToString());
-                Console.ForegroundColor = defaultColor;
-
-                throw;
+                return false;
             }
 
             //Test 3 - Node degrees. 

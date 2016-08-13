@@ -1,5 +1,6 @@
 ﻿using MODA.Impl;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MODA.Console
 {
@@ -20,7 +21,7 @@ namespace MODA.Console
             ////    "a", "b", "c"
             ////};
             //var item = mappingsToSearch.Find(x => x.Equals(new Mapping(new Dictionary<string, string>())));
-            
+
             //System.Console.ReadKey();
 
             MODATest.Run(args);

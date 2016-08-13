@@ -10,6 +10,7 @@ namespace MODA.Impl
     {
         public static List<string> GetNonNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG = true, List<string> neighboursOfVertex = null)
         {
+            if (string.IsNullOrWhiteSpace(vertex)) return new List<string>();
             if (neighboursOfVertex == null)
             {
                 neighboursOfVertex = GetNeighbors(graph, vertex, isG);
@@ -29,6 +30,7 @@ namespace MODA.Impl
         
         public static List<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG = true)
         {
+            if (string.IsNullOrWhiteSpace(vertex)) return new List<string>();
             List<string> neighbors;
             if (isG)
             {
