@@ -30,6 +30,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseModified|AnyCPU'">
+    <OutputPath>bin\ReleaseModified\</OutputPath>
+    <DefineConstants>TRACE;MODIFIED</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="MsgPack, Version=0.1.4298.15470, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MsgPack.0.1.0.2011042300\lib\net40\MsgPack.dll</HintPath>
@@ -60,12 +69,14 @@
     <Compile Include="GraphProcessor.cs" />
     <Compile Include="Map.cs" />
     <Compile Include="Mapping.cs" />
+    <Compile Include="ModaAlgorithms.2.cs" />
     <Compile Include="ModaAlgorithms.3.cs" />
     <Compile Include="ModaAlgorithms.2.Modified.cs" />
     <Compile Include="ModaAlgorithms.1.cs" />
     <Compile Include="MySerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RecursionHelper.cs" />
+    <Compile Include="MappingNodesComparer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj">

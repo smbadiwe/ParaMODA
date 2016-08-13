@@ -6,7 +6,13 @@ namespace MODA.Impl
 {
     public partial class ModaAlgorithms
     {
-        public static string MapFolder = @"C:\SOMA\Drive\MyUW\Research\Kim\Capstone\ExperimentalNetworks\MapFolder";
+        public static int VertexCountDividend { get; set; }
+        //public ModaAlgorithms(int vertexCountDividend = 1)
+        //{
+        //    VertexCountDividend = vertexCountDividend;
+        //}
+
+        public const string MapFolder = @"C:\SOMA\Drive\MyUW\Research\Kim\Capstone\ExperimentalNetworks\MapFolder";
         /// <summary>
         /// Algo 1: Find subgraph frequency
         /// </summary>
@@ -14,7 +20,7 @@ namespace MODA.Impl
         /// <param name="subgraphSize"></param>
         /// <param name="thresholdValue"></param>
         /// <returns>Fg, frequent subgraph list</returns>
-        public Dictionary<UndirectedGraph<string, Edge<string>>, int> Algorithm1(UndirectedGraph<string, Edge<string>> inputGraph, int subgraphSize, int thresholdValue = 0)
+        public static Dictionary<UndirectedGraph<string, Edge<string>>, int> Algorithm1(UndirectedGraph<string, Edge<string>> inputGraph, int subgraphSize, int thresholdValue = 0)
         {
             var builder = new ExpansionTreeBuilder<Edge<string>>(subgraphSize);
             builder.Build();
@@ -28,7 +34,11 @@ namespace MODA.Impl
                 if (qGraph.EdgeCount == (subgraphSize - 1))
                 {
                     // Modified Mapping module - MODA and Grockow & Kellis
-                    mappings = Algorithm2_Modified(qGraph, inputGraph); //Algorithm2_Original
+#if MODIFIED 
+                    mappings = Algorithm2_Modified(qGraph, inputGraph);
+#else 
+                    mappings = Algorithm2(qGraph, inputGraph);
+#endif
                 }
                 else
                 {
@@ -37,7 +47,7 @@ namespace MODA.Impl
                 }
                 if (mappings.Count > 0)
                 {
-                    //Save mappings. Do we need to save to disk?
+                    // Save mappings. Do we need to save to disk? Yes!
                     allMappings.Add(qGraph, mappings.Count);
                     File.WriteAllBytes(Path.Combine(MapFolder, qGraph.AsString().Replace(">", "&lt;") + ".map"), MySerializer.Serialize(new Map
                     {
@@ -67,7 +77,7 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="extTreeNodesQueued"></param>
         /// <returns></returns>
-        private ExpansionTreeNode<Edge<string>> GetNextNode(IDictionary<ExpansionTreeNode<Edge<string>>, GraphColor> extTreeNodesQueued)
+        private static ExpansionTreeNode<Edge<string>> GetNextNode(IDictionary<ExpansionTreeNode<Edge<string>>, GraphColor> extTreeNodesQueued)
         {
             foreach (var node in extTreeNodesQueued)
             {

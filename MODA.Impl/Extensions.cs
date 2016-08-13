@@ -26,7 +26,7 @@ namespace MODA.Impl
             }
             return nonNeighbors;
         }
-
+        
         public static List<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG = true)
         {
             List<string> neighbors;
@@ -90,30 +90,29 @@ namespace MODA.Impl
         /// </summary>
         /// <typeparam name="string"></typeparam>
         /// <param name="graph"></param>
+        /// <param name="count">The expected number of items to return.</param>
         /// <returns></returns>
-        public static List<string> GetDegreeSequence(this UndirectedGraph<string, Edge<string>> graph)
+        public static string[] GetDegreeSequence(this UndirectedGraph<string, Edge<string>> graph, int count)
         {
-            if (graph.IsVerticesEmpty) return new List<string>(0);
+            if (graph.IsVerticesEmpty) return new string[0];
 
-            var vertices = graph.Vertices.ToList();
-            var tempList = new Dictionary<string, int>(vertices.Count);
+            var vertices = graph.Vertices.Take(count).ToArray();
+            var tempList = new Dictionary<string, int>(vertices.Length);
 
-            vertices.ForEach(node =>
+            foreach (var node in vertices)
             {
                 tempList.Add(node, graph.AdjacentDegree(node));
             }
-            );
-            var listToReturn = new List<string>(vertices.Count);
-            //int index = 0;
+
+            var listToReturn = new List<string>(vertices.Length);
             foreach (var item in tempList.OrderByDescending(x => x.Value))
             {
-                //listToReturn[index] = item.Key;
-                //index++;
                 listToReturn.Add(item.Key);
             }
+
             vertices = null;
             tempList = null;
-            return listToReturn;
+            return listToReturn.ToArray();
         }
         
     }

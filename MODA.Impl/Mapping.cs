@@ -13,7 +13,7 @@ namespace MODA.Impl
             Function = function;
         }
 
-        public Dictionary<string, string> Function { get; }
+        public Dictionary<string, string> Function { get; private set; }
 
         /// <summary>
         /// The subgraph (with all edges) in the input graph G that fit the query graph (---Function.Values)
@@ -32,19 +32,37 @@ namespace MODA.Impl
             var other = obj as Mapping;
             if (other == null) return false;
 
-            //Test 1 - Vertices
-            var test = (new HashSet<string>(this.Function.Keys).SetEquals(other.Function.Keys)
-                && new HashSet<string>(this.Function.Values).SetEquals(other.Function.Values));
-            if (test == false)
+            try
             {
-                return false;
-            }
+                //Test 1 - Vertices
+                var test = (new HashSet<string>(this.Function.Keys).SetEquals(other.Function.Keys)
+                    && new HashSet<string>(this.Function.Values).SetEquals(other.Function.Values));
+                if (test == false)
+                {
+                    return false;
+                }
 
-            //Test 2 - Edge count
-            test = this.MapOnInputSubGraph.EdgeCount == other.MapOnInputSubGraph.EdgeCount;
-            if (test == false)
+                //Test 2 - Edge count
+                test = this.MapOnInputSubGraph.EdgeCount == other.MapOnInputSubGraph.EdgeCount;
+                if (test == false)
+                {
+                    return false;
+                }
+            }
+            catch //(Exception ex)
             {
-                return false;
+                var sb = new StringBuilder("Somebody's Function or MapOnInputSubGraph is null here!\n");
+                sb.AppendFormat("\tthis.Function == null? {0}\n", this.Function == null);
+                sb.AppendFormat("\tthis.MapOnInputSubGraph == null? {0}\n", this.MapOnInputSubGraph == null);
+                sb.AppendFormat("\tother.Function == null? {0}\n", other.Function == null);
+                sb.AppendFormat("\tother.MapOnInputSubGraph == null? {0}\n", other.MapOnInputSubGraph == null);
+
+                var defaultColor = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(sb.ToString());
+                Console.ForegroundColor = defaultColor;
+
+                throw;
             }
 
             //Test 3 - Node degrees. 
@@ -53,7 +71,7 @@ namespace MODA.Impl
 
             //var any = MapOnInputSubGraph.Vertices.ToList().Find(node =>
             //        this.MapOnInputSubGraph.AdjacentDegree(node) != other.MapOnInputSubGraph.AdjacentDegree(node));
-            
+
             //if (any != null) return false;
             //foreach (var node in MapOnInputSubGraph.Vertices)
             //{
@@ -66,6 +84,12 @@ namespace MODA.Impl
             return true;
         }
 
+        /// <summary>
+        /// With the way the code is now, you don't need this; but if you're
+        /// going to do something with this object, see if you need to provide
+        /// implementation.
+        /// </summary>
+        /// <returns></returns>
         public override int GetHashCode()
         {
             return base.GetHashCode();

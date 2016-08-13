@@ -443,17 +443,32 @@ namespace QuickGraph
         #region IUndirectedGraph<Vertex,Edge> Members
         public IEnumerable<TEdge> AdjacentEdges(TVertex v)
         {
-            return this.adjacentEdges[v];
+            IEdgeList<TVertex, TEdge> edges;
+            if (this.adjacentEdges.TryGetValue(v, out edges))
+            {
+                return edges;
+            }
+            return new TEdge[0];
         }
 
         public int AdjacentDegree(TVertex v)
         {
-            return this.adjacentEdges[v].Count;
+            IEdgeList<TVertex, TEdge> edges;
+            if (this.adjacentEdges.TryGetValue(v, out edges))
+            {
+                return edges.Count;
+            }
+            return 0;
         }
 
         public bool IsAdjacentEdgesEmpty(TVertex v)
         {
-            return this.adjacentEdges[v].Count == 0;
+            IEdgeList<TVertex, TEdge> edges;
+            if (this.adjacentEdges.TryGetValue(v, out edges))
+            {
+                return edges.Count == 0;
+            }
+            return true;
         }
         #endregion
     }

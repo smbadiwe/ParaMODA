@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MODA.Impl
@@ -15,24 +16,29 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size</param>
-        [Obsolete("Use Algorithm2_Modified instead.")]
-        private List<Mapping> Algorithm2(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
+        private static List<Mapping> Algorithm2(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
         {
-            if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3;
-            int counter = 0;
-            // Do we need this clone? Can't we just remove the node directly from the graph?
+            var timer = System.Diagnostics.Stopwatch.StartNew();
+            if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / VertexCountDividend;
+
+            // Do we need this clone? Can't we just remove the node directly from the graph? 
+            // We do need it.
             var inputGraphClone = inputGraph.Clone();
-            var theMappings = new List<Mapping>();
-            var queryGraphVertices = queryGraph.Vertices.ToList();
-            InputSubgraphs = new ConcurrentDictionary<string[], UndirectedGraph<string, Edge<string>>>();
-            MostConstrainedNeighbours = new ConcurrentDictionary<string[], string>();
-            NeighboursOfRange = new ConcurrentDictionary<string[], HashSet<string>>();
+
+            var comparer = new MappingNodesComparer();
+            InputSubgraphs = new ConcurrentDictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
+            MostConstrainedNeighbours = new ConcurrentDictionary<string[], string>(comparer);
+            NeighboursOfRange = new ConcurrentDictionary<string[], HashSet<string>>(comparer);
+            comparer = null;
+
             G_NodeNeighbours = new ConcurrentDictionary<string, List<string>>();
             H_NodeNeighbours = new ConcurrentDictionary<string, List<string>>();
-            foreach (var g in inputGraph.GetDegreeSequence())
+            
+            var theMappings = new Dictionary<string, List<Mapping>>();
+            var queryGraphVertices = queryGraph.Vertices.ToList();
+            foreach (var g in inputGraph.GetDegreeSequence(numberOfSamples))
             {
-                //foreach (var h in queryGraph.Vertices)
-                queryGraphVertices.ForEach(h =>
+                foreach (var h in queryGraphVertices)
                 {
                     if (CanSupport(queryGraph, h, inputGraphClone, g))
                     {
@@ -41,46 +47,56 @@ namespace MODA.Impl
                         //Remember: f(h) = g, so h is Domain and g is Range
                         var function = new Dictionary<string, string>(1) { { h, g } }; //function, f
                         var mappings = IsomorphicExtension(function, queryGraph, inputGraphClone);
+                        if (mappings.Count == 0) continue;
+
                         sw.Stop();
-                        Console.WriteLine("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}", sw.Elapsed.ToString(), h, g);
+                        var logGist = new StringBuilder();
+                        logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}", sw.Elapsed.ToString(), h, g);
                         sw.Restart();
-
-                        int count = mappings.Count;
-
-                        if (theMappings.Count == 0)
+                        
+                        foreach (Mapping mapping in mappings)
                         {
-                            theMappings.AddRange(mappings);
-                        }
-                        else
-                        {
-                            mappings.ForEach(map =>
+                            List<Mapping> mappingsToSearch; //Recall: f(h) = g
+                            var g_key = mapping.Function.Last().Value;
+                            if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
                             {
-                                var existing = theMappings.Find(x => x.Equals(map));
+                                var existing = mappingsToSearch.Find(x => x.Equals(mapping));
 
                                 if (existing == null)
                                 {
-                                    theMappings.Add(map);
+                                    theMappings[g_key].Add(mapping);
                                 }
-                            });
+                            }
+                            else
+                            {
+                                theMappings[g_key] = new List<Mapping> { mapping };
+                            }
+                            mappingsToSearch = null;
                         }
-                        mappings = null;
+                        
                         function = null;
                         sw.Stop();
-                        Console.WriteLine("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}", count--, sw.Elapsed.ToString(), h, g);
+                        logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
+                        mappings = null;
                         sw = null;
-                        Console.WriteLine("*****************************************\n");
+                        logGist.AppendFormat("*****************************************\n");
+                        Console.WriteLine(logGist);
+                        logGist = null;
                         #endregion
                     }
                 }
-                );
 
                 //Remove g
                 inputGraphClone.RemoveVertex(g);
-                counter++;
-
-                if (counter == numberOfSamples) break;
-
             }
+
+            var toReturn = new List<Mapping>();
+            foreach (var mapping in theMappings)
+            {
+                toReturn.AddRange(mapping.Value);
+            }
+            timer.Stop();
+
             InputSubgraphs = null;
             MostConstrainedNeighbours = null;
             NeighboursOfRange = null;
@@ -88,7 +104,9 @@ namespace MODA.Impl
             H_NodeNeighbours = null;
             queryGraphVertices = null;
             inputGraphClone = null;
-            return theMappings;
+            Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", toReturn.Count, timer.Elapsed.ToString());
+            timer = null;
+            return toReturn;
         }
         
     }

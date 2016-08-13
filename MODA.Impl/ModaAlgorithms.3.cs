@@ -1,5 +1,6 @@
 ﻿using QuickGraph;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,13 +16,14 @@ namespace MODA.Impl
         /// <param name="queryGraph"></param>
         /// <param name="inputGraph"></param>
         /// <param name="expansionTree"></param>
-        private List<Mapping> Algorithm3(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph,
+        private static List<Mapping> Algorithm3(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph,
             AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree)
         {
             var timer = System.Diagnostics.Stopwatch.StartNew();
             var parentQueryGraph = GetParent(queryGraph, expansionTree); // H
             var file = Path.Combine(MapFolder, parentQueryGraph.AsString().Replace(">", "&lt;") + ".map");
             var mapObject = MySerializer.DeSerialize<Map>(File.ReadAllBytes(file));
+            if (mapObject == null) return new List<Mapping>();
             var mappings = mapObject.Mappings; // foundMappings[parentQueryGraph]; //It's guaranteed to be there. If it's not, there's a prolem
             if (mappings.Count == 0) return new List<Mapping>();
 
@@ -29,6 +31,7 @@ namespace MODA.Impl
             // New Edge = E(G') - E(H)
             var newEdgeNodes = new string[2];
             int index = 0;
+            bool gotNewEdge = false;
             foreach (var node in queryGraph.Vertices)
             {
                 //Trick: 
@@ -37,13 +40,15 @@ namespace MODA.Impl
                 // These two nodes form the new edge.
                 if (queryGraph.AdjacentDegree(node) == parentQueryGraph.AdjacentDegree(node)) continue;
 
+                gotNewEdge = true;
                 newEdgeNodes[index] = node;
                 index++;
             }
+
+            if (!gotNewEdge) return new List<Mapping>();
+
             var theNewEdge = new Edge<string>(newEdgeNodes[0], newEdgeNodes[1]);
             newEdgeNodes = null;
-            var theMappings = new List<Mapping>();
-
             var tasks = new List<Task>();
             List<Mapping>[] chunks = new List<Mapping>[mappings.Count < 40 ? 1 : Math.Min(mappings.Count / 40, 25)];
             for (int i = 0; i < chunks.Length; i++)
@@ -57,6 +62,8 @@ namespace MODA.Impl
                 iter++;
             }
             iter = 0;
+            var theMappings = new ConcurrentDictionary<string, List<Mapping>>();
+
             foreach (var mappingsChunk in chunks)
             {
                 tasks.Add(Task.Factory.StartNew((objects) =>
@@ -64,6 +71,7 @@ namespace MODA.Impl
                     var objectsSet = objects as object[];
                     var mappingsChunk_ = objectsSet[0] as Mapping[];
                     var theNewEdge_ = objectsSet[1] as Edge<string>;
+                    var mappingsFound = new List<Mapping>();
                     for (int i = 0; i < mappingsChunk_.Length; i++)
                     {
                         var map = mappingsChunk_[i];
@@ -74,28 +82,50 @@ namespace MODA.Impl
                             Edge<string> edge;
                             if (map.InputSubGraph.TryGetEdge(map.Function[theNewEdge_.Source], map.Function[theNewEdge_.Target], out edge))
                             {
-                                var newMap = new Mapping(map.Function)
+                                mappingsFound.Add(new Mapping(map.Function)
                                 {
                                     InputSubGraph = map.InputSubGraph,
                                     MapOnInputSubGraph = map.InputSubGraph
-                                };
-                                lock (theMappings)
-                                {
-                                    if (!theMappings.Any(x => x.Equals(newMap)))
-                                    {
-                                        theMappings.Add(newMap);
-                                    } 
-                                }
+                                });
                             }
                         }
                     }
+
+                    foreach (Mapping mapping in mappingsFound)
+                    {
+                        List<Mapping> mappingsToSearch; //Recall: f(h) = g
+                        var g_key = mapping.Function.Last().Value;
+                        if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
+                        {
+                            var existing = mappingsToSearch.Find(x => x.Equals(mapping));
+
+                            if (existing == null)
+                            {
+                                theMappings[g_key].Add(mapping);
+                            }
+                        }
+                        else
+                        {
+                            theMappings[g_key] = new List<Mapping> { mapping };
+                        }
+                        mappingsToSearch = null;
+                    }
+
                 }, new object[] { mappingsChunk.ToArray(), theNewEdge }));
             }
             Task.WaitAll(tasks.ToArray());
+            var toReturn = new List<Mapping>();
+            foreach (var mapping in theMappings)
+            {
+                toReturn.AddRange(mapping.Value);
+            }
+            timer.Stop();
             Console.WriteLine("Algorithm 3: All {2} tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", theMappings.Count, timer.Elapsed.ToString(), tasks.Count);
 
             tasks = null;
-            return theMappings;
+            timer = null;
+            theMappings = null;
+            return toReturn;
         }
 
         /// <summary>
@@ -104,13 +134,12 @@ namespace MODA.Impl
         /// <param name="queryGraph"></param>
         /// <param name="expansionTree"></param>
         /// <returns></returns>
-        private UndirectedGraph<string, Edge<string>> GetParent(UndirectedGraph<string, Edge<string>> queryGraph, AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree)
+        private static UndirectedGraph<string, Edge<string>> GetParent(UndirectedGraph<string, Edge<string>> queryGraph, AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree)
         {
-            var vertex = new ExpansionTreeNode<Edge<string>>
+            var hasNode = expansionTree.ContainsVertex(new ExpansionTreeNode<Edge<string>>
             {
                 QueryGraph = queryGraph,
-            };
-            var hasNode = expansionTree.ContainsVertex(vertex);
+            });
             if (hasNode)
             {
                 return expansionTree.Vertices.First(x => !x.IsRootNode && x.QueryGraph == queryGraph).ParentNode.QueryGraph;
