@@ -19,7 +19,7 @@ namespace MODA.Impl
         private static List<Mapping> Algorithm2(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
         {
             var timer = System.Diagnostics.Stopwatch.StartNew();
-            if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / VertexCountDividend;
+            if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
 
             // Do we need this clone? Can't we just remove the node directly from the graph? 
             // We do need it.

@@ -34,11 +34,13 @@ namespace MODA.Impl
             {
                 Level = 1,
                 QueryGraph = qGraphL1_1,
+                NodeName = "qGraphL1_1"
             };
             var nodeL1_2 = new ExpansionTreeNode<Edge<string>>
             {
                 Level = 1,
                 QueryGraph = qGraphL1_2,
+                NodeName = "qGraphL1_2"
             };
 
             expansionTree.AddVerticesAndEdge(new Edge<ExpansionTreeNode<Edge<string>>>(rootNode, nodeL1_1));
@@ -67,11 +69,13 @@ namespace MODA.Impl
             {
                 Level = 2,
                 QueryGraph = qGraphL2_1,
+                NodeName = "qGraphL2_1"
             };
             var nodeL2_2 = new ExpansionTreeNode<Edge<string>>
             {
                 Level = 2,
                 QueryGraph = qGraphL2_2,
+                NodeName = "qGraphL2_2"
             };
 
             expansionTree.AddVerticesAndEdge(new Edge<ExpansionTreeNode<Edge<string>>>(nodeL1_1, nodeL2_1));
@@ -93,6 +97,7 @@ namespace MODA.Impl
             {
                 Level = 3,
                 QueryGraph = qGraphL3_1,
+                NodeName = "qGraphL3_1"
             };
 
             expansionTree.AddVerticesAndEdge(new Edge<ExpansionTreeNode<Edge<string>>>(nodeL2_1, nodeL3_1));
@@ -115,6 +120,7 @@ namespace MODA.Impl
             {
                 Level = 4,
                 QueryGraph = qGraphL4_1,
+                NodeName = "qGraphL4_1"
             };
 
             expansionTree.AddVerticesAndEdge(new Edge<ExpansionTreeNode<Edge<string>>>(nodeL3_1, nodeL4_1));

@@ -5,6 +5,10 @@ namespace MODA.Impl
     public class ExpansionTreeNode<TEdge> where TEdge : IEdge<string>
     {
         public int Level { get; set; }
+        /// <summary>
+        /// A name to identify this node, especially useful
+        /// </summary>
+        public string NodeName { get; set; }
         public ExpansionTreeNode<TEdge> ParentNode { get; set; }
         public bool IsRootNode { get { return QueryGraph == null; } }
 

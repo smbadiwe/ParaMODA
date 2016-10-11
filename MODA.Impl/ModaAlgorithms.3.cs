@@ -11,21 +11,35 @@ namespace MODA.Impl
     public partial class ModaAlgorithms
     {
         /// <summary>
+        /// Get the mappings of the parent query graph from wherever we kept it
+        /// </summary>
+        /// <param name="parentQueryGraph"></param>
+        /// <returns></returns>
+        private static List<Mapping> GetParentNodeMapping(UndirectedGraph<string, Edge<string>> parentQueryGraph)
+        {
+            var file = Path.Combine(MapFolder, parentQueryGraph.AsString().Replace(">", "&lt;") + ".map");
+            var mapObject = MySerializer.DeSerialize<Map>(File.ReadAllBytes(file));
+            if (mapObject == null) return new List<Mapping>();
+
+            return mapObject.Mappings;
+        }
+
+        /// <summary>
         /// Enumeration module
         /// </summary>
         /// <param name="queryGraph"></param>
         /// <param name="inputGraph"></param>
         /// <param name="expansionTree"></param>
         private static List<Mapping> Algorithm3(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph,
-            AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree)
+            AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree,
+            Dictionary<UndirectedGraph<string, Edge<string>>, List<Mapping>> mappingsInMemory)
         {
             var timer = System.Diagnostics.Stopwatch.StartNew();
-            var parentQueryGraph = GetParent(queryGraph, expansionTree); // H
-            var file = Path.Combine(MapFolder, parentQueryGraph.AsString().Replace(">", "&lt;") + ".map");
-            var mapObject = MySerializer.DeSerialize<Map>(File.ReadAllBytes(file));
-            if (mapObject == null) return new List<Mapping>();
-            var mappings = mapObject.Mappings; // foundMappings[parentQueryGraph]; //It's guaranteed to be there. If it's not, there's a prolem
-            if (mappings.Count == 0) return new List<Mapping>();
+            var parentQueryGraph = GetParent(queryGraph, expansionTree);
+
+            List<Mapping> mappings;
+            mappingsInMemory.TryGetValue(parentQueryGraph, out mappings);
+            if (mappings?.Count == 0) return mappings;
 
             // Get the new edge in the queryGraph
             // New Edge = E(G') - E(H)
@@ -111,12 +125,9 @@ namespace MODA.Impl
             AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree)
         {
             var timer = System.Diagnostics.Stopwatch.StartNew();
-            var parentQueryGraph = GetParent(queryGraph, expansionTree); // H
-            var file = Path.Combine(MapFolder, parentQueryGraph.AsString().Replace(">", "&lt;") + ".map");
-            var mapObject = MySerializer.DeSerialize<Map>(File.ReadAllBytes(file));
-            if (mapObject == null) return new List<Mapping>();
-            var mappings = mapObject.Mappings; // foundMappings[parentQueryGraph]; //It's guaranteed to be there. If it's not, there's a prolem
-            if (mappings.Count == 0) return new List<Mapping>();
+            var parentQueryGraph = GetParent(queryGraph, expansionTree);
+            var mappings = GetParentNodeMapping(parentQueryGraph);
+            if (mappings.Count == 0) return mappings;
 
             // Get the new edge in the queryGraph
             // New Edge = E(G') - E(H)
@@ -140,8 +151,7 @@ namespace MODA.Impl
 
             var theNewEdge = new Edge<string>(newEdgeNodes[0], newEdgeNodes[1]);
             newEdgeNodes = null;
-            var tasks = new List<Task>();
-            List<Mapping>[] chunks = new List<Mapping>[mappings.Count < 40 ? 1 : Math.Min(mappings.Count / 40, 25)];
+            List<Mapping>[] chunks = new List<Mapping>[Environment.ProcessorCount - 1];
             for (int i = 0; i < chunks.Length; i++)
             {
                 chunks[i] = new List<Mapping>();
@@ -155,6 +165,7 @@ namespace MODA.Impl
             iter = 0;
             var theMappings = new ConcurrentDictionary<string, List<Mapping>>();
 
+            var tasks = new List<Task>(chunks.Length);
             foreach (var mappingsChunk in chunks)
             {
                 tasks.Add(Task.Factory.StartNew((objects) =>
