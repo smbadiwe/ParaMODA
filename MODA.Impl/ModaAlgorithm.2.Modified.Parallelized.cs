@@ -166,7 +166,7 @@ namespace MODA.Impl
                 }
 
                 string[] inputSubgraphKey = partialMap.Values.ToArray();
-                var keys = InputSubgraphs.Select(x => x.Key).ToArray();
+                var keys = InputSubgraphs.Keys.ToArray();
                 bool exists = keys.Any(x => new HashSet<string>(x).SetEquals(inputSubgraphKey));
                 keys = null;
                 if (!exists)
@@ -304,7 +304,7 @@ namespace MODA.Impl
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static HashSet<string> ChooseNeighboursOfRange(string[] used_range, UndirectedGraph<string, Edge<string>> inputGraph)
         {
-            var keys = NeighboursOfRange.Select(x => x.Key).ToArray();
+            var keys = NeighboursOfRange.Keys.ToArray();
             var exists = keys.Any(x => new HashSet<string>(x).SetEquals(used_range));
             keys = null;
             if (!exists)
@@ -379,7 +379,7 @@ namespace MODA.Impl
              * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
              * the highest degree and largest neighbor degree sequence.
              * */
-            var keys = MostConstrainedNeighbours.Select(x => x.Key).ToArray();
+            var keys = MostConstrainedNeighbours.Keys.ToArray();
             bool exists = keys.Any(x => new HashSet<string>(x).SetEquals(domain));
             keys = null;
             if (!exists)
