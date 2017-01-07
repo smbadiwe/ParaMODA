@@ -12,7 +12,7 @@ namespace QuickGraph
     [Serializable]
 #endif
     [DebuggerDisplay("{Source}->{Target}")]
-    public class Edge<TVertex> 
+    public class Edge<TVertex>
         : IEdge<TVertex>
     {
         private readonly TVertex source;
@@ -25,10 +25,8 @@ namespace QuickGraph
         /// <param name="target">The target.</param>
         public Edge(TVertex source, TVertex target)
         {
-            Contract.Requires(source != null);
-            Contract.Requires(target != null);
-            Contract.Ensures(this.Source.Equals(source));
-            Contract.Ensures(this.Target.Equals(target));
+            if (source == null) throw new ArgumentNullException("source");
+            if (target == null) throw new ArgumentNullException("target");
 
             this.source = source;
             this.target = target;
@@ -60,7 +58,7 @@ namespace QuickGraph
         /// </returns>
         public override string ToString()
         {
-            return this.Source + "->" + this.Target;
+            return this.source + "->" + this.target;
         }
     }
 }

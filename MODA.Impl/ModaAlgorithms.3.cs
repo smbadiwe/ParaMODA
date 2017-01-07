@@ -34,7 +34,7 @@ namespace MODA.Impl
             AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree,
             Dictionary<UndirectedGraph<string, Edge<string>>, List<Mapping>> mappingsInMemory)
         {
-            var timer = System.Diagnostics.Stopwatch.StartNew();
+            //var timer = System.Diagnostics.Stopwatch.StartNew();
             var parentQueryGraph = GetParent(queryGraph, expansionTree);
 
             List<Mapping> mappings;
@@ -107,10 +107,12 @@ namespace MODA.Impl
             {
                 toReturn.AddRange(mapping.Value);
             }
-            timer.Stop();
-            Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", theMappings.Count, timer.Elapsed.ToString());
+            Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\n", theMappings.Count);
             
-            timer = null;
+            //timer.Stop();
+            //Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", theMappings.Count, timer.Elapsed);
+            
+            //timer = null;
             theMappings = null;
             return toReturn;
         }

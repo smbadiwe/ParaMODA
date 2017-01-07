@@ -9,7 +9,13 @@ namespace MODA.Impl
         public static int VertexCountDividend { get; set; }
         
         public const string MapFolder = @"C:\SOMA\Drive\MyUW\Research\Kim\Capstone\ExperimentalNetworks\MapFolder";
-        
+        private static ExpansionTreeBuilder<Edge<string>> _builder;
+        public static void BuildTree(UndirectedGraph<string, Edge<string>> queryGraph, int subgraphSize)
+        {
+            _builder = new ExpansionTreeBuilder<Edge<string>>(subgraphSize, queryGraph: queryGraph);
+            _builder.Build();
+        }
+
         /// <summary>
         /// Algo 1: Find subgraph frequency (mappings help in memory)
         /// </summary>
@@ -19,13 +25,10 @@ namespace MODA.Impl
         /// <returns>Fg, frequent subgraph list</returns>
         public static Dictionary<UndirectedGraph<string, Edge<string>>, List<Mapping>> Algorithm1(UndirectedGraph<string, Edge<string>> inputGraph, int subgraphSize, int thresholdValue = 0)
         {
-            var builder = new ExpansionTreeBuilder<Edge<string>>(subgraphSize);
-            builder.Build();
-
             var allMappings = new Dictionary<UndirectedGraph<string, Edge<string>>, List<Mapping>>();
             do
             {
-                var qGraph = GetNextNode(builder.VerticesSorted)?.QueryGraph;
+                var qGraph = GetNextNode()?.QueryGraph;
                 if (qGraph == null) break;
                 List<Mapping> mappings;
                 if (qGraph.EdgeCount == (subgraphSize - 1))
@@ -41,10 +44,10 @@ namespace MODA.Impl
                 else
                 {
                     // Enumeration moodule - MODA
-                    mappings = Algorithm3(qGraph, inputGraph, builder.ExpansionTree, allMappings);
+                    mappings = Algorithm3(qGraph, inputGraph, _builder.ExpansionTree, allMappings);
                 }
 
-                // Save mappings. Do we need to save to disk? Yes!
+                // Save mappings. Do we need to save to disk? Maybe not!
                 allMappings.Add(qGraph, mappings);
 
                 mappings = null;
@@ -60,22 +63,22 @@ namespace MODA.Impl
             }
             while (true);
 
-            builder = null;
+            _builder = null;
             return allMappings;
         }
-
+        
         /// <summary>
         /// Helper method for algorithm 1
         /// </summary>
         /// <param name="extTreeNodesQueued"></param>
         /// <returns></returns>
-        public static ExpansionTreeNode<Edge<string>> GetNextNode(IDictionary<ExpansionTreeNode<Edge<string>>, GraphColor> extTreeNodesQueued)
+        private static ExpansionTreeNode<Edge<string>> GetNextNode()
         {
-            foreach (var node in extTreeNodesQueued)
+            foreach (var node in _builder.VerticesSorted)
             {
                 if (node.Value == GraphColor.White) continue;
 
-                extTreeNodesQueued[node.Key] = GraphColor.White;
+                _builder.VerticesSorted[node.Key] = GraphColor.White;
                 return node.Key;
             }
             return null;

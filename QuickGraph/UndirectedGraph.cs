@@ -13,8 +13,8 @@ namespace QuickGraph
     [Serializable]
 #endif
     [DebuggerDisplay("VertexCount = {VertexCount}, EdgeCount = {EdgeCount}")]
-    public class UndirectedGraph<TVertex, TEdge> 
-        : IMutableUndirectedGraph<TVertex,TEdge>
+    public class UndirectedGraph<TVertex, TEdge>
+        : IMutableUndirectedGraph<TVertex, TEdge>
         where TEdge : IEdge<TVertex>
     {
         private readonly bool allowParallelEdges = true;
@@ -34,7 +34,7 @@ namespace QuickGraph
         }
 
         public UndirectedGraph(bool allowParallelEdges, EdgeEqualityComparer<TVertex, TEdge> edgeEqualityComparer)
-            :this(allowParallelEdges, edgeEqualityComparer, -1)
+            : this(allowParallelEdges, edgeEqualityComparer, -1)
         {
         }
 
@@ -44,8 +44,8 @@ namespace QuickGraph
 
         public UndirectedGraph(bool allowParallelEdges, EdgeEqualityComparer<TVertex, TEdge> edgeEqualityComparer, int vertexCapacity, IEqualityComparer<TVertex> vertexComparer)
         {
-            Contract.Requires(edgeEqualityComparer != null);
-            Contract.Requires(vertexComparer != null);
+            if (edgeEqualityComparer == null) throw new ArgumentNullException("edgeEqualityComparer");
+            if (vertexComparer == null) throw new ArgumentNullException("vertexComparer");
 
             this.allowParallelEdges = allowParallelEdges;
             this.edgeEqualityComparer = edgeEqualityComparer;
@@ -59,7 +59,6 @@ namespace QuickGraph
         {
             get
             {
-                Contract.Ensures(Contract.Result<EdgeEqualityComparer<TVertex, TEdge>>() != null);
                 return this.edgeEqualityComparer;
             }
         }
@@ -72,16 +71,16 @@ namespace QuickGraph
                 this.edgeCapacity = value;
             }
         }
-    
+
         #region IGraph<Vertex,Edge> Members
-        public bool  IsDirected
+        public bool IsDirected
         {
-        	get { return false; }
+            get { return false; }
         }
 
-        public bool  AllowParallelEdges
+        public bool AllowParallelEdges
         {
-        	get { return this.allowParallelEdges; }
+            get { return this.allowParallelEdges; }
         }
         #endregion
 
@@ -89,11 +88,7 @@ namespace QuickGraph
         public event VertexAction<TVertex> VertexAdded;
         protected virtual void OnVertexAdded(TVertex args)
         {
-            Contract.Requires(args != null);
-
-            var eh = this.VertexAdded;
-            if (eh != null)
-                eh(args);
+            this.VertexAdded?.Invoke(args);
         }
 
         public int AddVertexRange(IEnumerable<TVertex> vertices)
@@ -110,8 +105,8 @@ namespace QuickGraph
             if (this.ContainsVertex(v))
                 return false;
 
-            var edges = this.EdgeCapacity < 0 
-                ? new EdgeList<TVertex, TEdge>() 
+            var edges = this.EdgeCapacity < 0
+                ? new EdgeList<TVertex, TEdge>()
                 : new EdgeList<TVertex, TEdge>(this.EdgeCapacity);
             this.adjacentEdges.Add(v, edges);
             this.OnVertexAdded(v);
@@ -122,8 +117,8 @@ namespace QuickGraph
         {
             IEdgeList<TVertex, TEdge> edges;
             if (!this.adjacentEdges.TryGetValue(v, out edges))
-                this.adjacentEdges[v] = edges = this.EdgeCapacity < 0 
-                    ? new EdgeList<TVertex, TEdge>() 
+                this.adjacentEdges[v] = edges = this.EdgeCapacity < 0
+                    ? new EdgeList<TVertex, TEdge>()
                     : new EdgeList<TVertex, TEdge>(this.EdgeCapacity);
 
             return edges;
@@ -132,11 +127,7 @@ namespace QuickGraph
         public event VertexAction<TVertex> VertexRemoved;
         protected virtual void OnVertexRemoved(TVertex args)
         {
-            Contract.Requires(args != null);
-
-            var eh = this.VertexRemoved;
-            if (eh != null)
-                eh(args);
+            this.VertexRemoved?.Invoke(args);
         }
 
         public bool RemoveVertex(TVertex v)
@@ -390,7 +381,7 @@ namespace QuickGraph
         #region IEdgeListGraph<Vertex,Edge> Members
         public bool IsEdgesEmpty
         {
-            get { return this.EdgeCount==0; }
+            get { return this.EdgeCount == 0; }
         }
 
         public int EdgeCount
@@ -400,12 +391,12 @@ namespace QuickGraph
 
         public IEnumerable<TEdge> Edges
         {
-            get 
+            get
             {
                 var edgeColors = new Dictionary<TEdge, GraphColor>(this.EdgeCount);
                 foreach (var edges in this.adjacentEdges.Values)
                 {
-                    foreach(TEdge edge in edges)
+                    foreach (TEdge edge in edges)
                     {
                         GraphColor c;
                         if (edgeColors.TryGetValue(edge, out c))
@@ -419,7 +410,7 @@ namespace QuickGraph
 
         public bool ContainsEdge(TEdge edge)
         {
-            var eqc = this.EdgeEqualityComparer;
+            //var eqc = this.EdgeEqualityComparer;
             foreach (var e in this.AdjacentEdges(edge.Source))
                 if (e.Equals(edge))
                     return true;
@@ -428,13 +419,13 @@ namespace QuickGraph
 
         private bool ContainsEdgeBetweenVertices(IEnumerable<TEdge> edges, TEdge edge)
         {
-            Contract.Requires(edges != null);
-            Contract.Requires(edge != null);
+            if (edges == null) throw new ArgumentNullException("edges");
+            if (edge == null) throw new ArgumentNullException("edge");
 
             var source = edge.Source;
-            var target= edge.Target;
+            var target = edge.Target;
             foreach (var e in edges)
-                if (this.EdgeEqualityComparer(e,source, target))
+                if (this.EdgeEqualityComparer(e, source, target))
                     return true;
             return false;
         }

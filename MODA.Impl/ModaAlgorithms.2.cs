@@ -18,7 +18,7 @@ namespace MODA.Impl
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size</param>
         private static List<Mapping> Algorithm2(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
         {
-            var timer = System.Diagnostics.Stopwatch.StartNew();
+            //var timer = System.Diagnostics.Stopwatch.StartNew();
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
 
             // Do we need this clone? Can't we just remove the node directly from the graph? 
@@ -43,16 +43,17 @@ namespace MODA.Impl
                     if (CanSupport(queryGraph, h, inputGraphClone, g))
                     {
                         #region Can Support
-                        var sw = System.Diagnostics.Stopwatch.StartNew();
+                        //var sw = System.Diagnostics.Stopwatch.StartNew();
                         //Remember: f(h) = g, so h is Domain and g is Range
                         var function = new Dictionary<string, string>(1) { { h, g } }; //function, f
                         var mappings = IsomorphicExtension(function, queryGraph, inputGraphClone);
                         if (mappings.Count == 0) continue;
 
-                        sw.Stop();
+                        //sw.Stop();
                         var logGist = new StringBuilder();
-                        logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}", sw.Elapsed.ToString(), h, g);
-                        sw.Restart();
+                        logGist.AppendFormat("Maps gotten from IsoExtension.\th = {0}. g = {1}\t", h, g);
+                        //logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}", sw.Elapsed.ToString(), h, g);
+                        //sw.Restart();
                         
                         foreach (Mapping mapping in mappings)
                         {
@@ -75,12 +76,13 @@ namespace MODA.Impl
                         }
                         
                         function = null;
-                        sw.Stop();
-                        logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
-                        mappings = null;
-                        sw = null;
+                        //sw.Stop();
+                        //logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
+                        //sw = null;
+                        logGist.AppendFormat("Mappings Count: {0}.\n", mappings.Count);
                         logGist.AppendFormat("*****************************************\n");
                         Console.WriteLine(logGist);
+                        mappings = null;
                         logGist = null;
                         #endregion
                     }
@@ -95,14 +97,15 @@ namespace MODA.Impl
             {
                 toReturn.AddRange(mapping.Value);
             }
-            timer.Stop();
-            
+            Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
+
+            //timer.Stop();
+            //Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", toReturn.Count, timer.Elapsed.ToString());
+            //timer = null;
             queryGraphVertices = null;
             G_NodeNeighbours = null;
             H_NodeNeighbours = null;
             inputGraphClone = null;
-            Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", toReturn.Count, timer.Elapsed.ToString());
-            timer = null;
             return toReturn;
         }
         

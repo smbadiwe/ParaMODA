@@ -5,7 +5,7 @@ using System.IO;
 
 namespace MODA.Impl
 {
-    public partial class GraphProcessor
+    public class GraphProcessor
     {
         /// <summary>
         /// Reads the content of the file whose name is supplied and constructs the nodes and edges for
@@ -61,32 +61,13 @@ namespace MODA.Impl
             foreach (var line in lines)
             {
                 if (line.StartsWith("#")) continue;
-                tmp = line.Split(new string[] { " ", "\t" }, StringSplitOptions.None);
+                tmp = line.Split(new string[] { " ", "\t" }, StringSplitOptions.RemoveEmptyEntries);
+                if (tmp.Length < 2) continue;
+
                 newGraphInstance.AddVerticesAndEdge(new Edge<string>(tmp[0], tmp[1]));
             }
             return newGraphInstance;
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="subgraphSize">k</param>
-        public static void BuildExpansionTree(int subgraphSize = 4)
-        {
-            int[] nodeLabels = new int[subgraphSize];
-            for (int i = 0; i < subgraphSize; i++)
-            {
-                nodeLabels[i] = i;
-            }
-
-            int maxDepthOfTree = ((subgraphSize * subgraphSize) - (3 * subgraphSize) + 4) / 2;
-        }
-
-        static int GetNumberOfEdgesInSubgraphGivenLevel(int subgraphSize, int levelNo)
-        {
-            return subgraphSize - 2 + levelNo;
-
-        }
-
+        
     }
 }

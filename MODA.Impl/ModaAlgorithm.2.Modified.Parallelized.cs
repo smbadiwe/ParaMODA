@@ -12,6 +12,19 @@ namespace MODA.Impl
 {
     public class ModaAlgorithm2Parallelized
     {
+        private static ConcurrentDictionary<string, List<string>> G_NodeNeighbours;
+
+        private static ConcurrentDictionary<string, List<string>> H_NodeNeighbours;
+
+        private static ConcurrentDictionary<string[], HashSet<string>> NeighboursOfRange;
+
+        private static ConcurrentDictionary<string[], string> MostConstrainedNeighbours;
+
+        /// <summary>
+        /// Given a set of nodes(the Key), we find the subgraph in the input graph G that has those nodes.
+        /// </summary>
+        private static ConcurrentDictionary<string[], UndirectedGraph<string, Edge<string>>> InputSubgraphs;
+
         /// <summary>
         /// Mapping module (aka FindSubgraphInstances in Grochow & Kellis) modified
         /// The modification:
@@ -142,11 +155,6 @@ namespace MODA.Impl
         }
 
         /// <summary>
-        /// Given a set of nodes(the Key), we find the subgraph in the input graph G that has those nodes.
-        /// </summary>
-        private static ConcurrentDictionary<string[], UndirectedGraph<string, Edge<string>>> InputSubgraphs;
-
-        /// <summary>
         /// Algorithm taken from Grochow and Kellis. This is failing at the moment
         /// </summary>
         /// <param name="partialMap">f; Map is represented as a dictionary, with the Key as h and the Value as g</param>
@@ -244,9 +252,6 @@ namespace MODA.Impl
             return listOfIsomorphisms;
         }
 
-        internal static ConcurrentDictionary<string, List<string>> G_NodeNeighbours { get; set; }
-        internal static ConcurrentDictionary<string, List<string>> H_NodeNeighbours { get; set; }
-
         /// <summary>
         /// If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
         /// or if there is a NON-neighbor d ∈ D of m such that n is neighbors with f(d) 
@@ -299,20 +304,18 @@ namespace MODA.Impl
             return false;
         }
 
-        private static ConcurrentDictionary<string[], HashSet<string>> NeighboursOfRange;
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static HashSet<string> ChooseNeighboursOfRange(string[] used_range, UndirectedGraph<string, Edge<string>> inputGraph)
+        private static HashSet<string> ChooseNeighboursOfRange(string[] usedRange, UndirectedGraph<string, Edge<string>> inputGraph)
         {
             var keys = NeighboursOfRange.Keys.ToArray();
-            var exists = keys.Any(x => new HashSet<string>(x).SetEquals(used_range));
+            var exists = keys.Any(x => new HashSet<string>(x).SetEquals(usedRange));
             keys = null;
             if (!exists)
             {
                 var result = new HashSet<string>();
-                for (int i = used_range.Length - 1; i >= 0; i--)
+                for (int i = usedRange.Length - 1; i >= 0; i--)
                 {
-                    var local = GetNeighbors(inputGraph, used_range[i]);
+                    var local = GetNeighbors(inputGraph, usedRange[i]);
                     if (local.Count == 0)
                     {
                         local = null;
@@ -333,7 +336,7 @@ namespace MODA.Impl
                     int counter = 0;
                     for (int j = 0; j < local.Count + counter; j++)
                     {
-                        if (used_range.Contains(local[j - counter]))
+                        if (usedRange.Contains(local[j - counter]))
                         {
                             try
                             {
@@ -354,15 +357,13 @@ namespace MODA.Impl
 
                     local = null;
                 }
-                NeighboursOfRange[used_range] = result;
+                NeighboursOfRange[usedRange] = result;
 
                 result = null;
             }
 
-            return NeighboursOfRange[used_range];
+            return NeighboursOfRange[usedRange];
         }
-
-        private static ConcurrentDictionary<string[], string> MostConstrainedNeighbours;
 
         /// <summary>
         /// 
@@ -432,12 +433,13 @@ namespace MODA.Impl
                 if (result.Count == 0)
                 {
                     MostConstrainedNeighbours[domain] = "";
+                    return "";
                 }
                 else
                 {
                     MostConstrainedNeighbours[domain] = result[0];
+                    return result[0];
                 }
-                result = null;
             }
 
             return MostConstrainedNeighbours[domain];
@@ -452,7 +454,6 @@ namespace MODA.Impl
         /// <param name="inputGraph">G</param>
         /// <param name="node_G">g</param>
         /// <returns></returns>
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool CanSupport(UndirectedGraph<string, Edge<string>> queryGraph, string node_H, UndirectedGraph<string, Edge<string>> inputGraph, string node_G)
         {
@@ -518,7 +519,6 @@ namespace MODA.Impl
             }
 
         }
-
 
     }
 }

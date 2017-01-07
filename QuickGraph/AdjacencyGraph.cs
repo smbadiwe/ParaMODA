@@ -55,7 +55,7 @@ namespace QuickGraph
 
         public AdjacencyGraph(bool allowParallelEdges, int vertexCapacity, int edgeCapacity, IEqualityComparer<TVertex> vertexComparer)
         {
-            Contract.Requires(vertexComparer != null);
+            if(vertexComparer == null) throw new ArgumentNullException("vertexComparer");
 
             this.allowParallelEdges = allowParallelEdges;
             if (vertexCapacity > -1)
@@ -71,7 +71,7 @@ namespace QuickGraph
             int edgeCapacity,
             Func<int, IVertexEdgeDictionary<TVertex, TEdge>> vertexEdgesDictionaryFactory)
         {
-            Contract.Requires(vertexEdgesDictionaryFactory != null);
+            if (vertexEdgesDictionaryFactory == null) throw new ArgumentNullException("vertexComparer");
             this.allowParallelEdges = allowParallelEdges;
             this.vertexEdges = vertexEdgesDictionaryFactory(capacity);
             this.edgeCapacity = edgeCapacity;
@@ -291,11 +291,7 @@ namespace QuickGraph
         public event VertexAction<TVertex> VertexAdded;
         protected virtual void OnVertexAdded(TVertex args)
         {
-            Contract.Requires(args != null);
-
-            var eh = this.VertexAdded;
-            if (eh != null)
-                eh(args);
+            this.VertexAdded?.Invoke(args);
         }
 
         public virtual bool RemoveVertex(TVertex v)
