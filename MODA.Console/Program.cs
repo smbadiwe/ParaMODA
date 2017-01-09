@@ -12,8 +12,8 @@ namespace MODA.Console
         {
             MODATest.Run(args);
             
-            //System.Console.WriteLine("Done!");
-            //System.Console.ReadKey();
+            //StdConsole.WriteLine("Done!");
+            //StdConsole.ReadKey();
         }
     }
 }

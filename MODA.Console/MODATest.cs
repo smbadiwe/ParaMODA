@@ -1,12 +1,11 @@
 ﻿using MODA.Impl;
-using MODA.Impl.Graphics;
 using QuickGraph;
 using System.Diagnostics;
 using System.IO;
 using System;
 using System.Text;
-using System.Xml.Linq;
-using System.Xml.XPath;
+using StdConsole = System.Console;
+using MODA.Impl.Graphics;
 
 namespace MODA.Console
 {
@@ -19,22 +18,23 @@ namespace MODA.Console
             {
                 if (args == null || args.Length != 3)
                 {
-                    System.Console.ForegroundColor = System.ConsoleColor.Red;
-                    //System.Console.WriteLine("Error. Use the command:\nMODA.Console  <graphFolder> <filename> <subGraphSize>\nSee ReadMe.txt file for more details.");
+                    StdConsole.ForegroundColor = ConsoleColor.Red;
+                    //StdConsole.WriteLine("Error. Use the command:\nMODA.Console  <graphFolder> <filename> <subGraphSize>\nSee ReadMe.txt file for more details.");
                     try
                     {
-                        System.Console.WriteLine(File.ReadAllText("ReadMe.txt"));
+                        StdConsole.WriteLine(File.ReadAllText("ReadMe.txt"));
                     }
                     catch
                     {
-                        System.Console.WriteLine("Error. Use the command:\nMODA.Console  <graphFolder> <filename> <subGraphSize>\nSee ReadMe.txt file for more details.");
+                        StdConsole.WriteLine("Error. Use the command:\nMODA.Console  <graphFolder> <filename> <subGraphSize>\nSee ReadMe.txt file for more details.");
                     }
-                    System.Console.ForegroundColor = ConsoleColor.White;
+                    StdConsole.ForegroundColor = ConsoleColor.White;
                     return;
                 }
                 string graphFolder = args[0]; // @"C:\SOMA\Drive\MyUW\Research\Kim\remodaalgorithmimplementation";
                 string filename = args[1]; // "QueryGraph.txt"; // "Ecoli20141001CR_idx.txt";
                 var inputGraphFile = Path.Combine(graphFolder, filename);
+                string queryGraphFile = null;
                 int subGraphSize;
                 if (!int.TryParse(args[2], out subGraphSize))
                 {
@@ -45,25 +45,25 @@ namespace MODA.Console
                 var sb = new StringBuilder("Processing Graph...");
                 sb.AppendFormat("Network File: {0}\nSub-graph Size: {1}\n", inputGraphFile, subGraphSize);
                 sb.AppendLine("==============================================================\n");
-                System.Console.ForegroundColor = ConsoleColor.Green;
-                System.Console.WriteLine(sb);
+                StdConsole.ForegroundColor = ConsoleColor.Green;
+                StdConsole.WriteLine(sb);
                 sb.Clear();
 
                 var inputGraph = GraphProcessor.LoadGraph(inputGraphFile);
                 UndirectedGraph<string, Edge<string>> queryGraph = null;
-                System.Console.WriteLine("Do you have a particular size {0} query graph in mind? Y/N", subGraphSize);
-                string resp = System.Console.ReadLine();
+                StdConsole.WriteLine("Do you have a particular size {0} query graph in mind? Y/N", subGraphSize);
+                string resp = StdConsole.ReadLine();
                 if (resp == "y" || resp == "Y")
                 {
                     while (true)
                     {
-                        System.Console.WriteLine("Enter the path to the query graph file");
-                        string queryGraphFile = System.Console.ReadLine();
+                        StdConsole.WriteLine("Enter the (relative or absolute) path to the query graph file");
+                        queryGraphFile = StdConsole.ReadLine();
                         queryGraph = GraphProcessor.LoadGraph(queryGraphFile);
                         if (queryGraph.VertexCount != subGraphSize)
                         {
-                            System.Console.WriteLine("The specified subgraph size does not match with the query graph size. \nDo you want to use the size of the specified query graph instead? Y/N");
-                            resp = System.Console.ReadLine();
+                            StdConsole.WriteLine("The specified subgraph size does not match with the query graph size. \nDo you want to use the size of the specified query graph instead? Y/N");
+                            resp = StdConsole.ReadLine();
                             if (resp == "y" || resp == "Y")
                             {
                                 subGraphSize = queryGraph.VertexCount;
@@ -81,16 +81,28 @@ namespace MODA.Console
                 {
                     throw new NotSupportedException("The specified subgraaph size is too large.");
                 }
-                System.Console.WriteLine("Input Graph (G): Nodes - {0}; Edges: {1}\n", inputGraph.VertexCount, inputGraph.EdgeCount);
+                StdConsole.WriteLine("Input Graph (G): Nodes - {0}; Edges: {1}\n", inputGraph.VertexCount, inputGraph.EdgeCount);
                 if (queryGraph != null)
                 {
-                    System.Console.WriteLine("Query Graph (H): Nodes - {0}; Edges: {1}\n", queryGraph.VertexCount, queryGraph.EdgeCount);
+                    StdConsole.WriteLine("Query Graph (H): Nodes - {0}; Edges: {1}\n", queryGraph.VertexCount, queryGraph.EdgeCount);
+                }
+
+                StdConsole.WriteLine("Do you want to generate an image of the input (and query) graph(s)? Y/N\nIf Y, you'll need to provide the path to dod.exe program on your machine");
+                resp = StdConsole.ReadLine();
+                if (resp == "y" || resp == "Y")
+                {
+                    StdConsole.WriteLine("Enter the path of the dot.exe program on your machine:");
+                    resp = StdConsole.ReadLine(); //the dot program's filename, including the path
+                    Visualizer.Visualize(inputGraph, resp, inputGraphFile + ".dot");
+                    if (queryGraph != null) // => queryGraphFile has a value
+                    {
+                        Visualizer.Visualize(queryGraph, resp, queryGraphFile + ".dot");
+                    }
                 }
 
                 ModaAlgorithms.BuildTree(queryGraph, subGraphSize);
 
                 var sw = Stopwatch.StartNew();
-                //Visualizer.Visualize(newGraphInstance, dotFileFulllName + ".dot");
                 //ModaAlgorithms.VertexCountDividend = vertexCountDividend;
                 var frequentSubgraphs = ModaAlgorithms.Algorithm1(inputGraph, subGraphSize);
                 sw.Stop();
@@ -106,8 +118,8 @@ namespace MODA.Console
                 sb.AppendLine("-------------------------------------------\n");
                 inputGraph = null;
                 frequentSubgraphs = null;
-                System.Console.ForegroundColor = ConsoleColor.Blue;
-                System.Console.WriteLine(sb);
+                StdConsole.ForegroundColor = ConsoleColor.Blue;
+                StdConsole.WriteLine(sb);
 
                 try
                 {
@@ -115,16 +127,16 @@ namespace MODA.Console
                 }
                 catch { }
 
-                System.Console.ForegroundColor = ConsoleColor.White;
-                System.Console.WriteLine("Done! Press any key to exit.");
+                StdConsole.ForegroundColor = ConsoleColor.White;
+                StdConsole.WriteLine("Done! Press any key to exit.");
             }
             catch (Exception ex)
             {
-                System.Console.ForegroundColor = ConsoleColor.Red;
-                System.Console.WriteLine(ex);
-                System.Console.ForegroundColor = ConsoleColor.White;
+                StdConsole.ForegroundColor = ConsoleColor.Red;
+                StdConsole.WriteLine(ex);
+                StdConsole.ForegroundColor = ConsoleColor.White;
             }
-            System.Console.ReadKey();
+            StdConsole.ReadKey();
         }
 
         //internal static void GenerateExpansionTreeNodes()
@@ -135,7 +147,7 @@ namespace MODA.Console
 
         //    var outputFolder = Path.Combine(System.Environment.CurrentDirectory, "ExpTree" + subgraphSize);
         //    if (!Directory.Exists(outputFolder)) Directory.CreateDirectory(outputFolder);
-        //    System.Console.WriteLine("Output Folder: {0} ", outputFolder);
+        //    StdConsole.WriteLine("Output Folder: {0} ", outputFolder);
 
         //    Visualizer.Visualize(builder.ExpansionTree, Path.Combine(outputFolder, "ExpansionTree_5.dot"));
 
@@ -147,7 +159,7 @@ namespace MODA.Console
 
         //    //    Visualizer.Visualize(qGraph, Path.Combine(outputFolder, node.NodeName + ".dot"));
 
-        //    //    System.Console.WriteLine("\tDrawn node {0} ", node.NodeName);
+        //    //    StdConsole.WriteLine("\tDrawn node {0} ", node.NodeName);
         //    //    //Check for complete-ness; if complete, break
         //    //    //  A Complete graph of n nodes has n(n-1)/2 edges
         //    //    if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))
@@ -160,8 +172,8 @@ namespace MODA.Console
         //    //}
         //    //while (true);
 
-        //    System.Console.WriteLine("Done!");
-        //    System.Console.ReadKey();
+        //    StdConsole.WriteLine("Done!");
+        //    StdConsole.ReadKey();
         //}
     }
 }
