@@ -6,7 +6,10 @@ namespace MODA.Impl
 {
     public partial class ModaAlgorithms
     {
-        public static int VertexCountDividend { get; set; }
+        /// <summary>
+        /// Frequency value, above which we can comsider the subgraph a "frequent subgraph"
+        /// </summary>
+        public static int Threshold { get; set; }
         
         public const string MapFolder = @"C:\SOMA\Drive\MyUW\Research\Kim\Capstone\ExperimentalNetworks\MapFolder";
         private static ExpansionTreeBuilder<Edge<string>> _builder;
@@ -47,6 +50,10 @@ namespace MODA.Impl
                     mappings = Algorithm3(qGraph, inputGraph, _builder.ExpansionTree, allMappings);
                 }
 
+                if (mappings.Count > Threshold)
+                {
+                    qGraph.IsFrequentSubgraph = true;
+                }
                 // Save mappings. Do we need to save to disk? Maybe not!
                 allMappings.Add(qGraph, mappings);
 
@@ -72,7 +79,7 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="extTreeNodesQueued"></param>
         /// <returns></returns>
-        private static ExpansionTreeNode<Edge<string>> GetNextNode()
+        private static ExpansionTreeNode GetNextNode()
         {
             foreach (var node in _builder.VerticesSorted)
             {

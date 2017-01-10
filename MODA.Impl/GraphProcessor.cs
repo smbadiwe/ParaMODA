@@ -49,13 +49,13 @@ namespace MODA.Impl
         /// (pairs of nodes connecting with each other).
         /// </summary>
         /// <param name="filename">The uploaded filename</param>
-        /// <param name="newGraphInstance"></param>
         /// <returns>A string containing feedback of the processing</returns>
-        public static UndirectedGraph<string, Edge<string>> LoadGraph(string filename)
+        public static UndirectedGraph<string, Edge<string>> LoadGraph(string filename, bool isQueryGraph = false)
         {
             var lines = File.ReadAllLines(filename);
 
             var newGraphInstance = new UndirectedGraph<string, Edge<string>>();
+
             //Parallelizing this actually made it take longer to process my datasets
             string[] tmp;
             foreach (var line in lines)
@@ -68,6 +68,6 @@ namespace MODA.Impl
             }
             return newGraphInstance;
         }
-        
+
     }
 }

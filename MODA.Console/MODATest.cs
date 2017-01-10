@@ -16,7 +16,7 @@ namespace MODA.Console
         {
             try
             {
-                if (args == null || args.Length != 3)
+                if (args == null || args.Length != 4)
                 {
                     StdConsole.ForegroundColor = ConsoleColor.Red;
                     //StdConsole.WriteLine("Error. Use the command:\nMODA.Console  <graphFolder> <filename> <subGraphSize>\nSee ReadMe.txt file for more details.");
@@ -40,7 +40,11 @@ namespace MODA.Console
                 {
                     throw new ArgumentException("Invalid input for <subGraphSize> argument (arg[2])");
                 }
-                //int vertexCountDividend = int.Parse(args[3]);
+                int threshold;
+                if (!int.TryParse(args[3], out threshold))
+                {
+                    throw new ArgumentException("Invalid input for <threshold> argument (arg[3])");
+                }
 
                 var sb = new StringBuilder("Processing Graph...");
                 sb.AppendFormat("Network File: {0}\nSub-graph Size: {1}\n", inputGraphFile, subGraphSize);
@@ -101,9 +105,9 @@ namespace MODA.Console
                 }
 
                 ModaAlgorithms.BuildTree(queryGraph, subGraphSize);
+                ModaAlgorithms.Threshold = threshold;
 
                 var sw = Stopwatch.StartNew();
-                //ModaAlgorithms.VertexCountDividend = vertexCountDividend;
                 var frequentSubgraphs = ModaAlgorithms.Algorithm1(inputGraph, subGraphSize);
                 sw.Stop();
                 int totalMappings = 0;

@@ -108,7 +108,6 @@
     <Compile Include="EdgeExtensions.cs" />
     <Compile Include="EdgePredicate.cs" />
     <Compile Include="GraphColor.cs" />
-    <Compile Include="GraphExtensions.cs" />
     <Compile Include="IEdge.cs" />
     <Compile Include="IEdgeListAndIncidenceGraph.cs" />
     <Compile Include="IEdgeListGraph.cs" />

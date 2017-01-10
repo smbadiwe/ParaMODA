@@ -116,6 +116,31 @@ namespace MODA.Impl
             tempList = null;
             return listToReturn.ToArray();
         }
-        
+
+        /// <summary>
+        /// Converts a sequence of edges into a query graph
+        /// </summary>
+        /// <param name="edges"></param>
+        /// <returns></returns>
+        public static QueryGraph ToQueryGraph(this IEnumerable<Edge<string>> edges)
+        {
+            return ToQueryGraph(edges, true);
+        }
+
+        /// <summary>
+        /// Converts a sequence of edges into a query graph
+        /// </summary>
+        /// <param name="edges"></param>
+        /// <param name="allowParralelEdges"></param>
+        /// <returns></returns>
+        public static QueryGraph ToQueryGraph(this IEnumerable<Edge<string>> edges, bool allowParralelEdges)
+        {
+            //if (edges == null || edges.Any(e => e == null)) throw new System.ArgumentNullException("edges", "Null value(s) not accepted.");
+
+            var g = new QueryGraph(allowParralelEdges);
+            g.AddVerticesAndEdgeRange(edges);
+            return g;
+        }
+
     }
 }

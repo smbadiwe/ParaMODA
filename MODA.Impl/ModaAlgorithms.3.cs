@@ -30,8 +30,8 @@ namespace MODA.Impl
         /// <param name="queryGraph"></param>
         /// <param name="inputGraph"></param>
         /// <param name="expansionTree"></param>
-        private static List<Mapping> Algorithm3(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph,
-            AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree,
+        private static List<Mapping> Algorithm3(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraph,
+            AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> expansionTree,
             Dictionary<UndirectedGraph<string, Edge<string>>, List<Mapping>> mappingsInMemory)
         {
             //var timer = System.Diagnostics.Stopwatch.StartNew();
@@ -123,8 +123,8 @@ namespace MODA.Impl
         /// <param name="queryGraph"></param>
         /// <param name="inputGraph"></param>
         /// <param name="expansionTree"></param>
-        private static List<Mapping> Algorithm3_Parallelized(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph,
-            AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree)
+        private static List<Mapping> Algorithm3_Parallelized(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraph,
+            AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> expansionTree)
         {
             var timer = System.Diagnostics.Stopwatch.StartNew();
             var parentQueryGraph = GetParent(queryGraph, expansionTree);
@@ -238,9 +238,9 @@ namespace MODA.Impl
         /// <param name="queryGraph"></param>
         /// <param name="expansionTree"></param>
         /// <returns></returns>
-        private static UndirectedGraph<string, Edge<string>> GetParent(UndirectedGraph<string, Edge<string>> queryGraph, AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> expansionTree)
+        private static QueryGraph GetParent(QueryGraph queryGraph, AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> expansionTree)
         {
-            var hasNode = expansionTree.ContainsVertex(new ExpansionTreeNode<Edge<string>>
+            var hasNode = expansionTree.ContainsVertex(new ExpansionTreeNode
             {
                 QueryGraph = queryGraph,
             });

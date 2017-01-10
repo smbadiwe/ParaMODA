@@ -14,10 +14,10 @@ namespace MODA.Impl
 
         private int _numberOfNodes;
         private TreeTraversalType _traversalType;
-        private IVertexListGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> _graph;
+        private IVertexListGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> _graph;
 
-        public IDictionary<ExpansionTreeNode<Edge<string>>, GraphColor> VerticesSorted { get; set; }
-        public AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>> ExpansionTree { get; set; }
+        public IDictionary<ExpansionTreeNode, GraphColor> VerticesSorted { get; set; }
+        public AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> ExpansionTree { get; set; }
 
         /// <summary>
         /// 
@@ -33,14 +33,14 @@ namespace MODA.Impl
             }
             _numberOfNodes = numberOfNodes;
             _traversalType = traversalType;
-            ExpansionTree = new AdjacencyGraph<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>>(false);
+            ExpansionTree = new AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>>(false);
 
             ExpansionTree.EdgeAdded += e => e.Target.ParentNode = e.Source;
         }
 
         public void Build()
         {
-            ExpansionTreeNode<Edge<string>> rootNode;
+            ExpansionTreeNode rootNode;
             switch (_numberOfNodes)
             {
                 case 3:
@@ -53,8 +53,8 @@ namespace MODA.Impl
                     rootNode = ExpansionTree.BuildFiveNodesTree();
                     break;
                 default: //Do for 4
-                    rootNode = ExpansionTree.BuildFourNodesTree();
-                    break;
+                    //rootNode = ExpansionTree.BuildFourNodesTree();
+                    throw new System.NotSupportedException("Subgraph sizes below 3 and above 5 are not supported");
             }
             //TODO: Construct the tree.
             // It turns out there's yet no formula to determine the number of isomorphic trees that can be formed
@@ -62,7 +62,7 @@ namespace MODA.Impl
 
             if (_traversalType == TreeTraversalType.BFS)
             {
-                var bfs = new BreadthFirstSearchAlgorithm<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>>(ExpansionTree);
+                var bfs = new BreadthFirstSearchAlgorithm<ExpansionTreeNode, Edge<ExpansionTreeNode>>(ExpansionTree);
                 bfs.SetRootVertex(rootNode);
                 bfs.Compute();
 
@@ -72,7 +72,7 @@ namespace MODA.Impl
             }
             else
             {
-                var dfs = new DepthFirstSearchAlgorithm<ExpansionTreeNode<Edge<string>>, Edge<ExpansionTreeNode<Edge<string>>>>(ExpansionTree);
+                var dfs = new DepthFirstSearchAlgorithm<ExpansionTreeNode, Edge<ExpansionTreeNode>>(ExpansionTree);
                 dfs.SetRootVertex(rootNode);
                 dfs.Compute();
 

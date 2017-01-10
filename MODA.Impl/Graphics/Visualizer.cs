@@ -5,11 +5,11 @@ namespace MODA.Impl.Graphics
 {
     public static class Visualizer
     {
-        #region 'ExpansionTreeNode<Edge<string>> as TVertex
+        #region 'ExpansionTreeNode as TVertex
         public static void Visualize<TVertex, TEdge>(this IEdgeListGraph<TVertex, TEdge> graph,
             string dotProgramLocation, string outputFullFileName)
             where TEdge : IEdge<TVertex>
-            where TVertex : ExpansionTreeNode<Edge<string>>
+            where TVertex : ExpansionTreeNode
         {
             Visualize(graph, dotProgramLocation, outputFullFileName, NoOpEdgeFormatter);
         }
@@ -17,7 +17,7 @@ namespace MODA.Impl.Graphics
         public static void Visualize<TVertex, TEdge>(this IEdgeListGraph<TVertex, TEdge> graph,
             string dotProgramLocation, string outputFullFileName, FormatEdgeAction<TVertex, TEdge> edgeFormatter)
             where TEdge : IEdge<TVertex>
-            where TVertex : ExpansionTreeNode<Edge<string>>
+            where TVertex : ExpansionTreeNode
         {
             var viz = new GraphvizAlgorithm<TVertex, TEdge>(graph);
 
@@ -30,7 +30,7 @@ namespace MODA.Impl.Graphics
 
         public static string ToDotNotation<TVertex, TEdge>(this IVertexAndEdgeListGraph<TVertex, TEdge> graph)
             where TEdge : IEdge<TVertex>
-            where TVertex : ExpansionTreeNode<Edge<string>>
+            where TVertex : ExpansionTreeNode
         {
             var viz = new GraphvizAlgorithm<TVertex, TEdge>(graph);
             viz.FormatVertex += VizFormastring;
@@ -80,7 +80,7 @@ namespace MODA.Impl.Graphics
         }
 
         private static void VizFormastring<TVertex>(object sender, FormatVertexEventArgs<TVertex> e)
-            where TVertex : ExpansionTreeNode<Edge<string>>
+            where TVertex : ExpansionTreeNode
         {
             var graph = e.Vertex.QueryGraph;
             e.VertexFormatter.Shape = QuickGraph.Graphviz.Dot.GraphvizVertexShape.Box;
@@ -90,7 +90,7 @@ namespace MODA.Impl.Graphics
 
         private static void NoOpEdgeFormatter<TVertex, TEdge>(object sender, FormatEdgeEventArgs<TVertex, TEdge> e)
             where TEdge : IEdge<TVertex>
-            where TVertex : ExpansionTreeNode<Edge<string>>
+            where TVertex : ExpansionTreeNode
         {
             // noop
             //e.EdgeFormatter.Label.Value = e.Edge.Label;
