@@ -1,6 +1,6 @@
 ﻿using QuickGraph;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
 
 namespace MODA.Impl
 {
@@ -10,6 +10,10 @@ namespace MODA.Impl
         /// Frequency value, above which we can comsider the subgraph a "frequent subgraph"
         /// </summary>
         public static int Threshold { get; set; }
+        /// <summary>
+        /// If true, it means we only care about how many mappings are found for each subgraph, not info about the mappings themselves.
+        /// </summary>
+        public static bool GetOnlyMappingCounts { get; set; }
         
         public const string MapFolder = @"C:\SOMA\Drive\MyUW\Research\Kim\Capstone\ExperimentalNetworks\MapFolder";
         private static ExpansionTreeBuilder<Edge<string>> _builder;
@@ -25,9 +29,11 @@ namespace MODA.Impl
         /// <param name="inputGraph"></param>
         /// <param name="subgraphSize"></param>
         /// <param name="thresholdValue"></param>
-        /// <returns>Fg, frequent subgraph list</returns>
-        public static Dictionary<UndirectedGraph<string, Edge<string>>, List<Mapping>> Algorithm1(UndirectedGraph<string, Edge<string>> inputGraph, int subgraphSize, int thresholdValue = 0)
+        /// <returns>Fg, frequent subgraph list. NB: The dictionary .Value is an <see cref="object"/> which will be either a list of <see cref="Mapping"/> or a <see cref="long"/>
+        /// depending on the value of <see cref="GetOnlyMappingCounts"/>.</returns>
+        public static Dictionary<UndirectedGraph<string, Edge<string>>, object> Algorithm1(UndirectedGraph<string, Edge<string>> inputGraph, int subgraphSize, int thresholdValue = 0)
         {
+            // The enumeration module (Algo 3) needs the mappings generated from the previous run(s)
             var allMappings = new Dictionary<UndirectedGraph<string, Edge<string>>, List<Mapping>>();
             do
             {
@@ -71,7 +77,24 @@ namespace MODA.Impl
             while (true);
 
             _builder = null;
-            return allMappings;
+            var toReturn = new Dictionary<UndirectedGraph<string, Edge<string>>, object>();
+
+            if (GetOnlyMappingCounts)
+            {
+                foreach (var item in allMappings)
+                {
+                    toReturn.Add(item.Key, item.Value.Count);
+                } 
+            }
+            else
+            {
+                foreach (var item in allMappings)
+                {
+                    toReturn.Add(item.Key, item.Value);
+                }
+            }
+            allMappings = null;
+            return toReturn;
         }
         
         /// <summary>

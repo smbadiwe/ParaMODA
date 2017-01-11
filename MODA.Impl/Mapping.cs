@@ -13,6 +13,9 @@ namespace MODA.Impl
             Function = function;
         }
 
+        /// <summary>
+        /// This represents the [f(h) = g] relation. Meaning key is h and value is g.
+        /// </summary>
         public Dictionary<string, string> Function { get; private set; }
 
         /// <summary>

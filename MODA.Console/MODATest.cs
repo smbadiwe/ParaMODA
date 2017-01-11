@@ -16,7 +16,7 @@ namespace MODA.Console
         {
             try
             {
-                if (args == null || args.Length != 4)
+                if (args == null || args.Length != 5)
                 {
                     StdConsole.ForegroundColor = ConsoleColor.Red;
                     //StdConsole.WriteLine("Error. Use the command:\nMODA.Console  <graphFolder> <filename> <subGraphSize>\nSee ReadMe.txt file for more details.");
@@ -26,7 +26,7 @@ namespace MODA.Console
                     }
                     catch
                     {
-                        StdConsole.WriteLine("Error. Use the command:\nMODA.Console  <graphFolder> <filename> <subGraphSize>\nSee ReadMe.txt file for more details.");
+                        StdConsole.WriteLine("Error. Use the command:\nMODA.Console  <graphFolder> <filename> <subGraphSize> <threshold> <getOnlyMappingCounts>\nSee ReadMe.txt file for more details.");
                     }
                     StdConsole.ForegroundColor = ConsoleColor.White;
                     return;
@@ -45,11 +45,14 @@ namespace MODA.Console
                 {
                     throw new ArgumentException("Invalid input for <threshold> argument (arg[3])");
                 }
-
+                string getOnlyMappingCounts = args[4];
+                if (getOnlyMappingCounts == "y" || getOnlyMappingCounts == "Y")
+                {
+                    ModaAlgorithms.GetOnlyMappingCounts = true;
+                }
                 var sb = new StringBuilder("Processing Graph...");
                 sb.AppendFormat("Network File: {0}\nSub-graph Size: {1}\n", inputGraphFile, subGraphSize);
                 sb.AppendLine("==============================================================\n");
-                StdConsole.ForegroundColor = ConsoleColor.Green;
                 StdConsole.WriteLine(sb);
                 sb.Clear();
 
@@ -103,20 +106,36 @@ namespace MODA.Console
                         Visualizer.Visualize(queryGraph, resp, queryGraphFile + ".dot");
                     }
                 }
+                StdConsole.ForegroundColor = ConsoleColor.Green;
 
                 ModaAlgorithms.BuildTree(queryGraph, subGraphSize);
                 ModaAlgorithms.Threshold = threshold;
 
                 var sw = Stopwatch.StartNew();
+
                 var frequentSubgraphs = ModaAlgorithms.Algorithm1(inputGraph, subGraphSize);
+
                 sw.Stop();
-                int totalMappings = 0;
+                long totalMappings = 0;
                 sb.Append("\nCompleted. Result Summary\n");
                 sb.AppendLine("-------------------------------------------\n");
-                foreach (var qGraph in frequentSubgraphs)
+                if (ModaAlgorithms.GetOnlyMappingCounts)
                 {
-                    sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\n", qGraph.Key.AsString(), qGraph.Value.Count);
-                    totalMappings += qGraph.Value.Count;
+                    foreach (var qGraph in frequentSubgraphs)
+                    {
+                        int count = (int)qGraph.Value;
+                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\n", qGraph.Key.AsString(), count);
+                        totalMappings += count;
+                    }
+                }
+                else
+                {
+                    foreach (var qGraph in frequentSubgraphs)
+                    {
+                        int count = ((System.Collections.Generic.List<Mapping>)qGraph.Value).Count;
+                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\n", qGraph.Key.AsString(), count);
+                        totalMappings += count;
+                    }
                 }
                 sb.AppendFormat("\nTime Taken: {0} ({1}ms)\nNetwork: Nodes - {2}; Edges: {3};\nTotal Mappings found: {4}\nSubgraph Size: {5}\n", sw.Elapsed, sw.ElapsedMilliseconds.ToString("N"), inputGraph.VertexCount, inputGraph.EdgeCount, totalMappings, subGraphSize);
                 sb.AppendLine("-------------------------------------------\n");

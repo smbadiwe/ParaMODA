@@ -8,12 +8,14 @@ TO RUN PROGRAM
 - To run the program, you'll need to
 	- Launch Command Prompt and navigate to the folder containing the MODA.Console.exe file
 	- Then type in the command:
-		MODA.Console <graphFolder> <filename> <subGraphSize> <threshold>
+		MODA.Console <graphFolder> <filename> <subGraphSize> <threshold> <getOnlyMappingCounts>
 		where:
 		- <graphFolder>: the (relative or absolute) folder the input graph file is.
 		- <filename>: the input graph file name.
 		- <subGraphSize>: the subgraph size you're interested in, or you want to query.
 		- <threshold>: Frequency value, above which we can comsider the subgraph a "frequent subgraph"
+		- <getOnlyMappingCounts>: Possible values: y or n (signifying yes or no). If yes, it means we only care about 
+		                          how many mappings are found for each subgraph, not info about the mappings themselves.
 
 - To run with the test data, simply run with the command:
 	MODA.Console . Scere20141001CR_idx.txt 4

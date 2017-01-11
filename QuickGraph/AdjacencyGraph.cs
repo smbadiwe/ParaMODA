@@ -343,11 +343,7 @@ namespace QuickGraph
         public event VertexAction<TVertex> VertexRemoved;
         protected virtual void OnVertexRemoved(TVertex args)
         {
-            Contract.Requires(args != null);
-
-            var eh = this.VertexRemoved;
-            if (eh != null)
-                eh(args);
+            this.VertexRemoved?.Invoke(args);
         }
 
         public int RemoveVertexIf(VertexPredicate<TVertex> predicate)
@@ -416,9 +412,7 @@ namespace QuickGraph
         public event EdgeAction<TVertex, TEdge> EdgeAdded;
         protected virtual void OnEdgeAdded(TEdge args)
         {
-            var eh = this.EdgeAdded;
-            if (eh != null)
-                eh(args);
+            this.EdgeAdded?.Invoke(args);
         }
 
         public virtual bool RemoveEdge(TEdge e)
@@ -439,9 +433,7 @@ namespace QuickGraph
         public event EdgeAction<TVertex, TEdge> EdgeRemoved;
         protected virtual void OnEdgeRemoved(TEdge args)
         {
-            var eh = this.EdgeRemoved;
-            if (eh != null)
-                eh(args);
+            this.EdgeRemoved?.Invoke(args);
         }
 
         public int RemoveEdgeIf(EdgePredicate<TVertex, TEdge> predicate)
@@ -504,9 +496,7 @@ namespace QuickGraph
         public event EventHandler Cleared;
         private void OnCleared(EventArgs e)
         {
-            var eh = this.Cleared;
-            if (eh != null)
-                eh(this, e);
+            this.Cleared?.Invoke(this, e);
         }
 
         #region ICloneable Members
