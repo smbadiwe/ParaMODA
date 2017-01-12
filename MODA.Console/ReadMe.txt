@@ -18,7 +18,7 @@ TO RUN PROGRAM
 		- <useModifiedGrochow>: If true, the program will use the newly proposed modified Grochow's algorithm (Algo 2)
 
 - To run with the test data, simply run with the command:
-	MODA.Console . Scere20141001CR_idx.txt 4
+	MODA.Console . Scere20141001CR_idx.txt 4 0 y n
 
 - Subgraph sizes (the last parameter in the command) below 3 and above 5 are not (yet) supported
 - You will get the chance to provide sample file of the query graph (subgraph) you're interested in, if you have one
