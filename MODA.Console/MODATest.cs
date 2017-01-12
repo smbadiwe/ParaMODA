@@ -11,12 +11,12 @@ namespace MODA.Console
 {
     public class MODATest
     {
-        //MODA.Console "C:\SOMA\Drive\MyUW\Research\Kim\remodaalgorithmimplementation" "Ecoli20141001CR_idx.txt" 3 1
         internal static void Run(string[] args)
         {
             try
             {
-                if (args == null || args.Length != 5)
+                #region Process input parameters
+                if (args == null || args.Length != 6)
                 {
                     StdConsole.ForegroundColor = ConsoleColor.Red;
                     //StdConsole.WriteLine("Error. Use the command:\nMODA.Console  <graphFolder> <filename> <subGraphSize>\nSee ReadMe.txt file for more details.");
@@ -34,11 +34,10 @@ namespace MODA.Console
                 string graphFolder = args[0]; // @"C:\SOMA\Drive\MyUW\Research\Kim\remodaalgorithmimplementation";
                 string filename = args[1]; // "QueryGraph.txt"; // "Ecoli20141001CR_idx.txt";
                 var inputGraphFile = Path.Combine(graphFolder, filename);
-                string queryGraphFile = null;
                 int subGraphSize;
-                if (!int.TryParse(args[2], out subGraphSize))
+                if (!int.TryParse(args[2], out subGraphSize) || subGraphSize <= 2)
                 {
-                    throw new ArgumentException("Invalid input for <subGraphSize> argument (arg[2])");
+                    throw new ArgumentException("Invalid input for <subGraphSize> argument (arg[2]). Value should be an integer greater than 2.");
                 }
                 int threshold;
                 if (!int.TryParse(args[3], out threshold))
@@ -50,6 +49,11 @@ namespace MODA.Console
                 {
                     ModaAlgorithms.GetOnlyMappingCounts = true;
                 }
+                string useModifiedGrochow = args[5];
+                if (useModifiedGrochow == "y" || useModifiedGrochow == "Y")
+                {
+                    ModaAlgorithms.UseModifiedGrochow = true;
+                }
                 var sb = new StringBuilder("Processing Graph...");
                 sb.AppendFormat("Network File: {0}\nSub-graph Size: {1}\n", inputGraphFile, subGraphSize);
                 sb.AppendLine("==============================================================\n");
@@ -57,16 +61,24 @@ namespace MODA.Console
                 sb.Clear();
 
                 var inputGraph = GraphProcessor.LoadGraph(inputGraphFile);
-                UndirectedGraph<string, Edge<string>> queryGraph = null;
-                StdConsole.WriteLine("Do you have a particular size {0} query graph in mind? Y/N", subGraphSize);
+                string queryGraphFile = null;
+                QueryGraph queryGraph = null;
+                if (subGraphSize > 5)
+                {
+                    StdConsole.WriteLine("You need a query graph to proceed. To supply the query graph file, type 'y' and press Enter.");
+                }
+                else
+                {
+                    StdConsole.WriteLine("Do you have a particular size {0} query graph in mind? Y/N", subGraphSize);
+                }
                 string resp = StdConsole.ReadLine();
-                if (resp == "y" || resp == "Y")
+                if (resp == "y" || resp == "Y" || subGraphSize > 5)
                 {
                     while (true)
                     {
                         StdConsole.WriteLine("Enter the (relative or absolute) path to the query graph file");
                         queryGraphFile = StdConsole.ReadLine();
-                        queryGraph = GraphProcessor.LoadGraph(queryGraphFile);
+                        queryGraph = GraphProcessor.LoadGraph(queryGraphFile, true) as QueryGraph;
                         if (queryGraph.VertexCount != subGraphSize)
                         {
                             StdConsole.WriteLine("The specified subgraph size does not match with the query graph size. \nDo you want to use the size of the specified query graph instead? Y/N");
@@ -84,6 +96,7 @@ namespace MODA.Console
                         }
                     }
                 }
+
                 if (subGraphSize >= inputGraph.VertexCount)
                 {
                     throw new NotSupportedException("The specified subgraaph size is too large.");
@@ -108,14 +121,22 @@ namespace MODA.Console
                 }
                 StdConsole.ForegroundColor = ConsoleColor.Green;
 
-                ModaAlgorithms.BuildTree(queryGraph, subGraphSize);
+                if (queryGraph == null)
+                {
+                    ModaAlgorithms.BuildTree(subGraphSize);
+                }
                 ModaAlgorithms.Threshold = threshold;
+                ModaAlgorithms.QueryGraph = queryGraph;
+
+                #endregion
 
                 var sw = Stopwatch.StartNew();
 
                 var frequentSubgraphs = ModaAlgorithms.Algorithm1(inputGraph, subGraphSize);
 
                 sw.Stop();
+
+                #region Process output
                 long totalMappings = 0;
                 sb.Append("\nCompleted. Result Summary\n");
                 sb.AppendLine("-------------------------------------------\n");
@@ -124,7 +145,7 @@ namespace MODA.Console
                     foreach (var qGraph in frequentSubgraphs)
                     {
                         int count = (int)qGraph.Value;
-                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\n", qGraph.Key.AsString(), count);
+                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}n", qGraph.Key.AsString(), count, qGraph.Key.IsFrequentSubgraph);
                         totalMappings += count;
                     }
                 }
@@ -133,7 +154,7 @@ namespace MODA.Console
                     foreach (var qGraph in frequentSubgraphs)
                     {
                         int count = ((System.Collections.Generic.List<Mapping>)qGraph.Value).Count;
-                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\n", qGraph.Key.AsString(), count);
+                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}n", qGraph.Key.AsString(), count, qGraph.Key.IsFrequentSubgraph);
                         totalMappings += count;
                     }
                 }
@@ -150,6 +171,8 @@ namespace MODA.Console
                 }
                 catch { }
 
+                #endregion
+
                 StdConsole.ForegroundColor = ConsoleColor.White;
                 StdConsole.WriteLine("Done! Press any key to exit.");
             }
@@ -161,42 +184,5 @@ namespace MODA.Console
             }
             StdConsole.ReadKey();
         }
-
-        //internal static void GenerateExpansionTreeNodes()
-        //{
-        //    int subgraphSize = 5;
-        //    var builder = new ExpansionTreeBuilder<Edge<string>>(subgraphSize);
-        //    builder.Build();
-
-        //    var outputFolder = Path.Combine(System.Environment.CurrentDirectory, "ExpTree" + subgraphSize);
-        //    if (!Directory.Exists(outputFolder)) Directory.CreateDirectory(outputFolder);
-        //    StdConsole.WriteLine("Output Folder: {0} ", outputFolder);
-
-        //    Visualizer.Visualize(builder.ExpansionTree, Path.Combine(outputFolder, "ExpansionTree_5.dot"));
-
-        //    //do
-        //    //{
-        //    //    var node = ModaAlgorithms.GetNextNode(builder.VerticesSorted);
-        //    //    var qGraph = node?.QueryGraph;
-        //    //    if (qGraph == null) break;
-
-        //    //    Visualizer.Visualize(qGraph, Path.Combine(outputFolder, node.NodeName + ".dot"));
-
-        //    //    StdConsole.WriteLine("\tDrawn node {0} ", node.NodeName);
-        //    //    //Check for complete-ness; if complete, break
-        //    //    //  A Complete graph of n nodes has n(n-1)/2 edges
-        //    //    if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))
-        //    //    {
-        //    //        node = null;
-        //    //        qGraph = null;
-        //    //        break;
-        //    //    }
-        //    //    qGraph = null;
-        //    //}
-        //    //while (true);
-
-        //    StdConsole.WriteLine("Done!");
-        //    StdConsole.ReadKey();
-        //}
     }
 }

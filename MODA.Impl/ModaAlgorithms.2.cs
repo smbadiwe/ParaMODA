@@ -1,10 +1,8 @@
 ﻿using QuickGraph;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MODA.Impl
 {
@@ -16,7 +14,7 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size</param>
-        private static List<Mapping> Algorithm2(UndirectedGraph<string, Edge<string>> queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
+        private static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
         {
             //var timer = System.Diagnostics.Stopwatch.StartNew();
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
@@ -51,10 +49,10 @@ namespace MODA.Impl
 
                         //sw.Stop();
                         var logGist = new StringBuilder();
-                        logGist.AppendFormat("Maps gotten from IsoExtension.\th = {0}. g = {1}\t", h, g);
-                        //logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}", sw.Elapsed.ToString(), h, g);
+                        logGist.AppendFormat("Maps gotten from IsomorphicExtension.\th = {0}. g = {1}\t", h, g);
+                        //logGist.AppendFormat("Maps gotten from IsomorphicExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}", sw.Elapsed.ToString(), h, g);
                         //sw.Restart();
-                        
+
                         foreach (Mapping mapping in mappings)
                         {
                             List<Mapping> mappingsToSearch; //Recall: f(h) = g
@@ -108,6 +106,5 @@ namespace MODA.Impl
             inputGraphClone = null;
             return toReturn;
         }
-        
     }
 }

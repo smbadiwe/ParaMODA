@@ -54,8 +54,18 @@ namespace MODA.Impl
         {
             var lines = File.ReadAllLines(filename);
 
-            var newGraphInstance = new UndirectedGraph<string, Edge<string>>();
-
+            UndirectedGraph<string, Edge<string>> newGraphInstance;
+            if (isQueryGraph)
+            {
+                newGraphInstance = new QueryGraph
+                {
+                    Label = Path.GetFileNameWithoutExtension(filename)
+                };
+            }
+            else
+            {
+                newGraphInstance = new UndirectedGraph<string, Edge<string>>();
+            }
             //Parallelizing this actually made it take longer to process my datasets
             string[] tmp;
             foreach (var line in lines)

@@ -20,12 +20,11 @@ namespace MODA.Impl
                 new Edge<string>("A","B"),
                 new Edge<string>("B","C")
             }
-            .ToQueryGraph(false);
+            .ToQueryGraph("qGraphL1_1");
             var nodeL1_1 = new ExpansionTreeNode
             {
                 Level = 1,
                 QueryGraph = qGraphL1_1,
-                NodeName = "qGraphL1_1"
             };
 
             expansionTree.AddVerticesAndEdge(new Edge<ExpansionTreeNode>(rootNode, nodeL1_1));
@@ -37,12 +36,11 @@ namespace MODA.Impl
                 new Edge<string>("B","C"),
                 new Edge<string>("A","C") //New Add;
             }
-            .ToQueryGraph(false);
+            .ToQueryGraph("qGraphL2_1");
             var nodeL2_1 = new ExpansionTreeNode
             {
                 Level = 2,
                 QueryGraph = qGraphL2_1,
-                NodeName = "qGraphL2_1"
             };
 
             expansionTree.AddVerticesAndEdge(new Edge<ExpansionTreeNode>(nodeL1_1, nodeL2_1));

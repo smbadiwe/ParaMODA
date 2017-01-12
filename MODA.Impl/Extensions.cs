@@ -122,9 +122,9 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="edges"></param>
         /// <returns></returns>
-        public static QueryGraph ToQueryGraph(this IEnumerable<Edge<string>> edges)
+        public static QueryGraph ToQueryGraph(this IEnumerable<Edge<string>> edges, string graphLabel = "")
         {
-            return ToQueryGraph(edges, true);
+            return ToQueryGraph(edges, true, graphLabel);
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace MODA.Impl
         /// <param name="edges"></param>
         /// <param name="allowParralelEdges"></param>
         /// <returns></returns>
-        public static QueryGraph ToQueryGraph(this IEnumerable<Edge<string>> edges, bool allowParralelEdges)
+        public static QueryGraph ToQueryGraph(this IEnumerable<Edge<string>> edges, bool allowParralelEdges, string graphLabel = "")
         {
             //if (edges == null || edges.Any(e => e == null)) throw new System.ArgumentNullException("edges", "Null value(s) not accepted.");
 

@@ -24,13 +24,8 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="numberOfNodes"></param>
         /// <param name="traversalType"></param>
-        /// <param name="queryGraph">The query graph we're looking for. Leave null if you're not looking for any in particular</param>
-        public ExpansionTreeBuilder(int numberOfNodes, TreeTraversalType traversalType = TreeTraversalType.BFS, UndirectedGraph<string, Edge<string>> queryGraph = null)
+        public ExpansionTreeBuilder(int numberOfNodes, TreeTraversalType traversalType = TreeTraversalType.BFS)
         {
-            if (queryGraph != null)
-            {
-                numberOfNodes = queryGraph.VertexCount;
-            }
             _numberOfNodes = numberOfNodes;
             _traversalType = traversalType;
             ExpansionTree = new AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>>(false);
@@ -54,7 +49,7 @@ namespace MODA.Impl
                     break;
                 default: //Do for 4
                     //rootNode = ExpansionTree.BuildFourNodesTree();
-                    throw new System.NotSupportedException("Subgraph sizes below 3 and above 5 are not supported");
+                    throw new System.NotSupportedException("Subgraph sizes below 3 and above 5 are not supported, unless you supply a query graph.");
             }
             //TODO: Construct the tree.
             // It turns out there's yet no formula to determine the number of isomorphic trees that can be formed
