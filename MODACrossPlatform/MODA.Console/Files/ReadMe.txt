@@ -13,14 +13,14 @@
 		- <useModifiedGrochow>: Possible values: y or n (signifying yes or no). If yes, the program will use the newly 
 								proposed modified Grochow's algorithm (Algo 2)
 
-- As an example, to run with the test data, simply run with the command:
-	MODA.Console . Scere20141001CR_idx.txt 4 0 y n
+	- As an example, to run with the test data, simply run with the command:
+		dotnet run Files Scere20141001CR_idx.txt 4 0 y n
 
 - Subgraph sizes (the last parameter in the command) below 3 and above 5 are not (yet) supported
 - You will get the chance to provide sample file of the query graph (subgraph) you're interested in, if you have one
 
 
 SYSTEM REQUIREMENTS
-- Windows 7/8/10
-- .NET Framework 4.5 or higher
+- Windows / Linux / OSX
+- .NET Core (download at http://dot.net)
 - dot program installed on the system, if you need to generate images of the input or query graph
