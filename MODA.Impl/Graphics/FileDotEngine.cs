@@ -2,6 +2,7 @@
 using QuickGraph.Graphviz.Dot;
 using System;
 using System.IO;
+using System.Diagnostics;
 
 namespace MODA.Impl.Graphics
 {
@@ -12,8 +13,7 @@ namespace MODA.Impl.Graphics
         {
             if (string.IsNullOrWhiteSpace(dotProgramLocation))
             {
-                dotProgramLocation = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Graphviz2.38\\bin", "dot.exe");
-                //Or do I throw an exception?
+                throw new ArgumentNullException("dotProgramLocation");
             }
             _dotProgramLocation = dotProgramLocation;
         }
@@ -27,7 +27,7 @@ namespace MODA.Impl.Graphics
         /// <returns></returns>
         public string Run(GraphvizImageType imageType, string dot, string outputFileName)
         {
-            if (!outputFileName.EndsWith(".dot", StringComparison.InvariantCultureIgnoreCase))
+            if (!outputFileName.EndsWith(".dot", StringComparison.CurrentCultureIgnoreCase))
             {
                 outputFileName = outputFileName + ".dot";
             }
@@ -40,7 +40,7 @@ namespace MODA.Impl.Graphics
             var args = string.Format(@"{0} -Tpng -o {0}.png", outputFileName);
             try
             {
-                System.Diagnostics.Process.Start(_dotProgramLocation, args);
+                Process.Start(_dotProgramLocation, args);
             }
             catch (FileNotFoundException ex)
             {

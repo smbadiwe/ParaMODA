@@ -20,5 +20,6 @@ namespace MODA.Impl
         public string Label { get; set; }
 
         public bool IsFrequentSubgraph { get; set; }
+
     }
 }

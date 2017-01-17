@@ -105,7 +105,7 @@ namespace MODA.Console
                     StdConsole.WriteLine("Query Graph (H): Nodes - {0}; Edges: {1}\n", queryGraph.VertexCount, queryGraph.EdgeCount);
                 }
 
-                StdConsole.WriteLine("Do you want to generate an image of the input (and query) graph(s)? Y/N\nIf Y, you'll need to provide the path to dod.exe program on your machine");
+                StdConsole.WriteLine("Do you want to generate an image of the input (and query) graph(s)? Y/N\nIf Y, you'll need to provide the path to dot.exe program on your machine");
                 resp = StdConsole.ReadLine();
                 if (resp == "y" || resp == "Y")
                 {
@@ -153,6 +153,10 @@ namespace MODA.Console
                     {
                         int count = ((System.Collections.Generic.List<Mapping>)qGraph.Value).Count;
                         sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.AsString(), count, qGraph.Key.IsFrequentSubgraph);
+                        foreach (var mapping in ((System.Collections.Generic.List<Mapping>)qGraph.Value))
+                        {
+                            sb.AppendFormat("\t\t{0}", mapping);
+                        }
                         totalMappings += count;
                     }
                 }
@@ -172,7 +176,9 @@ namespace MODA.Console
                 #endregion
 
                 StdConsole.ForegroundColor = ConsoleColor.White;
+#if !DEBUG
                 StdConsole.WriteLine("Done! Press any key to exit.");
+#endif
             }
             catch (Exception ex)
             {
@@ -180,7 +186,9 @@ namespace MODA.Console
                 StdConsole.WriteLine(ex);
                 StdConsole.ForegroundColor = ConsoleColor.White;
             }
+#if DEBUG
             StdConsole.ReadKey();
+#endif
         }
     }
 }

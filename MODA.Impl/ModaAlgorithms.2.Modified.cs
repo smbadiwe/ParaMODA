@@ -23,20 +23,17 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
-        /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size</param>
+        /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size / 3</param>
         private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
         {
-            var timer = System.Diagnostics.Stopwatch.StartNew();
+            //var timer = System.Diagnostics.Stopwatch.StartNew();
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
 
             var comparer = new MappingNodesComparer();
             InputSubgraphs = new Dictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
             MostConstrainedNeighbours = new Dictionary<string[], string>(comparer);
             NeighboursOfRange = new Dictionary<string[], HashSet<string>>(comparer);
-            comparer = null;
-
-            G_NodeNeighbours = new Dictionary<string, List<string>>();
-            H_NodeNeighbours = new Dictionary<string, List<string>>();
+            
             var theMappings = new Dictionary<string, List<Mapping>>();
 
             var logGist = new StringBuilder();
@@ -49,16 +46,15 @@ namespace MODA.Impl
                 if (CanSupport(queryGraph, h, inputGraph, g))
                 {
                     #region Can Support
-                    var sw = System.Diagnostics.Stopwatch.StartNew();
+                    //var sw = System.Diagnostics.Stopwatch.StartNew();
                     //Remember: f(h) = g, so h is Domain and g is Range
                     //function, f = new Dictionary<string, string>(1) { { h, g } }
                     var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { h, g } }, queryGraph, inputGraph);
                     if (mappings.Count == 0) continue;
 
-                    sw.Stop();
-
-                    logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}\n", sw.Elapsed.ToString(), h, g);
-                    sw.Restart();
+                    //sw.Stop();
+                    logGist.Append(".");
+                    //sw.Restart();
 
                     foreach (Mapping mapping in mappings)
                     {
@@ -66,7 +62,8 @@ namespace MODA.Impl
                         var g_key = mapping.Function.Last().Value;
                         if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                         {
-                            var existing = mappingsToSearch.Find(x => x.Equals(mapping));
+                            var newInputSubgraph = GetInputSubgraph(inputGraph, mapping.Function.Values.ToArray());
+                            var existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping, newInputSubgraph));
 
                             if (existing == null)
                             {
@@ -80,13 +77,10 @@ namespace MODA.Impl
                         mappingsToSearch = null;
                     }
 
-                    sw.Stop();
-                    logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
+                    //sw.Stop();
+                    //logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
+                    //sw = null;
                     mappings = null;
-                    sw = null;
-                    logGist.AppendFormat("*****************************************\n");
-                    Console.WriteLine(logGist);
-                    logGist.Clear();
                     #endregion
                 }
             }
@@ -96,16 +90,16 @@ namespace MODA.Impl
             {
                 toReturn.AddRange(mapping.Value);
             }
-            timer.Stop();
+            logGist.AppendFormat("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
+            Console.WriteLine(logGist);
+            
+            //timer.Stop();
             logGist = null;
             theMappings = null;
             InputSubgraphs = null;
             MostConstrainedNeighbours = null;
             NeighboursOfRange = null;
-            G_NodeNeighbours = null;
-            H_NodeNeighbours = null;
-            Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.\n", toReturn.Count, timer.Elapsed.ToString());
-            timer = null;
+            //timer = null;
             return toReturn;
         }
 

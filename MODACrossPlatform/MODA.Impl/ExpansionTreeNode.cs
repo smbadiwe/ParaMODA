@@ -19,7 +19,7 @@ namespace MODA.Impl
             var theObj = obj as ExpansionTreeNode;
             if (theObj.IsRootNode && this.IsRootNode) return true;
 
-            return QueryGraph.Equals(theObj.QueryGraph);
+            return string.Equals(NodeName, theObj.NodeName, System.StringComparison.CurrentCultureIgnoreCase);
         }
 
         public override int GetHashCode()
@@ -29,7 +29,7 @@ namespace MODA.Impl
 
         public override string ToString()
         {
-            return $"Node:Level - {Level}; Is Root - {IsRootNode}; Number of Query Graph edges -  {QueryGraph?.EdgeCount}";
+            return $"Node: Name: {NodeName}; Level - {Level}; Is Root - {IsRootNode}; Number of Query Graph edges -  {QueryGraph?.EdgeCount}";
         }
     }
 }

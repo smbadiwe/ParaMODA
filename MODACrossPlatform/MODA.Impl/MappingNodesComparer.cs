@@ -15,7 +15,7 @@ namespace MODA.Impl
         public override int GetHashCode(string[] obj)
         {
             int hash = 0;
-            for (int i = 0; i < obj.Length; i++)
+            for (int i = obj.Length - 1; i > -1; i--)
             {
                 hash += obj[i].GetHashCode();
             }

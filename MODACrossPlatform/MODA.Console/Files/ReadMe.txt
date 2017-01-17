@@ -19,6 +19,9 @@
 - Subgraph sizes (the last parameter in the command) below 3 and above 5 are not (yet) supported
 - You will get the chance to provide sample file of the query graph (subgraph) you're interested in, if you have one
 
+EXPECTED FORMATTING OF GGRAPH FILE
+- Each line represents an edge, which will be two nodes separated by a tal (\t) or space
+- Lines starting with # are treated as comments
 
 SYSTEM REQUIREMENTS
 - Windows / Linux / OSX

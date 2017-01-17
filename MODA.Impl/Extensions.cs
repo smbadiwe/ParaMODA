@@ -8,65 +8,97 @@ namespace MODA.Impl
 {
     public static class Extensions
     {
-        public static List<string> GetNonNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG = true, List<string> neighboursOfVertex = null)
+        public static bool IsIsomorphicWith(this Mapping thisMapping, Mapping otherMapping, UndirectedGraph<string, Edge<string>> inputSubgraph)
         {
-            if (string.IsNullOrWhiteSpace(vertex)) return new List<string>();
-            if (neighboursOfVertex == null)
-            {
-                neighboursOfVertex = GetNeighbors(graph, vertex, isG);
-            }
-            var nonNeighbors = new List<string>();
+            //Test 0 - basic object test
+            if (otherMapping == null) return false;
 
-            foreach (var node in graph.Vertices)
+            //Test 1 - Vertices - sameness and count
+            var areEqual = (new HashSet<string>(thisMapping.Function.Values).SetEquals(otherMapping.Function.Values)
+                && new HashSet<string>(thisMapping.Function.Keys).SetEquals(otherMapping.Function.Keys));
+            if (areEqual == false)
             {
-                if (node.Equals(vertex)) continue;
-                if (!neighboursOfVertex.Contains(node))
+                return false;
+            }
+
+            //Test 2 - Edge count
+            areEqual = thisMapping.MapOnInputSubGraph.EdgeCount == otherMapping.MapOnInputSubGraph.EdgeCount;
+            if (areEqual == false)
+            {
+                return false;
+            }
+
+            //Test 3 - Node degrees.
+            var any = thisMapping.MapOnInputSubGraph.Vertices.ToList().Find(node =>
+                    thisMapping.MapOnInputSubGraph.AdjacentDegree(node) != otherMapping.MapOnInputSubGraph.AdjacentDegree(node));
+            //var any = thisMapping.MapOnInputSubGraph.Vertices.FirstOrDefault(node =>
+            //        thisMapping.MapOnInputSubGraph.AdjacentDegree(node) != otherMapping.MapOnInputSubGraph.AdjacentDegree(node));
+            if (any != null)
+            {
+                //if input sub-graph is complete
+                if (inputSubgraph.IsComplete())
                 {
-                    nonNeighbors.Add(node);
+                    // Then the subgraphs is likely isomorphic, due to symmetry
+                    return true;
+                }
+                return false;
+            }
+            foreach (var node in thisMapping.MapOnInputSubGraph.Vertices)
+            {
+                if (thisMapping.MapOnInputSubGraph.AdjacentDegree(node) != otherMapping.MapOnInputSubGraph.AdjacentDegree(node))
+                {
+                    return false;
                 }
             }
-            return nonNeighbors;
+
+            return true;
         }
-        
-        public static List<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG = true)
+
+        /// <summary>
+        /// A Complete graph of n nodes has n(n-1)/2 edges
+        /// </summary>
+        /// <param name="graph"></param>
+        /// <returns></returns>
+        public static bool IsComplete(this UndirectedGraph<string, Edge<string>> graph)
+        {
+            return graph.EdgeCount == ((graph.VertexCount * (graph.VertexCount - 1)) / 2);
+        }
+
+        public static List<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG)
         {
             if (string.IsNullOrWhiteSpace(vertex)) return new List<string>();
-            List<string> neighbors;
+            //List<string> neighbors;
+            HashSet<string> set;
             if (isG)
             {
-                if (ModaAlgorithms.G_NodeNeighbours.TryGetValue(vertex, out neighbors))
+                var adjEdges = graph.AdjacentEdges(vertex);
+                set = new HashSet<string>(); // (adjEdges.Select(x => x.Source).Union(adjEdges.Select(x => x.Target)));
+                foreach (var edge in adjEdges)
                 {
-                    return neighbors;
+                    set.Add(edge.Source);
+                    set.Add(edge.Target);
                 }
-                else
-                {
-                    var adjEdges = graph.AdjacentEdges(vertex);
-                    var set = new HashSet<string>(adjEdges.Select(x => x.Source).Union(adjEdges.Select(x => x.Target)));
-                    set.Remove(vertex);
-                    adjEdges = null;
-                    ModaAlgorithms.G_NodeNeighbours[vertex] = neighbors = set.ToList();
-                    return neighbors;
-                }
+                set.Remove(vertex);
+                //neighbors = set.ToList();
+                adjEdges = null;
             }
             else
             {
-                if (ModaAlgorithms.H_NodeNeighbours.TryGetValue(vertex, out neighbors))
+                var adjEdges = graph.AdjacentEdges(vertex);
+                set = new HashSet<string>(); // (adjEdges.Select(x => x.Source).Union(adjEdges.Select(x => x.Target)));
+                foreach (var edge in adjEdges)
                 {
-                    return neighbors;
+                    set.Add(edge.Source);
+                    set.Add(edge.Target);
                 }
-                else
-                {
-                    var adjEdges = graph.AdjacentEdges(vertex);
-                    var set = new HashSet<string>(adjEdges.Select(x => x.Source).Union(adjEdges.Select(x => x.Target)));
-                    set.Remove(vertex);
-                    adjEdges = null;
-                    ModaAlgorithms.H_NodeNeighbours[vertex] = neighbors = set.ToList();
-                    return neighbors;
-                }
+                set.Remove(vertex);
+                //neighbors = set.ToList();
+                adjEdges = null;
             }
-            
+
+            return set.ToList();
         }
-        
+
         public static string AsString(this UndirectedGraph<string, Edge<string>> graph)
         {
             if (graph.IsEdgesEmpty) return "";
@@ -124,23 +156,12 @@ namespace MODA.Impl
         /// <returns></returns>
         public static QueryGraph ToQueryGraph(this IEnumerable<Edge<string>> edges, string graphLabel = "")
         {
-            return ToQueryGraph(edges, true, graphLabel);
-        }
-
-        /// <summary>
-        /// Converts a sequence of edges into a query graph
-        /// </summary>
-        /// <param name="edges"></param>
-        /// <param name="allowParralelEdges"></param>
-        /// <returns></returns>
-        public static QueryGraph ToQueryGraph(this IEnumerable<Edge<string>> edges, bool allowParralelEdges, string graphLabel = "")
-        {
-            //if (edges == null || edges.Any(e => e == null)) throw new System.ArgumentNullException("edges", "Null value(s) not accepted.");
-
-            var g = new QueryGraph(allowParralelEdges);
+            var g = new QueryGraph
+            {
+                Label = graphLabel
+            };
             g.AddVerticesAndEdgeRange(edges);
             return g;
         }
-
     }
 }

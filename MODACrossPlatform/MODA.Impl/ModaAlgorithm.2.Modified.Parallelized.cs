@@ -25,6 +25,35 @@ namespace MODA.Impl
         private static ConcurrentDictionary<string[], UndirectedGraph<string, Edge<string>>> InputSubgraphs;
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inputGraph"></param>
+        /// <param name="g_nodes">Usually {Mapping Instance}.Function.Values.ToArray();</param>
+        /// <returns></returns>
+        private static UndirectedGraph<string, Edge<string>> GetInputSubgraph(UndirectedGraph<string, Edge<string>> inputGraph, string[] g_nodes)
+        {
+            UndirectedGraph<string, Edge<string>> newInputSubgraph;
+            if (!InputSubgraphs.TryGetValue(g_nodes, out newInputSubgraph))
+            {
+                newInputSubgraph = new UndirectedGraph<string, Edge<string>>();
+                for (int k = 0; k < g_nodes.Length; k++)
+                {
+                    for (int j = (k + 1); j < g_nodes.Length; j++)
+                    {
+                        Edge<string> edge_;
+                        if (inputGraph.TryGetEdge(g_nodes[k], g_nodes[j], out edge_))
+                        {
+                            newInputSubgraph.AddVerticesAndEdge(edge_);
+                        }
+                    }
+                }
+                InputSubgraphs[g_nodes] = newInputSubgraph;
+            }
+            g_nodes = null;
+            return newInputSubgraph;
+        }
+
+        /// <summary>
         /// Mapping module (aka FindSubgraphInstances in Grochow & Kellis) modified
         /// The modification:
         ///     Instead of traversing all nodes in the query graph (H) for each node in the input graph (G),
@@ -92,7 +121,8 @@ namespace MODA.Impl
 
                                 sw.Stop();
                                 var logGist = new StringBuilder();
-                                logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}\n", sw.Elapsed.ToString(), h, g);
+                                logGist.Append(".");
+                                //logGist.AppendFormat("Maps gotten from IsoExtension.\tTook:\t{0:N}s.\th = {1}. g = {2}\n", sw.Elapsed.ToString(), h, g);
                                 sw.Restart();
 
                                 foreach (Mapping mapping in mappings)
@@ -101,7 +131,8 @@ namespace MODA.Impl
                                     var g_key = mapping.Function.Last().Value;
                                     if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
                                     {
-                                        var existing = mappingsToSearch.Find(x => x != null && x.Equals(mapping));
+                                        var newInputSubgraph = GetInputSubgraph(inputGraph, mapping.Function.Values.ToArray());
+                                        var existing = mappingsToSearch.Find(x => x != null && x.IsIsomorphicWith(mapping, newInputSubgraph));
 
                                         if (existing == null)
                                         {
@@ -116,7 +147,7 @@ namespace MODA.Impl
                                 }
 
                                 sw.Stop();
-                                logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
+                                logGist.AppendFormat("\nMap: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
                                 mappings = null;
                                 sw = null;
                                 logGist.AppendFormat("*****************************************\n");
@@ -178,7 +209,7 @@ namespace MODA.Impl
                 keys = null;
                 if (!exists)
                 {
-                    var newInputSubgraph = new UndirectedGraph<string, Edge<string>>(false);
+                    var newInputSubgraph = new UndirectedGraph<string, Edge<string>>();
                     for (int i = 0; i < inputSubgraphKey.Length; i++)
                     {
                         for (int j = (i + 1); j < inputSubgraphKey.Length; j++)
@@ -193,7 +224,7 @@ namespace MODA.Impl
                     InputSubgraphs[inputSubgraphKey] = newInputSubgraph;
 
                 }
-                map.InputSubGraph = InputSubgraphs[inputSubgraphKey];
+                //map.InputSubGraph = InputSubgraphs[inputSubgraphKey];
 
                 inputSubgraphKey = null;
                 return new List<Mapping> { map };
@@ -232,11 +263,12 @@ namespace MODA.Impl
                 }
                 else
                 {
-                    subList.ForEach(item =>
+                    foreach (var item in subList)
                     {
                         if (new HashSet<string>(item.Function.Values).Count == item.Function.Count)
                         {
-                            var existing = listOfIsomorphisms.Find(x => x.Equals(item));
+                            var newInputSubgraph = GetInputSubgraph(inputGraph, item.Function.Values.ToArray());
+                            var existing = listOfIsomorphisms.Find(x => x.IsIsomorphicWith(item, newInputSubgraph));
 
                             if (existing == null)
                             {
@@ -244,7 +276,7 @@ namespace MODA.Impl
                             }
                             existing = null;
                         }
-                    });
+                    }
                 }
                 newPartialMap = null;
             }

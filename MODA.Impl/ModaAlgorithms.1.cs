@@ -24,18 +24,19 @@ namespace MODA.Impl
         {
             // The enumeration module (Algo 3) needs the mappings generated from the previous run(s)
             var allMappings = new Dictionary<QueryGraph, List<Mapping>>();
+            var numIterations = inputGraph.VertexCount; // / 3
             if (QueryGraph != null)
             {
                 List<Mapping> mappings;
                 if (UseModifiedGrochow)
                 {
                     // Modified Mapping module - MODA and Grockow & Kellis
-                    mappings = Algorithm2_Modified(QueryGraph, inputGraph);
-                    //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph);
+                    mappings = Algorithm2_Modified(QueryGraph, inputGraph, numIterations);
+                    //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph, numIterations);
                 }
                 else
                 {
-                    mappings = Algorithm2(QueryGraph, inputGraph);
+                    mappings = Algorithm2(QueryGraph, inputGraph, numIterations);
                 }
                 allMappings.Add(QueryGraph, mappings);
             }
@@ -51,12 +52,12 @@ namespace MODA.Impl
                         if (UseModifiedGrochow)
                         {
                             // Modified Mapping module - MODA and Grockow & Kellis
-                            mappings = Algorithm2_Modified(qGraph, inputGraph);
+                            mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations);
                             //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph);
                         }
                         else
                         {
-                            mappings = Algorithm2(qGraph, inputGraph);
+                            mappings = Algorithm2(qGraph, inputGraph, numIterations);
                         }
                     }
                     else
@@ -75,8 +76,7 @@ namespace MODA.Impl
                     mappings = null;
 
                     //Check for complete-ness; if complete, break
-                    //  A Complete graph of n nodes has n(n-1)/2 edges
-                    if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))
+                    if (qGraph.IsComplete())
                     {
                         qGraph = null;
                         break;

@@ -47,42 +47,40 @@ namespace MODA.Impl
 
             var theNewEdge = new Edge<string>(newEdgeNodes[0], newEdgeNodes[1]);
             newEdgeNodes = null;
-            
-            var theMappings = new ConcurrentDictionary<string, List<Mapping>>();
+
+            var theMappings = new Dictionary<string, List<Mapping>>();
 
             for (int i = 0; i < mappings.Count; i++)
             {
                 var map = mappings[i];
-                if (map.Function.Count == map.MapOnInputSubGraph.VertexCount)
+                
+                var newInputSubgraph = GetInputSubgraph(inputGraph, map.Function.Values.ToArray());
+                // Reember, f(h) = g
+                // Remember, newInputSubgraph is a subgraph of inputGraph
+                Edge<string> edge;
+                if (newInputSubgraph.TryGetEdge(map.Function[theNewEdge.Source], map.Function[theNewEdge.Target], out edge))
                 {
-                    // Reember, f(h) = g
-                    // Remember, map.InputSubGraph is a subgraph of inputGraph
-                    Edge<string> edge;
-                    if (map.InputSubGraph.TryGetEdge(map.Function[theNewEdge.Source], map.Function[theNewEdge.Target], out edge))
+                    var mapping = new Mapping(map.Function)
                     {
-                        var mapping = new Mapping(map.Function)
-                        {
-                            InputSubGraph = map.InputSubGraph,
-                            MapOnInputSubGraph = map.InputSubGraph
-                        };
-                        List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                        var g_key = mapping.Function.Last().Value;
-                        if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
-                        {
-                            var existing = mappingsToSearch.Find(x => x.Equals(mapping));
+                        MapOnInputSubGraph = newInputSubgraph
+                    };
+                    List<Mapping> mappingsToSearch; //Recall: f(h) = g
+                    var g_key = mapping.Function.Last().Value;
+                    if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
+                    {
+                        var existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping, newInputSubgraph));
 
-                            if (existing == null)
-                            {
-                                theMappings[g_key].Add(mapping);
-                            }
-                        }
-                        else
+                        if (existing == null)
                         {
-                            theMappings[g_key] = new List<Mapping> { mapping };
+                            theMappings[g_key].Add(mapping);
                         }
-                        mapping = null;
-                        mappingsToSearch = null;
                     }
+                    else
+                    {
+                        theMappings[g_key] = new List<Mapping> { mapping };
+                    }
+                    mapping = null;
+                    mappingsToSearch = null;
                 }
             }
 
@@ -92,15 +90,15 @@ namespace MODA.Impl
                 toReturn.AddRange(mapping.Value);
             }
             Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\n", theMappings.Count);
-            
+
             //timer.Stop();
             //Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", theMappings.Count, timer.Elapsed);
-            
+
             //timer = null;
             theMappings = null;
             return toReturn;
         }
-        
+
         /// <summary>
         /// Helper method for algorithm 3
         /// </summary>
@@ -115,7 +113,7 @@ namespace MODA.Impl
             });
             if (hasNode)
             {
-                return expansionTree.Vertices.First(x => !x.IsRootNode && x.QueryGraph == queryGraph).ParentNode.QueryGraph;
+                return expansionTree.Vertices.First(x => !x.IsRootNode && x.NodeName == queryGraph.Label).ParentNode.QueryGraph;
             }
             return null;
         }
