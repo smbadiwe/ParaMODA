@@ -40,6 +40,7 @@ namespace MODA.Impl
         /// <param name="inputGraph"></param>
         /// <param name="g_nodes">Usually {Mapping Instance}.Function.Values.ToArray();</param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UndirectedGraph<string, Edge<string>> GetInputSubgraph(UndirectedGraph<string, Edge<string>> inputGraph, string[] g_nodes)
         {
             UndirectedGraph<string, Edge<string>> newInputSubgraph;
@@ -102,31 +103,38 @@ namespace MODA.Impl
                     continue;
                 }
                 //It's not; so, let f' = f on D, and f'(m) = n.
-                var newPartialMap = new Dictionary<string, string>(partialMap) { { m, n } };
 
                 //Find all isomorphic extensions of f'.
-                var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);
+                var subList = IsomorphicExtension(new Dictionary<string, string>(partialMap) { { m, n } }, queryGraph, inputGraph);
                 if (listOfIsomorphisms.Count == 0)
                 {
                     listOfIsomorphisms.AddRange(subList);
                 }
                 else
                 {
-                    foreach (var item in subList)
+                    for (int i = 0; i < subList.Count; i++)
                     {
-                        var newInputSubgraph = GetInputSubgraph(inputGraph, item.Function.Values.ToArray());
+                        var item = subList[i];
+                        var newInputSubgraph = GetInputSubgraph(inputGraph, item.MapOnInputSubGraph.Vertices.ToArray());
 
-                        var existing = listOfIsomorphisms.Find(x => x.IsIsomorphicWith(item, newInputSubgraph));
-
+                        Mapping existing = null;
+                        for (int j = 0; j < listOfIsomorphisms.Count; j++)
+                        {
+                            if (listOfIsomorphisms[j].IsIsomorphicWith(item, newInputSubgraph))
+                            {
+                                existing = listOfIsomorphisms[j];
+                                break;
+                            }
+                        }
                         if (existing == null)
                         {
                             listOfIsomorphisms.Add(item);
                         }
                         existing = null;
+                        item = null;
                         newInputSubgraph = null;
                     }
                 }
-                newPartialMap = null;
             }
             return listOfIsomorphisms;
         }

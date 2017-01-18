@@ -54,7 +54,7 @@ namespace MODA.Impl
             {
                 var map = mappings[i];
                 
-                var newInputSubgraph = GetInputSubgraph(inputGraph, map.Function.Values.ToArray());
+                var newInputSubgraph = GetInputSubgraph(inputGraph, map.MapOnInputSubGraph.Vertices.ToArray());
                 // Reember, f(h) = g
                 // Remember, newInputSubgraph is a subgraph of inputGraph
                 Edge<string> edge;

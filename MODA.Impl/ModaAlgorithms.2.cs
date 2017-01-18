@@ -39,15 +39,15 @@ namespace MODA.Impl
                     if (CanSupport(queryGraph, h, inputGraphClone, g))
                     {
                         #region Can Support
-                        var sw = System.Diagnostics.Stopwatch.StartNew();
+                        //var sw = System.Diagnostics.Stopwatch.StartNew();
                         //Remember: f(h) = g, so h is Domain and g is Range
                         var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { h, g } }, queryGraph, inputGraphClone);
                         if (mappings.Count == 0) continue;
 
-                        sw.Stop();
-                        Console.WriteLine("Time to do IsomorphicExtension: {0}\n", sw.Elapsed.ToString());
+                        //sw.Stop();
+                        //Console.WriteLine("Time to do IsomorphicExtension: {0}\n", sw.Elapsed.ToString());
                         logGist.Append(".");
-                        sw.Restart();
+                        //sw.Restart();
 
                         foreach (Mapping mapping in mappings)
                         {
@@ -55,9 +55,9 @@ namespace MODA.Impl
                             var g_key = mapping.Function.Last().Value;
                             if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                             {
-                                var newInputSubgraph = GetInputSubgraph(inputGraph, mapping.Function.Values.ToArray());
+                                var newInputSubgraph = GetInputSubgraph(inputGraph, mapping.MapOnInputSubGraph.Vertices.ToArray());
                                 var existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping, newInputSubgraph));
-
+                                
                                 if (existing == null)
                                 {
                                     theMappings[g_key].Add(mapping);
@@ -70,9 +70,9 @@ namespace MODA.Impl
                             mappingsToSearch = null;
                         }
 
-                        sw.Stop();
-                        Console.WriteLine("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
-                        sw = null;
+                        //sw.Stop();
+                        //Console.WriteLine("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
+                        //sw = null;
                         mappings = null;
                         #endregion
                     }

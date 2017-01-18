@@ -2,12 +2,12 @@
 Completed. Result Summary
 -------------------------------------------
 
-	Sub-graph: Graph-Edges_[A->B],[B->C],	 Mappings: 39194	 Is Frequent Subgraph? True
-	Sub-graph: Graph-Edges_[A->B],[A->C],[B->C],	 Mappings: 3161	 Is Frequent Subgraph? True
+	Sub-graph: Graph-Edges_[A->B],[B->C],	 Mappings: 31834	 Is Frequent Subgraph? True
+	Sub-graph: Graph-Edges_[A->B],[A->C],[B->C],	 Mappings: 2460	 Is Frequent Subgraph? True
 
-Time Taken: 00:00:25.8711487 (25,871.00ms)
+Time Taken: 00:00:11.2237101 (11,223.00ms)
 Network: Nodes - 2444; Edges: 5263;
-Total Mappings found: 42355
+Total Mappings found: 34294
 Subgraph Size: 3
 -------------------------------------------
 

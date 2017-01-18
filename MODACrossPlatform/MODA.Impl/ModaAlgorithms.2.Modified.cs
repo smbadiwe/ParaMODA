@@ -62,7 +62,7 @@ namespace MODA.Impl
                         var g_key = mapping.Function.Last().Value;
                         if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                         {
-                            var newInputSubgraph = GetInputSubgraph(inputGraph, mapping.Function.Values.ToArray());
+                            var newInputSubgraph = GetInputSubgraph(inputGraph, mapping.MapOnInputSubGraph.Vertices.ToArray());
                             var existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping, newInputSubgraph));
 
                             if (existing == null)

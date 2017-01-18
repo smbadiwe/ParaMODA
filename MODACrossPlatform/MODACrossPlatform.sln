@@ -11,6 +11,11 @@ Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "QuickGraph", "QuickGraph\Qu
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "QuickGraph.Graphviz", "QuickGraph.Graphviz\QuickGraph.Graphviz.xproj", "{18E7D89C-7BD9-4D68-ADC7-340EA1AAB27B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A9F16E96-7D4C-4117-8BEA-F59D0B2DB2A4}"
+	ProjectSection(SolutionItems) = preProject
+		Performance1.psess = Performance1.psess
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

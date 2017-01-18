@@ -24,7 +24,8 @@ namespace MODA.Impl
         {
             // The enumeration module (Algo 3) needs the mappings generated from the previous run(s)
             var allMappings = new Dictionary<QueryGraph, List<Mapping>>();
-            var numIterations = inputGraph.VertexCount; // / 3
+            int numIterations = -1;
+            if (inputGraph.VertexCount < 121) numIterations = inputGraph.VertexCount;
             if (QueryGraph != null)
             {
                 List<Mapping> mappings;

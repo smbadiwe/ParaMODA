@@ -83,7 +83,7 @@ namespace MODA.Impl
             {
                 chunks[i % chunks.Length].Add(nodesToWorkWith[i]);
             }
-            
+
             //Console.WriteLine("Calling Algo 2-Modified: Number of Iterations: {0}. Number of chunks to parallelize: {1}\n", numberOfSamples, chunks.Length);
 
             var comparer = new MappingNodesComparer();
@@ -131,7 +131,7 @@ namespace MODA.Impl
                                     var g_key = mapping.Function.Last().Value;
                                     if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
                                     {
-                                        var newInputSubgraph = GetInputSubgraph(inputGraph, mapping.Function.Values.ToArray());
+                                        var newInputSubgraph = GetInputSubgraph(inputGraph, mapping.MapOnInputSubGraph.Vertices.ToArray());
                                         var existing = mappingsToSearch.Find(x => x != null && x.IsIsomorphicWith(mapping, newInputSubgraph));
 
                                         if (existing == null)
@@ -263,19 +263,27 @@ namespace MODA.Impl
                 }
                 else
                 {
-                    foreach (var item in subList)
+                    for (int i = 0; i < subList.Count; i++)
                     {
-                        if (new HashSet<string>(item.Function.Values).Count == item.Function.Count)
-                        {
-                            var newInputSubgraph = GetInputSubgraph(inputGraph, item.Function.Values.ToArray());
-                            var existing = listOfIsomorphisms.Find(x => x.IsIsomorphicWith(item, newInputSubgraph));
+                        var item = subList[i];
+                        var newInputSubgraph = GetInputSubgraph(inputGraph, item.MapOnInputSubGraph.Vertices.ToArray());
 
-                            if (existing == null)
+                        Mapping existing = null;
+                        for (int j = 0; j < listOfIsomorphisms.Count; j++)
+                        {
+                            if (listOfIsomorphisms[j].IsIsomorphicWith(item, newInputSubgraph))
                             {
-                                listOfIsomorphisms.Add(item);
+                                existing = listOfIsomorphisms[j];
+                                break;
                             }
-                            existing = null;
                         }
+                        if (existing == null)
+                        {
+                            listOfIsomorphisms.Add(item);
+                        }
+                        existing = null;
+                        item = null;
+                        newInputSubgraph = null;
                     }
                 }
                 newPartialMap = null;

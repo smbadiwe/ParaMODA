@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace MODA.Impl
@@ -10,43 +11,25 @@ namespace MODA.Impl
     {
         public static bool IsIsomorphicWith(this Mapping thisMapping, Mapping otherMapping, UndirectedGraph<string, Edge<string>> inputSubgraph)
         {
-            //Test 0 - basic object test
-            if (otherMapping == null) return false;
+            //NB: Node and edge count already guaranteed to be equal
 
-            //Test 1 - Vertices - sameness and count
-            var areEqual = (new HashSet<string>(thisMapping.Function.Values).SetEquals(otherMapping.Function.Values)
-                && new HashSet<string>(thisMapping.Function.Keys).SetEquals(otherMapping.Function.Keys));
-            if (areEqual == false)
-            {
-                return false;
-            }
-
-            //Test 2 - Edge count
-            areEqual = thisMapping.MapOnInputSubGraph.EdgeCount == otherMapping.MapOnInputSubGraph.EdgeCount;
-            if (areEqual == false)
-            {
-                return false;
-            }
-
-            //Test 3 - Node degrees.
-            var any = thisMapping.MapOnInputSubGraph.Vertices.ToList().Find(node =>
-                    thisMapping.MapOnInputSubGraph.AdjacentDegree(node) != otherMapping.MapOnInputSubGraph.AdjacentDegree(node));
-            //var any = thisMapping.MapOnInputSubGraph.Vertices.FirstOrDefault(node =>
-            //        thisMapping.MapOnInputSubGraph.AdjacentDegree(node) != otherMapping.MapOnInputSubGraph.AdjacentDegree(node));
-            if (any != null)
-            {
-                //if input sub-graph is complete
-                if (inputSubgraph.IsComplete())
-                {
-                    // Then the subgraphs is likely isomorphic, due to symmetry
-                    return true;
-                }
-                return false;
-            }
             foreach (var node in thisMapping.MapOnInputSubGraph.Vertices)
             {
+                //Test 1 - Vertices - sameness
+                if (!otherMapping.MapOnInputSubGraph.ContainsVertex(node))
+                {
+                    return false;
+                }
+
+                //Test 2 - Node degrees.
                 if (thisMapping.MapOnInputSubGraph.AdjacentDegree(node) != otherMapping.MapOnInputSubGraph.AdjacentDegree(node))
                 {
+                    //if input sub-graph is complete
+                    if (IsComplete(inputSubgraph))
+                    {
+                        // Then the subgraphs is likely isomorphic, due to symmetry
+                        return true;
+                    }
                     return false;
                 }
             }
@@ -59,6 +42,7 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="graph"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsComplete(this UndirectedGraph<string, Edge<string>> graph)
         {
             return graph.EdgeCount == ((graph.VertexCount * (graph.VertexCount - 1)) / 2);
