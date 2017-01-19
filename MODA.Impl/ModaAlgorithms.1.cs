@@ -77,7 +77,7 @@ namespace MODA.Impl
                     mappings = null;
 
                     //Check for complete-ness; if complete, break
-                    if (qGraph.IsComplete())
+                    if (qGraph.EdgeCount == ((qGraph.VertexCount * (qGraph.VertexCount - 1)) / 2))
                     {
                         qGraph = null;
                         break;

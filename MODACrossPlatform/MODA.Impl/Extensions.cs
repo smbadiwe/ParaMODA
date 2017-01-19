@@ -51,36 +51,52 @@ namespace MODA.Impl
         public static List<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG)
         {
             if (string.IsNullOrWhiteSpace(vertex)) return new List<string>();
-            //List<string> neighbors;
+            List<string> neighbors;
             HashSet<string> set;
             if (isG)
             {
-                var adjEdges = graph.AdjacentEdges(vertex);
-                set = new HashSet<string>(); // (adjEdges.Select(x => x.Source).Union(adjEdges.Select(x => x.Target)));
-                foreach (var edge in adjEdges)
+                if (ModaAlgorithms.G_NodeNeighbours.TryGetValue(vertex, out neighbors))
                 {
-                    set.Add(edge.Source);
-                    set.Add(edge.Target);
+                    return neighbors;
                 }
-                set.Remove(vertex);
-                //neighbors = set.ToList();
-                adjEdges = null;
+                else
+                {
+                    var adjEdges = graph.AdjacentEdges(vertex);
+                    set = new HashSet<string>();
+                    foreach (var edge in adjEdges)
+                    {
+                        set.Add(edge.Source);
+                        set.Add(edge.Target);
+                    }
+                    set.Remove(vertex);
+                    neighbors = set.ToList();
+                    ModaAlgorithms.G_NodeNeighbours[vertex] = neighbors;
+                    //adjEdges = null;
+                    return neighbors;
+                }
             }
             else
             {
-                var adjEdges = graph.AdjacentEdges(vertex);
-                set = new HashSet<string>(); // (adjEdges.Select(x => x.Source).Union(adjEdges.Select(x => x.Target)));
-                foreach (var edge in adjEdges)
+                if (ModaAlgorithms.H_NodeNeighbours.TryGetValue(vertex, out neighbors))
                 {
-                    set.Add(edge.Source);
-                    set.Add(edge.Target);
+                    return neighbors;
                 }
-                set.Remove(vertex);
-                //neighbors = set.ToList();
-                adjEdges = null;
+                else
+                {
+                    var adjEdges = graph.AdjacentEdges(vertex);
+                    set = new HashSet<string>();
+                    foreach (var edge in adjEdges)
+                    {
+                        set.Add(edge.Source);
+                        set.Add(edge.Target);
+                    }
+                    set.Remove(vertex);
+                    neighbors = set.ToList();
+                    ModaAlgorithms.H_NodeNeighbours[vertex] = neighbors;
+                    //adjEdges = null;
+                    return neighbors;
+                }
             }
-
-            return set.ToList();
         }
 
         public static string AsString(this UndirectedGraph<string, Edge<string>> graph)

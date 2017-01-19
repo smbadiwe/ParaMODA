@@ -30,9 +30,22 @@ namespace MODA.Impl
         /// Given a set of nodes(the Key), we find the subgraph in the input graph G that has those nodes.
         /// </summary>
         private static Dictionary<string[], UndirectedGraph<string, Edge<string>>> InputSubgraphs;
-
+        /// <summary>
+        /// Used to cache 
+        /// </summary>
         private static Dictionary<string[], HashSet<string>> NeighboursOfRange;
+        /// <summary>
+        /// Used to cache 
+        /// </summary>
         private static Dictionary<string[], string> MostConstrainedNeighbours;
+        /// <summary>
+        /// Used to cache 
+        /// </summary>
+        public static Dictionary<string, List<string>> G_NodeNeighbours;
+        /// <summary>
+        /// Used to cache 
+        /// </summary>
+        public static Dictionary<string, List<string>> H_NodeNeighbours;
 
         /// <summary>
         /// 
@@ -206,40 +219,13 @@ namespace MODA.Impl
                         local = null;
                         continue;
                     }
-                    /* You'd wonder why I didn't just do this:
-                     * for (int j = 0; j < local.Count; j++)
-                        {
-                            if (!used_range.Contains(local[j]))
-                            {
-                                result.Add(local[j]);
-                            }
-                        }
-                     * instead of the creepy thing below.
-                     * Well, it turns out that, for whatever reason only the compiler knows, the above code
-                     * makes the program incredibly slow. Code that runs in 15secs suddenly started taking over 3hours. 
-                     * */
-                    int counter = 0;
-                    for (int j = 0; j < local.Count + counter; j++)
+                    for (int j = 0; j < local.Count; j++)
                     {
-                        if (used_range.Contains(local[j - counter]))
+                        if (!used_range.Contains(local[j]))
                         {
-                            try
-                            {
-                                local.Remove(local[j - counter]);
-                                counter++;
-                            }
-                            catch { }
-                            if (local.Count == 0)
-                            {
-                                break;
-                            }
+                            toReturn.Add(local[j]);
                         }
                     }
-                    foreach (var item in local)
-                    {
-                        toReturn.Add(item);
-                    }
-
                     local = null;
                 }
                 NeighboursOfRange[used_range] = toReturn;
@@ -276,39 +262,14 @@ namespace MODA.Impl
                         local = null;
                         continue;
                     }
-                    /* You'd wonder why I didn't just do this:
-                     * for (int j = 0; j < local.Count; j++)
-                        {
-                            if (!domain.Contains(local[j]))
-                            {
-                                result.Add(local[j]);
-                            }
-                        }
-                     * instead of the creepy thing below.
-                     * Well, it turns out that, for whatever reason only the compiler knows, the above code
-                     * makes the program incredibly slow. Code that runs in 15secs suddenly started taking over 3hours. 
-                     * */
-                    int counter = 0;
-                    for (int j = 0; j < local.Count + counter; j++)
+                    for (int j = 0; j < local.Count; j++)
                     {
-                        if (domain.Contains(local[j - counter]))
+                        if (!domain.Contains(local[j]))
                         {
-                            try
-                            {
-                                local.Remove(local[j - counter]);
-                                counter++;
-                            }
-                            catch { }
-                            if (local.Count == 0)
-                            {
-                                break;
-                            }
+                            toReturn = local[j];
+                            MostConstrainedNeighbours[domain] = toReturn;
+                            return toReturn;
                         }
-                    }
-                    if (local.Count > 0)
-                    {
-                        toReturn = local[0];
-                        break;
                     }
                     local = null;
                 }

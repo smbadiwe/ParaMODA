@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
+using System.Linq;
 
 namespace QuickGraph
 {
@@ -71,6 +72,57 @@ namespace QuickGraph
                 this.edgeCapacity = value;
             }
         }
+
+        #region Newly Added
+
+        /// <summary>
+        /// NB: The degree sequence of an undirected graph is the non-increasing sequence of its vertex degrees;
+        /// </summary>
+        /// <param name="count">The expected number of items to return.</param>
+        /// <returns></returns>
+        public TVertex[] GetDegreeSequence(int count)
+        {
+            if (this.IsVerticesEmpty) return new TVertex[0];
+
+            var vertices = this.Vertices.Take(count).ToArray();
+            var tempList = new Dictionary<TVertex, int>(vertices.Length);
+
+            foreach (var node in vertices)
+            {
+                tempList.Add(node, this.AdjacentDegree(node));
+            }
+
+            var listToReturn = new List<TVertex>(vertices.Length);
+            foreach (var item in tempList.OrderByDescending(x => x.Value))
+            {
+                listToReturn.Add(item.Key);
+            }
+
+            vertices = null;
+            tempList = null;
+            return listToReturn.ToArray();
+        }
+        
+        public UndirectedGraph<TVertex, TEdge> Clone()
+        {
+            var inputGraphClone = new UndirectedGraph<TVertex, TEdge>();
+            inputGraphClone.AddVerticesAndEdgeRange(this.Edges);
+            Debug.Assert(inputGraphClone.EdgeCount == this.EdgeCount && inputGraphClone.VertexCount == this.VertexCount);
+            return inputGraphClone;
+        }
+        
+        public override string ToString()
+        {
+            if (this.IsEdgesEmpty) return "";
+            var sb = new System.Text.StringBuilder("Graph-Edges_");
+            foreach (var edge in this.Edges)
+            {
+                sb.AppendFormat("[{0}],", edge);
+            }
+            //sb.AppendLine();
+            return sb.ToString().TrimEnd();
+        }
+        #endregion
 
         #region IGraph<Vertex,Edge> Members
         public bool IsDirected

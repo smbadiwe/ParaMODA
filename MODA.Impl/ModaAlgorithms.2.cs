@@ -26,14 +26,15 @@ namespace MODA.Impl
             var comparer = new MappingNodesComparer();
             InputSubgraphs = new Dictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
             MostConstrainedNeighbours = new Dictionary<string[], string>(comparer);
-            NeighboursOfRange = new Dictionary<string[], HashSet<string>>(comparer);
-            
+            H_NodeNeighbours = new Dictionary<string, List<string>>();
             var theMappings = new Dictionary<string, List<Mapping>>();
             var queryGraphVertices = queryGraph.Vertices.ToList();
             var logGist = new StringBuilder();
             logGist.AppendFormat("Calling Algo 2: Number of Iterations: {0}.\n", numberOfSamples);
             foreach (var g in inputGraph.GetDegreeSequence(numberOfSamples))
             {
+                NeighboursOfRange = new Dictionary<string[], HashSet<string>>(comparer);
+                G_NodeNeighbours = new Dictionary<string, List<string>>();
                 foreach (var h in queryGraphVertices)
                 {
                     if (CanSupport(queryGraph, h, inputGraphClone, g))
@@ -94,6 +95,10 @@ namespace MODA.Impl
             //timer = null;
             queryGraphVertices = null;
             inputGraphClone = null;
+            G_NodeNeighbours = null;
+            H_NodeNeighbours = null;
+            MostConstrainedNeighbours = null;
+            NeighboursOfRange = null;
             return toReturn;
         }
     }

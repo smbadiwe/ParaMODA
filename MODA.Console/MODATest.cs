@@ -143,7 +143,7 @@ namespace MODA.Console
                     foreach (var qGraph in frequentSubgraphs)
                     {
                         int count = (int)qGraph.Value;
-                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.AsString(), count, qGraph.Key.IsFrequentSubgraph);
+                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
                         totalMappings += count;
                     }
                 }
@@ -152,7 +152,7 @@ namespace MODA.Console
                     foreach (var qGraph in frequentSubgraphs)
                     {
                         int count = ((System.Collections.Generic.List<Mapping>)qGraph.Value).Count;
-                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.AsString(), count, qGraph.Key.IsFrequentSubgraph);
+                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
                         foreach (var mapping in ((System.Collections.Generic.List<Mapping>)qGraph.Value))
                         {
                             sb.AppendFormat("\t\t{0}", mapping);
