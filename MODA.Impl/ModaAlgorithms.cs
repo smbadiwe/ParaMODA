@@ -95,7 +95,8 @@ namespace MODA.Impl
                     map.MapOnInputSubGraph.AddVerticesAndEdge(new Edge<string>(partialMap[qEdge.Source], partialMap[qEdge.Target]));
                 }
 
-                return new List<Mapping> { map };
+                map.InputSubGraph = GetInputSubgraph(inputGraph, map.MapOnInputSubGraph.Vertices.ToArray());
+                return new List<Mapping>(1) { map };
                 #endregion
             }
 
@@ -104,7 +105,7 @@ namespace MODA.Impl
 
             // get m, most constrained neighbor
             string m = GetMostConstrainedNeighbour(partialMap.Keys.ToArray(), queryGraph);
-            if (string.IsNullOrWhiteSpace(m)) return new List<Mapping>();
+            if (string.IsNullOrWhiteSpace(m)) return null;
 
             var listOfIsomorphisms = new List<Mapping>();
 
@@ -119,21 +120,23 @@ namespace MODA.Impl
 
                 //Find all isomorphic extensions of f'.
                 var subList = IsomorphicExtension(new Dictionary<string, string>(partialMap) { { m, n } }, queryGraph, inputGraph);
+                if (subList == null || subList.Count == 0) continue;
+
                 if (listOfIsomorphisms.Count == 0)
                 {
                     listOfIsomorphisms.AddRange(subList);
                 }
                 else
                 {
+                    var notIsoWithAnyExisting = new List<Mapping>();
                     for (int i = 0; i < subList.Count; i++)
                     {
                         var item = subList[i];
-                        var newInputSubgraph = GetInputSubgraph(inputGraph, item.MapOnInputSubGraph.Vertices.ToArray());
 
                         Mapping existing = null;
                         for (int j = 0; j < listOfIsomorphisms.Count; j++)
                         {
-                            if (listOfIsomorphisms[j].IsIsomorphicWith(item, newInputSubgraph))
+                            if (listOfIsomorphisms[j].IsIsomorphicWith(item))
                             {
                                 existing = listOfIsomorphisms[j];
                                 break;
@@ -141,11 +144,14 @@ namespace MODA.Impl
                         }
                         if (existing == null)
                         {
-                            listOfIsomorphisms.Add(item);
+                            notIsoWithAnyExisting.Add(item); // is NOT part of Iso
                         }
                         existing = null;
                         item = null;
-                        newInputSubgraph = null;
+                    }
+                    if (notIsoWithAnyExisting.Count > 0)
+                    {
+                        listOfIsomorphisms.AddRange(notIsoWithAnyExisting);
                     }
                 }
             }

@@ -66,7 +66,6 @@
     <Compile Include="Graphics\GraphicsUtils.cs" />
     <Compile Include="Graphics\Visualizer.cs" />
     <Compile Include="GraphProcessor.cs" />
-    <Compile Include="Map.cs" />
     <Compile Include="Mapping.cs" />
     <Compile Include="ModaAlgorithms.2.cs" />
     <Compile Include="ModaAlgorithm.2.Modified.Parallelized.cs" />

@@ -66,7 +66,7 @@ namespace MODA.Impl
                         // Enumeration moodule - MODA
                         mappings = Algorithm3(qGraph, inputGraph, _builder.ExpansionTree, allMappings);
                     }
-
+                    if (mappings == null) continue;
                     if (mappings.Count > Threshold)
                     {
                         qGraph.IsFrequentSubgraph = true;

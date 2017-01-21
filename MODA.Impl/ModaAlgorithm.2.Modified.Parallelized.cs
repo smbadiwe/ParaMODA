@@ -69,7 +69,7 @@ namespace MODA.Impl
             var timer = System.Diagnostics.Stopwatch.StartNew();
             var numberOfSamples = inputGraph.VertexCount / 3;
 
-            var h_ = queryGraph.Vertices.First();
+            var h_ = queryGraph.Vertices.ElementAt(0);
 
             //Each chunk will go to a thread
             List<string>[] chunks = new List<string>[Environment.ProcessorCount - 1];
@@ -131,8 +131,7 @@ namespace MODA.Impl
                                     var g_key = mapping.Function.Last().Value;
                                     if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
                                     {
-                                        var newInputSubgraph = GetInputSubgraph(inputGraph, mapping.MapOnInputSubGraph.Vertices.ToArray());
-                                        var existing = mappingsToSearch.Find(x => x != null && x.IsIsomorphicWith(mapping, newInputSubgraph));
+                                        var existing = mappingsToSearch.Find(x => x != null && x.IsIsomorphicWith(mapping));
 
                                         if (existing == null)
                                         {
@@ -266,12 +265,10 @@ namespace MODA.Impl
                     for (int i = 0; i < subList.Count; i++)
                     {
                         var item = subList[i];
-                        var newInputSubgraph = GetInputSubgraph(inputGraph, item.MapOnInputSubGraph.Vertices.ToArray());
-
                         Mapping existing = null;
                         for (int j = 0; j < listOfIsomorphisms.Count; j++)
                         {
-                            if (listOfIsomorphisms[j].IsIsomorphicWith(item, newInputSubgraph))
+                            if (listOfIsomorphisms[j].IsIsomorphicWith(item))
                             {
                                 existing = listOfIsomorphisms[j];
                                 break;
@@ -283,7 +280,6 @@ namespace MODA.Impl
                         }
                         existing = null;
                         item = null;
-                        newInputSubgraph = null;
                     }
                 }
                 newPartialMap = null;

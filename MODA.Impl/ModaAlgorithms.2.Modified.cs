@@ -33,27 +33,28 @@ namespace MODA.Impl
             InputSubgraphs = new Dictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
             MostConstrainedNeighbours = new Dictionary<string[], string>(comparer);
             NeighboursOfRange = new Dictionary<string[], HashSet<string>>(comparer);
-            
+
             var theMappings = new Dictionary<string, List<Mapping>>();
+            var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
+            var queryGraphVertices = queryGraph.Vertices.ToArray();
 
-            var logGist = new StringBuilder();
-            logGist.AppendFormat("Calling Algo 2-Modified: Number of Iterations: {0}.\n", numberOfSamples);
+            Console.WriteLine("Calling Algo 2-Modified: Number of Iterations: {0}.\n", numberOfSamples);
 
-            var h = queryGraph.Vertices.First();
+            var h = queryGraph.Vertices.ElementAt(0);
 
-            foreach (var g in inputGraph.GetDegreeSequence(numberOfSamples))
+            for (int i = 0; i < inputGraphDegSeq.Length; i++)
             {
-                if (CanSupport(queryGraph, h, inputGraph, g))
+                if (CanSupport(queryGraph, h, inputGraph, inputGraphDegSeq[i]))
                 {
                     #region Can Support
                     //var sw = System.Diagnostics.Stopwatch.StartNew();
                     //Remember: f(h) = g, so h is Domain and g is Range
                     //function, f = new Dictionary<string, string>(1) { { h, g } }
-                    var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { h, g } }, queryGraph, inputGraph);
+                    var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { h, inputGraphDegSeq[i] } }, queryGraph, inputGraph);
                     if (mappings.Count == 0) continue;
 
                     //sw.Stop();
-                    logGist.Append(".");
+                    Console.WriteLine(".");
                     //sw.Restart();
 
                     foreach (Mapping mapping in mappings)
@@ -62,8 +63,7 @@ namespace MODA.Impl
                         var g_key = mapping.Function.Last().Value;
                         if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                         {
-                            var newInputSubgraph = GetInputSubgraph(inputGraph, mapping.MapOnInputSubGraph.Vertices.ToArray());
-                            var existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping, newInputSubgraph));
+                            var existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping));
 
                             if (existing == null)
                             {
@@ -90,11 +90,7 @@ namespace MODA.Impl
             {
                 toReturn.AddRange(mapping.Value);
             }
-            logGist.AppendFormat("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
-            Console.WriteLine(logGist);
-            
-            //timer.Stop();
-            logGist = null;
+            Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
             theMappings = null;
             InputSubgraphs = null;
             MostConstrainedNeighbours = null;

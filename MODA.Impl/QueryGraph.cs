@@ -2,7 +2,7 @@
 
 namespace MODA.Impl
 {
-    public class QueryGraph : UndirectedGraph<string, Edge<string>>
+    public sealed class QueryGraph : UndirectedGraph<string, Edge<string>>
     {
         public QueryGraph() : base()
         {

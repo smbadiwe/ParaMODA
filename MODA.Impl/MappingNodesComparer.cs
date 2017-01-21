@@ -5,7 +5,7 @@ namespace MODA.Impl
     /// <summary>
     /// This compares two <seealso cref="Mapping"/> nodes are equal. Used in dictionary where these nodes form the key
     /// </summary>
-    public class MappingNodesComparer : EqualityComparer<string[]>
+    public sealed class MappingNodesComparer : EqualityComparer<string[]>
     {
         public override bool Equals(string[] x, string[] y)
         {
