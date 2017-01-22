@@ -32,7 +32,7 @@ namespace MODA.Impl
             var comparer = new MappingNodesComparer();
             InputSubgraphs = new Dictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
             MostConstrainedNeighbours = new Dictionary<string[], string>(comparer);
-            NeighboursOfRange = new Dictionary<string[], HashSet<string>>(comparer);
+            NeighboursOfRange = new Dictionary<string[], List<string>>(comparer);
 
             var theMappings = new Dictionary<string, List<Mapping>>();
             var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
@@ -63,7 +63,7 @@ namespace MODA.Impl
                         var g_key = mapping.Function.Last().Value;
                         if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                         {
-                            var existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping));
+                            Mapping existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping));
 
                             if (existing == null)
                             {

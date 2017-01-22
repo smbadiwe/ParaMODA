@@ -8,7 +8,7 @@ namespace MODA.Impl
     {
         public static List<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG)
         {
-            if (string.IsNullOrWhiteSpace(vertex)) return new List<string>();
+            if (string.IsNullOrWhiteSpace(vertex)) return new List<string>(1);
             List<string> neighbors;
             HashSet<string> set;
             if (isG)
@@ -27,9 +27,9 @@ namespace MODA.Impl
                         set.Add(edge.Target);
                     }
                     set.Remove(vertex);
-                    neighbors = set.ToList();
+                    neighbors = set.ToList(); 
                     ModaAlgorithms.G_NodeNeighbours[vertex] = neighbors;
-                    //adjEdges = null;
+                    adjEdges = null;
                     return neighbors;
                 }
             }
@@ -51,12 +51,12 @@ namespace MODA.Impl
                     set.Remove(vertex);
                     neighbors = set.ToList();
                     ModaAlgorithms.H_NodeNeighbours[vertex] = neighbors;
-                    //adjEdges = null;
+                    adjEdges = null;
                     return neighbors;
                 }
             }
         }
-        
+
         /// <summary>
         /// Converts a sequence of edges into a query graph
         /// </summary>

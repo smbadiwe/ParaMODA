@@ -33,7 +33,7 @@ namespace MODA.Impl
         /// <summary>
         /// Used to cache 
         /// </summary>
-        private static Dictionary<string[], HashSet<string>> NeighboursOfRange;
+        private static Dictionary<string[], List<string>> NeighboursOfRange;
         /// <summary>
         /// Used to cache 
         /// </summary>
@@ -95,7 +95,8 @@ namespace MODA.Impl
                     map.MapOnInputSubGraph.AddVerticesAndEdge(new Edge<string>(partialMap[qEdge.Source], partialMap[qEdge.Target]));
                 }
 
-                map.InputSubGraph = GetInputSubgraph(inputGraph, map.MapOnInputSubGraph.Vertices.ToArray());
+                //map.InputSubGraph = GetInputSubgraph(inputGraph, map.MapOnInputSubGraph.Vertices.ToArray());
+                map.InputSubGraph = GetInputSubgraph(inputGraph, partialMap.Values.ToArray());
                 return new List<Mapping>(1) { map };
                 #endregion
             }
@@ -110,8 +111,10 @@ namespace MODA.Impl
             var listOfIsomorphisms = new List<Mapping>();
 
             var neighbourRange = ChooseNeighboursOfRange(partialMap.Values.ToArray(), inputGraph);
-            foreach (var n in neighbourRange) //foreach neighbour n of f(D)
+            //foreach (var n in neighbourRange) //foreach neighbour n of f(D)
+            for (int q = 0; q < neighbourRange.Length; q++) //foreach neighbour n of f(D)
             {
+                var n = neighbourRange[q];
                 if (IsNeighbourIncompatible(inputGraph, queryGraph, n, m, partialMap))
                 {
                     continue;
@@ -133,15 +136,15 @@ namespace MODA.Impl
                     {
                         var item = subList[i];
 
-                        Mapping existing = null;
-                        for (int j = 0; j < listOfIsomorphisms.Count; j++)
-                        {
-                            if (listOfIsomorphisms[j].IsIsomorphicWith(item))
-                            {
-                                existing = listOfIsomorphisms[j];
-                                break;
-                            }
-                        }
+                        Mapping existing = listOfIsomorphisms.Find(x => x.IsIsomorphicWith(item));
+                        //for (int j = 0; j < listOfIsomorphisms.Count; j++)
+                        //{
+                        //    if (listOfIsomorphisms[j].IsIsomorphicWith(item))
+                        //    {
+                        //        existing = listOfIsomorphisms[j];
+                        //        break;
+                        //    }
+                        //}
                         if (existing == null)
                         {
                             notIsoWithAnyExisting.Add(item); // is NOT part of Iso
@@ -211,15 +214,15 @@ namespace MODA.Impl
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static HashSet<string> ChooseNeighboursOfRange(string[] used_range, UndirectedGraph<string, Edge<string>> inputGraph)
+        private static string[] ChooseNeighboursOfRange(string[] used_range, UndirectedGraph<string, Edge<string>> inputGraph)
         {
-            HashSet<string> toReturn;
+            List<string> toReturn;
             if (!NeighboursOfRange.TryGetValue(used_range, out toReturn))
             {
-                toReturn = new HashSet<string>();
+                toReturn = new List<string>();
                 for (int i = used_range.Length - 1; i >= 0; i--)
                 {
-                    var local = inputGraph.GetNeighbors(used_range[i], true);
+                    var local = new List<string>(inputGraph.GetNeighbors(used_range[i], true));
                     if (local.Count == 0)
                     {
                         local = null;
@@ -232,13 +235,34 @@ namespace MODA.Impl
                             toReturn.Add(local[j]);
                         }
                     }
+                    //int counter = 0;
+                    //for (int j = 0; j < local.Count + counter; j++)
+                    //{
+                    //    if (used_range.Contains(local[j - counter]))
+                    //    {
+                    //        try
+                    //        {
+                    //            local.Remove(local[j - counter]);
+                    //            counter++;
+                    //        }
+                    //        catch { }
+                    //        if (local.Count == 0)
+                    //        {
+                    //            break;
+                    //        }
+                    //    }
+                    //}
+                    //foreach (var item in local)
+                    //{
+                    //    toReturn.Add(item);
+                    //}
                     local = null;
                 }
                 NeighboursOfRange[used_range] = toReturn;
 
             }
 
-            return toReturn;
+            return toReturn.ToArray();
         }
 
         /// <summary>
@@ -308,6 +332,7 @@ namespace MODA.Impl
             //So, deg(g) >= deg(h).
 
             //2. Based on the degree of their neighbors
+            //TODO: eith review or remove this test
             var gNeighbors = inputGraph.GetNeighbors(node_G, true);
             var hNeighbors = queryGraph.GetNeighbors(node_H, false);
             for (int i = hNeighbors.Count - 1; i >= 0; i--)
@@ -324,7 +349,7 @@ namespace MODA.Impl
             }
             gNeighbors = null;
             hNeighbors = null;
-            return false;
+            return true; // false;
         }
 
         #endregion

@@ -186,7 +186,7 @@ namespace MODA.Console
                 StdConsole.WriteLine(ex);
                 StdConsole.ForegroundColor = ConsoleColor.White;
             }
-#if DEBUG
+#if !DEBUG
             StdConsole.ReadKey();
 #endif
         }

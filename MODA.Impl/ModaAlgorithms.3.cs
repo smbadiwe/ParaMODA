@@ -55,21 +55,22 @@ namespace MODA.Impl
             {
                 var map = mappings[i];
 
-                var newInputSubgraph = GetInputSubgraph(inputGraph, map.MapOnInputSubGraph.Vertices.ToArray());
                 // Reember, f(h) = g
                 // Remember, newInputSubgraph is a subgraph of inputGraph
                 Edge<string> edge;
-                if (newInputSubgraph.TryGetEdge(map.Function[theNewEdge.Source], map.Function[theNewEdge.Target], out edge))
+                if (map.InputSubGraph.TryGetEdge(map.Function[theNewEdge.Source], map.Function[theNewEdge.Target], out edge))
                 {
                     var mapping = new Mapping(map.Function)
                     {
-                        MapOnInputSubGraph = newInputSubgraph
+                        MapOnInputSubGraph = map.MapOnInputSubGraph,
+                        InputSubGraph = map.InputSubGraph
                     };
+                    mapping.MapOnInputSubGraph.AddEdge(edge);
                     List<Mapping> mappingsToSearch; //Recall: f(h) = g
                     var g_key = mapping.Function.ElementAt(map.Function.Count - 1).Value;
                     if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
                     {
-                        var existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping));
+                        Mapping existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping));
 
                         if (existing == null)
                         {

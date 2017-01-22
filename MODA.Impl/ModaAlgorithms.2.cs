@@ -16,7 +16,7 @@ namespace MODA.Impl
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size / 3</param>
         private static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
         {
-            //var timer = System.Diagnostics.Stopwatch.StartNew();
+            var timer = System.Diagnostics.Stopwatch.StartNew();
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
 
             // Do we need this clone? Can't we just remove the node directly from the graph? 
@@ -35,7 +35,7 @@ namespace MODA.Impl
             for (int i = 0; i < inputGraphDegSeq.Length; i++)
             {
                 //var g = inputGraphDegSeq[i];
-                NeighboursOfRange = new Dictionary<string[], HashSet<string>>(comparer);
+                NeighboursOfRange = new Dictionary<string[], List<string>>(comparer);
                 G_NodeNeighbours = new Dictionary<string, List<string>>();
                 for (int j = 0; j < queryGraphVertices.Length; j++)
                 {
@@ -46,20 +46,21 @@ namespace MODA.Impl
                         //var sw = System.Diagnostics.Stopwatch.StartNew();
                         //Remember: f(h) = g, so h is Domain and g is Range
                         var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { queryGraphVertices[j], inputGraphDegSeq[i] } }, queryGraph, inputGraphClone);
-                        if (mappings?.Count == 0) continue;
-
+                        
                         //sw.Stop();
                         //Console.WriteLine("Time to do IsomorphicExtension: {0}\n", sw.Elapsed.ToString());
-                        Console.Write(".");
+                        //Console.Write(".");
+                        if (mappings?.Count == 0) continue;
+
                         //sw.Restart();
 
                         foreach (Mapping mapping in mappings)
                         {
                             List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                            var g_key = mapping.Function.Last().Value;
+                            var g_key = mapping.Function.ElementAt(mapping.Function.Count - 1).Value;
                             if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                             {
-                                var existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping));
+                                Mapping existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping));
 
                                 if (existing == null)
                                 {
@@ -74,7 +75,7 @@ namespace MODA.Impl
                         }
 
                         //sw.Stop();
-                        //Console.WriteLine("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
+                        //Console.WriteLine("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), queryGraphVertices[j], inputGraphDegSeq[i]);
                         //sw = null;
                         mappings = null;
                         #endregion
@@ -83,6 +84,8 @@ namespace MODA.Impl
 
                 //Remove g
                 inputGraphClone.RemoveVertex(inputGraphDegSeq[i]);
+                NeighboursOfRange = null;
+                G_NodeNeighbours = null;
             }
 
             var toReturn = new List<Mapping>();
@@ -91,9 +94,9 @@ namespace MODA.Impl
                 toReturn.AddRange(mapping.Value);
             }
             Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
-            //timer.Stop();
-            //Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", toReturn.Count, timer.Elapsed.ToString());
-            //timer = null;
+            timer.Stop();
+            Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", toReturn.Count, timer.Elapsed.ToString());
+            timer = null;
             inputGraphDegSeq = null;
             queryGraphVertices = null;
             inputGraphClone = null;
