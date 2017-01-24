@@ -12,24 +12,24 @@ namespace MODA.Impl
         /// Enumeration module
         /// </summary>
         /// <param name="queryGraph"></param>
-        /// <param name="inputGraph"></param>
         /// <param name="expansionTree"></param>
-        private static List<Mapping> Algorithm3(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraph,
+        /// <param name="parentQueryGraph"></param>
+        /// <param name="parentGraphMappings"></param>
+        private static List<Mapping> Algorithm3(QueryGraph queryGraph,
             AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> expansionTree,
-            Dictionary<QueryGraph, List<Mapping>> mappingsInMemory)
+            QueryGraph parentQueryGraph, List<Mapping> parentGraphMappings)
         {
             //var timer = System.Diagnostics.Stopwatch.StartNew();
-            var parentQueryGraph = GetParent(queryGraph, expansionTree);
+            //var parentQueryGraph = GetParent(queryGraph, expansionTree);
 
-            List<Mapping> mappings;
-            mappingsInMemory.TryGetValue(parentQueryGraph, out mappings);
-            if (mappings?.Count == 0) return mappings;
+            //List<Mapping> mappings;
+            //mappingsInMemory.TryGetValue(parentQueryGraph, out mappings);
+            //if (mappings?.Count == 0) return mappings;
 
             // Get the new edge in the queryGraph
             // New Edge = E(G') - E(H)
             var newEdgeNodes = new string[2];
             int index = 0;
-            bool gotNewEdge = false;
             foreach (var node in queryGraph.Vertices)
             {
                 //Trick: 
@@ -37,28 +37,29 @@ namespace MODA.Impl
                 // then we can be sure that there will be two nodes whose degrees changed.
                 // These two nodes form the new edge.
                 if (queryGraph.AdjacentDegree(node) == parentQueryGraph.AdjacentDegree(node)) continue;
-
-                gotNewEdge = true;
+                
                 newEdgeNodes[index] = node;
                 index++;
                 if (index > 1) break;
             }
 
-            if (!gotNewEdge) return null;
+            // if no need to do new edge
+            if (index == 0) return null;
 
-            var theNewEdge = new Edge<string>(newEdgeNodes[0], newEdgeNodes[1]);
-            newEdgeNodes = null;
+            //var theNewEdge = new Edge<string>(newEdgeNodes[0], newEdgeNodes[1]);
+            //newEdgeNodes = null;
 
             var theMappings = new Dictionary<string, List<Mapping>>();
 
-            for (int i = 0; i < mappings.Count; i++)
+            for (int i = 0; i < parentGraphMappings.Count; i++)
             {
-                var map = mappings[i];
+                var map = parentGraphMappings[i];
 
                 // Reember, f(h) = g
                 // Remember, newInputSubgraph is a subgraph of inputGraph
                 Edge<string> edge;
-                if (map.InputSubGraph.TryGetEdge(map.Function[theNewEdge.Source], map.Function[theNewEdge.Target], out edge))
+                //if (map.InputSubGraph.TryGetEdge(map.Function[newEdgeNodes[0]], map.Function[newEdgeNodes[1]], out edge))
+                if (map.InputSubGraph.TryGetEdge(map.Function[newEdgeNodes[0]], map.Function[newEdgeNodes[1]], out edge))
                 {
                     var mapping = new Mapping(map.Function)
                     {
@@ -70,9 +71,7 @@ namespace MODA.Impl
                     var g_key = mapping.Function.ElementAt(map.Function.Count - 1).Value;
                     if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
                     {
-                        Mapping existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping));
-
-                        if (existing == null)
+                        if (!mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
                         {
                             theMappings[g_key].Add(mapping);
                         }

@@ -151,7 +151,6 @@ namespace MODA.Impl
             var listOfIsomorphisms = new List<Mapping>();
 
             var neighbourRange = ChooseNeighboursOfRange(partialMap.Values, inputGraph);
-            //foreach (var n in neighbourRange) //foreach neighbour n of f(D)
             for (int i = 0; i < neighbourRange.Count; i++) //foreach neighbour n of f(D)
             {
                 var n = neighbourRange[i];
@@ -174,12 +173,11 @@ namespace MODA.Impl
                     var notIsoWithAnyExisting = new List<Mapping>();
                     for (int j = 0; j < subList.Count; j++)
                     {
-                        Mapping existing = listOfIsomorphisms.Find(x => x.IsIsomorphicWith(subList[j]));
-                        if (existing == null)
+                        if (!listOfIsomorphisms.Exists(x => x.IsIsomorphicWith(subList[j])))
                         {
                             notIsoWithAnyExisting.Add(subList[j]); // is NOT part of Iso
                         }
-                        existing = null;
+                        //existing = null;
                     }
                     if (notIsoWithAnyExisting.Count > 0)
                     {

@@ -12,32 +12,31 @@ namespace MODA.Impl
         /// Mapping module; aka FindSubgraphInstances in Grochow & Kellis
         /// </summary>
         /// <param name="queryGraph">H</param>
-        /// <param name="inputGraph">G</param>
-        /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size / 3</param>
-        private static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
+        /// <param name="inputGraphClone">G</param>
+        /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraphClone"/> size / 3</param>
+        private static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraphClone, int numberOfSamples = -1)
         {
             var timer = System.Diagnostics.Stopwatch.StartNew();
-            if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
+            if (numberOfSamples <= 0) numberOfSamples = inputGraphClone.VertexCount / 3; // VertexCountDividend;
 
             // Do we need this clone? Can't we just remove the node directly from the graph? 
             // We do need it.
-            var inputGraphClone = inputGraph.Clone();
 
             //var comparer = new MappingNodesComparer();
             //InputSubgraphs = new Dictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
             //MostConstrainedNeighbours = new Dictionary<string[], string>(comparer);
             H_NodeNeighbours = new Dictionary<string, List<string>>();
             var theMappings = new Dictionary<string, List<Mapping>>();
-            var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
+            var inputGraphDegSeq = inputGraphClone.GetDegreeSequence(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
-
-            Console.WriteLine("Calling Algo 2: Number of Iterations: {0}.\n", numberOfSamples);
+            var numQueryVertices = queryGraphVertices.Length;
+            Console.WriteLine("Calling Algo 2:\n");
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
                 //var g = inputGraphDegSeq[i];
                 //NeighboursOfRange = new Dictionary<string[], List<string>>(comparer);
                 G_NodeNeighbours = new Dictionary<string, List<string>>();
-                for (int j = 0; j < queryGraphVertices.Length; j++)
+                for (int j = 0; j < numQueryVertices; j++)
                 {
                     //var h = queryGraphVertices[j];
                     if (CanSupport(queryGraph, queryGraphVertices[j], inputGraphClone, inputGraphDegSeq[i]))
@@ -58,12 +57,10 @@ namespace MODA.Impl
                         {
                             Mapping mapping = mappings[k];
                             List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                            var g_key = mapping.Function.ElementAt(mapping.Function.Count - 1).Value;
+                            var g_key = mapping.Function.ElementAt(numQueryVertices - 1).Value;
                             if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                             {
-                                Mapping existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping));
-
-                                if (existing == null)
+                                if (!mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
                                 {
                                     theMappings[g_key].Add(mapping);
                                 }

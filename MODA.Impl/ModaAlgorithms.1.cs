@@ -43,6 +43,7 @@ namespace MODA.Impl
             }
             else // Use MODA's expansion tree
             {
+                var inputGraphClone = inputGraph.Clone();
                 do
                 {
                     var qGraph = GetNextNode()?.QueryGraph;
@@ -54,17 +55,25 @@ namespace MODA.Impl
                         {
                             // Modified Mapping module - MODA and Grockow & Kellis
                             mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations);
-                            //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph);
+                            //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraphClone);
                         }
                         else
                         {
-                            mappings = Algorithm2(qGraph, inputGraph, numIterations);
+                            mappings = Algorithm2(qGraph, inputGraphClone, numIterations);
                         }
                     }
                     else
                     {
                         // Enumeration moodule - MODA
-                        mappings = Algorithm3(qGraph, inputGraph, _builder.ExpansionTree, allMappings);
+
+                        //var timer = System.Diagnostics.Stopwatch.StartNew();
+
+                        // This is part of Algo 3; but performance tweaks makes it more useful to get it here
+                        var parentQueryGraph = GetParent(qGraph, _builder.ExpansionTree);
+                        List<Mapping> parentGraphMappings;
+                        allMappings.TryGetValue(parentQueryGraph, out parentGraphMappings);
+                        if (parentGraphMappings?.Count == 0) continue;
+                        mappings = Algorithm3(qGraph, _builder.ExpansionTree, parentQueryGraph, parentGraphMappings);
                     }
                     if (mappings == null) continue;
                     if (mappings.Count > Threshold)

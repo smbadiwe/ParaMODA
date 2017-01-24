@@ -13,7 +13,7 @@ namespace MODA.Impl
             InputSubGraph = new UndirectedGraph<string, Edge<string>>();
             MapOnInputSubGraph = new UndirectedGraph<string, Edge<string>>();
         }
-        
+
         /// <summary>
         /// This represents the [f(h) = g] relation. Meaning key is h and value is g.
         /// </summary>
@@ -32,7 +32,7 @@ namespace MODA.Impl
         public bool IsIsomorphicWith(Mapping otherMapping)
         {
             //NB: Node and edge count already guaranteed to be equal
-            foreach (var node in MapOnInputSubGraph.Vertices)
+            foreach (var node in InputSubGraph.Vertices)
             {
                 //Test 1 - Vertices - sameness
                 if (!otherMapping.MapOnInputSubGraph.ContainsVertex(node)) //Remember, f(h) = g. So, key is h and value is g
@@ -40,9 +40,9 @@ namespace MODA.Impl
                     return false;
                 }
             }
-            var size = Function.Count;
-            var isComplete = InputSubGraph.EdgeCount == ((size * (size - 1)) / 2);
-            foreach (var node in MapOnInputSubGraph.Vertices)
+            int size = Function.Count;
+            bool isComplete = InputSubGraph.EdgeCount == ((size * (size - 1)) / 2);
+            foreach (var node in InputSubGraph.Vertices)
             {
                 //Test 2 - Node degrees.
                 if (MapOnInputSubGraph.AdjacentDegree(node) != otherMapping.MapOnInputSubGraph.AdjacentDegree(node))

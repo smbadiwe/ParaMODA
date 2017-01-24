@@ -81,13 +81,14 @@ namespace QuickGraph
         public List<TVertex> GetDegreeSequence(int count)
         {
             if (this.IsVerticesEmpty) return new List<TVertex>(0);
-
-            var vertices = this.Vertices.Take(count); //.ToArray();
+            
             var tempList = new Dictionary<TVertex, int>(count);
-
-            foreach (var node in vertices)
+            int iter = 1;
+            foreach (var node in Vertices)
             {
                 tempList.Add(node, this.AdjacentDegree(node));
+                iter++;
+                if (iter == count) break;
             }
 
             var listToReturn = new List<TVertex>(count);
@@ -95,8 +96,7 @@ namespace QuickGraph
             {
                 listToReturn.Add(item.Key);
             }
-
-            vertices = null;
+            
             tempList = null;
             return listToReturn; //.ToArray();
         }
