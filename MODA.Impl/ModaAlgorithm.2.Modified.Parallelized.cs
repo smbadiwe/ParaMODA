@@ -79,7 +79,7 @@ namespace MODA.Impl
             }
 
             var nodesToWorkWith = inputGraph.GetDegreeSequence(numberOfSamples);
-            for (int i = nodesToWorkWith.Length - 1; i >= 0; i--)
+            for (int i = nodesToWorkWith.Count - 1; i >= 0; i--)
             {
                 chunks[i % chunks.Length].Add(nodesToWorkWith[i]);
             }

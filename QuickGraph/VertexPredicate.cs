@@ -2,6 +2,6 @@
 
 namespace QuickGraph
 {
-    [Pure]
+    
     public delegate bool VertexPredicate<TVertex>(TVertex v);
 }

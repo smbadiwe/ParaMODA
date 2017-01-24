@@ -42,7 +42,7 @@ namespace QuickGraph.Contracts
             }
         }
 
-        [Pure]
+        
         bool IEdgeSet<TVertex, TEdge>.ContainsEdge(TEdge edge)
         {
             IEdgeSet<TVertex, TEdge> ithis = this;

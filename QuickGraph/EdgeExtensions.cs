@@ -22,7 +22,7 @@ namespace QuickGraph
         /// <typeparam name="TEdge">type of the edges</typeparam>
         /// <param name="edge"></param>
         /// <returns></returns>
-        [Pure]
+        
         public static bool IsSelfEdge<TVertex, TEdge>(
 #if !NET20
 this 
@@ -44,7 +44,7 @@ this
         /// <param name="edge">must not be a self-edge</param>
         /// <param name="vertex"></param>
         /// <returns></returns>
-        [Pure]
+        
         public static TVertex GetOtherVertex<TVertex, TEdge>(
 #if !NET20
 this 
@@ -71,7 +71,7 @@ this
         /// <param name="edge"></param>
         /// <param name="vertex"></param>
         /// <returns></returns>
-        [Pure]
+        
         public static bool IsAdjacent<TVertex, TEdge>(
 #if !NET20
 this 
@@ -89,7 +89,7 @@ this
                 || edge.Target.Equals(vertex);
         }
 
-        [Pure]
+        
         public static bool IsPath<TVertex, TEdge>(
 #if !NET20
 this 
@@ -120,7 +120,7 @@ this
             return true;
         }
 
-        [Pure]
+        
         public static bool HasCycles<TVertex, TEdge>(
 #if !NET20
 this 
@@ -154,7 +154,7 @@ this
             return false;
         }
 
-        [Pure]
+        
         public static bool IsPathWithoutCycles<TVertex, TEdge>(
 #if !NET20
 this 

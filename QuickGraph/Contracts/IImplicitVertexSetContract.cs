@@ -6,7 +6,7 @@ namespace QuickGraph.Contracts
     abstract class IImplicitVertexSetContract<TVertex>
         : IImplicitVertexSet<TVertex>
     {
-        [Pure]
+        
         bool IImplicitVertexSet<TVertex>.ContainsVertex(TVertex vertex)
         {
             IImplicitVertexSet<TVertex> ithis = this;

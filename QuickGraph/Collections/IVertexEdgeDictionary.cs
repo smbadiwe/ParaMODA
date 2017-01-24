@@ -12,7 +12,7 @@ namespace QuickGraph.Collections
     /// </summary>
     /// <typeparam name="TVertex"></typeparam>
     /// <typeparam name="TEdge"></typeparam>
-    [ContractClass(typeof(IVertexEdgeDictionaryContract<,>))]
+    //[ContractClass(typeof(IVertexEdgeDictionaryContract<,>))]
     public interface IVertexEdgeDictionary<TVertex, TEdge>
         : IDictionary<TVertex, IEdgeList<TVertex, TEdge>>
 #if !SILVERLIGHT

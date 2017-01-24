@@ -10,7 +10,7 @@ namespace QuickGraph.Contracts
         : IImplicitGraph<TVertex, TEdge>
         where TEdge : IEdge<TVertex>
     {
-        [Pure]
+        
         bool IImplicitGraph<TVertex, TEdge>.IsOutEdgesEmpty(TVertex v)
         {
             IImplicitGraph<TVertex, TEdge> ithis = this;
@@ -21,7 +21,7 @@ namespace QuickGraph.Contracts
             return default(bool);
         }
 
-        [Pure]
+        
         int IImplicitGraph<TVertex, TEdge>.OutDegree(TVertex v)
         {
             IImplicitGraph<TVertex, TEdge> ithis = this;
@@ -32,7 +32,7 @@ namespace QuickGraph.Contracts
             return default(int);
         }
 
-        [Pure]
+        
         IEnumerable<TEdge> IImplicitGraph<TVertex, TEdge>.OutEdges(TVertex v)
         {
             IImplicitGraph<TVertex, TEdge> ithis = this;
@@ -44,7 +44,7 @@ namespace QuickGraph.Contracts
             return default(IEnumerable<TEdge>);
         }
 
-        [Pure]
+        
         bool IImplicitGraph<TVertex, TEdge>.TryGetOutEdges(TVertex v, out IEnumerable<TEdge> edges)
         {
             IImplicitGraph<TVertex, TEdge> ithis = this;
@@ -58,7 +58,7 @@ namespace QuickGraph.Contracts
             return default(bool);
         }
 
-        [Pure]
+        
         TEdge IImplicitGraph<TVertex, TEdge>.OutEdge(TVertex v, int index)
         {
             IImplicitGraph<TVertex, TEdge> ithis = this;

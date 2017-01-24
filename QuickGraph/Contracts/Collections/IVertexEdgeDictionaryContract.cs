@@ -2,7 +2,7 @@
 using System.Diagnostics.Contracts;
 namespace QuickGraph.Collections
 {
-    [ContractClassFor(typeof(IVertexEdgeDictionary<,>))]
+    //[ContractClassFor(typeof(IVertexEdgeDictionary<,>))]
     abstract class IVertexEdgeDictionaryContract<TVertex, TEdge> 
         : IVertexEdgeDictionary<TVertex, TEdge>
         where TEdge : IEdge<TVertex>

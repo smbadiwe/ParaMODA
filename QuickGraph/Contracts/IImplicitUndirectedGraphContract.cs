@@ -5,13 +5,13 @@ using System.Linq;
 
 namespace QuickGraph.Contracts
 {
-    [ContractClassFor(typeof(IImplicitUndirectedGraph<,>))]
+    //[ContractClassFor(typeof(IImplicitUndirectedGraph<,>))]
     abstract class IImplicitUndirectedGraphContract<TVertex, TEdge> 
         : IImplicitUndirectedGraph<TVertex, TEdge>
         where TEdge : IEdge<TVertex>
     {
         #region IImplicitUndirectedGraph<TVertex,TEdge> Members
-        [Pure]
+        
         EdgeEqualityComparer<TVertex, TEdge> IImplicitUndirectedGraph<TVertex, TEdge>.EdgeEqualityComparer
         {
             get
@@ -21,7 +21,7 @@ namespace QuickGraph.Contracts
             }
         }
 
-        [Pure]
+        
         IEnumerable<TEdge> IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentEdges(TVertex v)
         {
             IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
@@ -41,7 +41,7 @@ namespace QuickGraph.Contracts
             return default(IEnumerable<TEdge>);
         }
 
-        [Pure]
+        
         int IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentDegree(TVertex v)
         {
             IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
@@ -52,7 +52,7 @@ namespace QuickGraph.Contracts
             return default(int);
         }
 
-        [Pure]
+        
         bool IImplicitUndirectedGraph<TVertex, TEdge>.IsAdjacentEdgesEmpty(TVertex v)
         {
             IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
@@ -63,7 +63,7 @@ namespace QuickGraph.Contracts
             return default(bool);
         }
 
-        [Pure]
+        
         TEdge IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentEdge(TVertex v, int index)
         {
             IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
@@ -77,7 +77,7 @@ namespace QuickGraph.Contracts
             return default(TEdge);
         }
 
-        [Pure]
+        
         bool IImplicitUndirectedGraph<TVertex, TEdge>.TryGetEdge(TVertex source, TVertex target, out TEdge edge)
         {
             IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
@@ -88,7 +88,7 @@ namespace QuickGraph.Contracts
             return default(bool);
         }
 
-        [Pure]
+        
         bool IImplicitUndirectedGraph<TVertex, TEdge>.ContainsEdge(TVertex source, TVertex target)
         {
             IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;

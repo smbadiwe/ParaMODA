@@ -36,13 +36,12 @@ namespace MODA.Impl
 
             var theMappings = new Dictionary<string, List<Mapping>>();
             var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
-            var queryGraphVertices = queryGraph.Vertices.ToArray();
 
             Console.WriteLine("Calling Algo 2-Modified: Number of Iterations: {0}.\n", numberOfSamples);
 
             var h = queryGraph.Vertices.ElementAt(0);
 
-            for (int i = 0; i < inputGraphDegSeq.Length; i++)
+            for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
                 if (CanSupport(queryGraph, h, inputGraph, inputGraphDegSeq[i]))
                 {

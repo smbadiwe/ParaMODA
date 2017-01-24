@@ -23,19 +23,19 @@ namespace MODA.Impl
             // We do need it.
             var inputGraphClone = inputGraph.Clone();
 
-            var comparer = new MappingNodesComparer();
-            InputSubgraphs = new Dictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
-            MostConstrainedNeighbours = new Dictionary<string[], string>(comparer);
+            //var comparer = new MappingNodesComparer();
+            //InputSubgraphs = new Dictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
+            //MostConstrainedNeighbours = new Dictionary<string[], string>(comparer);
             H_NodeNeighbours = new Dictionary<string, List<string>>();
             var theMappings = new Dictionary<string, List<Mapping>>();
             var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
 
             Console.WriteLine("Calling Algo 2: Number of Iterations: {0}.\n", numberOfSamples);
-            for (int i = 0; i < inputGraphDegSeq.Length; i++)
+            for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
                 //var g = inputGraphDegSeq[i];
-                NeighboursOfRange = new Dictionary<string[], List<string>>(comparer);
+                //NeighboursOfRange = new Dictionary<string[], List<string>>(comparer);
                 G_NodeNeighbours = new Dictionary<string, List<string>>();
                 for (int j = 0; j < queryGraphVertices.Length; j++)
                 {
@@ -53,9 +53,10 @@ namespace MODA.Impl
                         if (mappings?.Count == 0) continue;
 
                         //sw.Restart();
-
-                        foreach (Mapping mapping in mappings)
+                        
+                        for (int k = 0; k < mappings.Count; k++)
                         {
+                            Mapping mapping = mappings[k];
                             List<Mapping> mappingsToSearch; //Recall: f(h) = g
                             var g_key = mapping.Function.ElementAt(mapping.Function.Count - 1).Value;
                             if (theMappings.TryGetValue(g_key, out mappingsToSearch))
@@ -84,7 +85,7 @@ namespace MODA.Impl
 
                 //Remove g
                 inputGraphClone.RemoveVertex(inputGraphDegSeq[i]);
-                NeighboursOfRange = null;
+                //NeighboursOfRange = null;
                 G_NodeNeighbours = null;
             }
 
@@ -93,10 +94,11 @@ namespace MODA.Impl
             {
                 toReturn.AddRange(mapping.Value);
             }
-            Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
+            //Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
             timer.Stop();
             Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", toReturn.Count, timer.Elapsed.ToString());
             timer = null;
+            theMappings = null;
             inputGraphDegSeq = null;
             queryGraphVertices = null;
             inputGraphClone = null;

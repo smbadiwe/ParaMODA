@@ -30,7 +30,7 @@ namespace QuickGraph
     {
         private readonly bool isDirected = true;
         private readonly bool allowParallelEdges;
-        private readonly IVertexEdgeDictionary<TVertex, TEdge> vertexEdges;
+        private readonly VertexEdgeDictionary<TVertex, TEdge> vertexEdges;
         private int edgeCount = 0;
         private int edgeCapacity = -1;
 
@@ -69,7 +69,7 @@ namespace QuickGraph
             bool allowParallelEdges, 
             int capacity, 
             int edgeCapacity,
-            Func<int, IVertexEdgeDictionary<TVertex, TEdge>> vertexEdgesDictionaryFactory)
+            Func<int, VertexEdgeDictionary<TVertex, TEdge>> vertexEdgesDictionaryFactory)
         {
             if (vertexEdgesDictionaryFactory == null) throw new ArgumentNullException("vertexComparer");
             this.allowParallelEdges = allowParallelEdges;
@@ -84,7 +84,7 @@ namespace QuickGraph
 
         public bool AllowParallelEdges
         {
-            [Pure]
+            
             get { return this.allowParallelEdges; }
         }
 
@@ -114,7 +114,7 @@ namespace QuickGraph
             get { return this.vertexEdges.Keys; }
         }
 
-        [Pure]
+        
         public bool ContainsVertex(TVertex v)
         {
             return this.vertexEdges.ContainsKey(v);
@@ -161,7 +161,7 @@ namespace QuickGraph
         /// </value>
         public bool IsEdgesEmpty
         {
-            [Pure]
+            
             get { return this.edgeCount == 0; }
         }
 
@@ -189,7 +189,7 @@ namespace QuickGraph
         /// <value>The edges.</value>
         public virtual IEnumerable<TEdge> Edges
         {
-            [Pure]
+            
             get
             {
                 foreach (var edges in this.vertexEdges.Values)
@@ -198,7 +198,7 @@ namespace QuickGraph
             }
         }
 
-        [Pure]
+        
         public bool ContainsEdge(TVertex source, TVertex target)
         {
             IEnumerable<TEdge> outEdges;
@@ -210,7 +210,7 @@ namespace QuickGraph
             return false;
         }
 
-        [Pure]
+        
         public bool ContainsEdge(TEdge edge)
         {
             IEdgeList<TVertex, TEdge> edges;
@@ -219,7 +219,7 @@ namespace QuickGraph
                 edges.Contains(edge);
         }
 
-        [Pure]
+        
         public bool TryGetEdge(
             TVertex source,
             TVertex target,
@@ -242,7 +242,7 @@ namespace QuickGraph
             return false;
         }
 
-        [Pure]
+        
         public virtual bool TryGetEdges(
             TVertex source,
             TVertex target,
@@ -500,37 +500,37 @@ namespace QuickGraph
         }
 
         #region ICloneable Members
-        private AdjacencyGraph(
-            IVertexEdgeDictionary<TVertex, TEdge> vertexEdges,
-            int edgeCount,
-            int edgeCapacity,
-            bool allowParallelEdges
-            )
-        {
-            Contract.Requires(vertexEdges != null);
-            Contract.Requires(edgeCount >= 0);
+        //private AdjacencyGraph(
+        //    VertexEdgeDictionary<TVertex, TEdge> vertexEdges,
+        //    int edgeCount,
+        //    int edgeCapacity,
+        //    bool allowParallelEdges
+        //    )
+        //{
+        //    Contract.Requires(vertexEdges != null);
+        //    Contract.Requires(edgeCount >= 0);
 
-            this.vertexEdges = vertexEdges;
-            this.edgeCount = edgeCount;
-            this.edgeCapacity = edgeCapacity;
-            this.allowParallelEdges = allowParallelEdges;
-        }
+        //    this.vertexEdges = vertexEdges;
+        //    this.edgeCount = edgeCount;
+        //    this.edgeCapacity = edgeCapacity;
+        //    this.allowParallelEdges = allowParallelEdges;
+        //}
 
-        [Pure]
-        public AdjacencyGraph<TVertex, TEdge> Clone()
-        {
-            return new AdjacencyGraph<TVertex, TEdge>(
-                this.vertexEdges.Clone(),
-                this.edgeCount,
-                this.edgeCapacity,
-                this.allowParallelEdges
-                );
-        }
+        
+        //public AdjacencyGraph<TVertex, TEdge> Clone()
+        //{
+        //    return new AdjacencyGraph<TVertex, TEdge>(
+        //        this.vertexEdges.Clone(),
+        //        this.edgeCount,
+        //        this.edgeCapacity,
+        //        this.allowParallelEdges
+        //        );
+        //}
         
 #if !SILVERLIGHT
         object ICloneable.Clone()
         {
-            return this.Clone();
+            throw new NotImplementedException(); // return this.Clone();
         }
 #endif
         #endregion
