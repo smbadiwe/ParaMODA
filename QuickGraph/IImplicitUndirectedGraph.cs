@@ -14,7 +14,7 @@ namespace QuickGraph
         EdgeEqualityComparer<TVertex, TEdge> EdgeEqualityComparer { get; }
 
         
-        IEnumerable<TEdge> AdjacentEdges(TVertex v);
+        IList<TEdge> AdjacentEdges(TVertex v);
 
         
         int AdjacentDegree(TVertex v);

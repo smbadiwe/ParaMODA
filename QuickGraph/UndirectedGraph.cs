@@ -74,14 +74,37 @@ namespace QuickGraph
         #region Newly Added
 
         /// <summary>
+        /// This returns the neighbourhood of the given <paramref name="vertex"/>.
+        /// </summary>
+        /// <param name="vertex"></param>
+        /// <param name="isG"></param>
+        /// <returns></returns>
+        public IList<TVertex> GetNeighbors(TVertex vertex)
+        {
+            IEdgeList<TVertex, TEdge> adjEdges;
+            if (this.adjacentEdges.TryGetValue(vertex, out adjEdges))
+            {
+                var set = new HashSet<TVertex>();
+                for (int i = 0; i < adjEdges.Count; i++)
+                {
+                    set.Add(adjEdges[i].Source);
+                    set.Add(adjEdges[i].Target);
+                }
+                set.Remove(vertex);
+                return set.ToList();
+            }
+            return new TVertex[0];
+        }
+
+        /// <summary>
         /// NB: The degree sequence of an undirected graph is the non-increasing sequence of its vertex degrees;
         /// </summary>
         /// <param name="count">The expected number of items to return. This value is usually less than the <see cref="VertexCount"/></param>
         /// <returns></returns>
-        public List<TVertex> GetDegreeSequence(int count)
+        public IList<TVertex> GetDegreeSequence(int count)
         {
-            if (this.IsVerticesEmpty) return new List<TVertex>(0);
-            
+            if (this.IsVerticesEmpty) return new TVertex[0];
+
             var tempList = new Dictionary<TVertex, int>(count);
             int iter = 1;
             foreach (var node in Vertices)
@@ -96,7 +119,7 @@ namespace QuickGraph
             {
                 listToReturn.Add(item.Key);
             }
-            
+
             tempList = null;
             return listToReturn; //.ToArray();
         }
@@ -303,7 +326,7 @@ namespace QuickGraph
         {
             get { return this.adjacentEdges.Keys; }
         }
-        
+
         public bool ContainsVertex(TVertex vertex)
         {
             return this.adjacentEdges.ContainsKey(vertex);
@@ -476,7 +499,7 @@ namespace QuickGraph
         #endregion
 
         #region IUndirectedGraph<Vertex,Edge> Members
-        public IEnumerable<TEdge> AdjacentEdges(TVertex v)
+        public IList<TEdge> AdjacentEdges(TVertex v)
         {
             IEdgeList<TVertex, TEdge> edges;
             if (this.adjacentEdges.TryGetValue(v, out edges))

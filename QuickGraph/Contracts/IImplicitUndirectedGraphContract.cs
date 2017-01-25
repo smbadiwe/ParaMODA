@@ -22,7 +22,7 @@ namespace QuickGraph.Contracts
         }
 
         
-        IEnumerable<TEdge> IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentEdges(TVertex v)
+        IList<TEdge> IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentEdges(TVertex v)
         {
             IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
             Contract.Requires(v != null);
@@ -38,7 +38,7 @@ namespace QuickGraph.Contracts
                     )
                 );
 
-            return default(IEnumerable<TEdge>);
+            return default(IList<TEdge>);
         }
 
         

@@ -25,7 +25,7 @@ namespace MODA.Impl
             //var comparer = new MappingNodesComparer();
             //InputSubgraphs = new Dictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
             //MostConstrainedNeighbours = new Dictionary<string[], string>(comparer);
-            H_NodeNeighbours = new Dictionary<string, List<string>>();
+            //H_NodeNeighbours = new Dictionary<string, List<string>>();
             var theMappings = new Dictionary<string, List<Mapping>>();
             var inputGraphDegSeq = inputGraphClone.GetDegreeSequence(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
@@ -35,7 +35,7 @@ namespace MODA.Impl
             {
                 //var g = inputGraphDegSeq[i];
                 //NeighboursOfRange = new Dictionary<string[], List<string>>(comparer);
-                G_NodeNeighbours = new Dictionary<string, List<string>>();
+                //G_NodeNeighbours = new Dictionary<string, List<string>>();
                 for (int j = 0; j < numQueryVertices; j++)
                 {
                     //var h = queryGraphVertices[j];
@@ -83,7 +83,7 @@ namespace MODA.Impl
                 //Remove g
                 inputGraphClone.RemoveVertex(inputGraphDegSeq[i]);
                 //NeighboursOfRange = null;
-                G_NodeNeighbours = null;
+                //G_NodeNeighbours = null;
             }
 
             var toReturn = new List<Mapping>();
@@ -99,8 +99,8 @@ namespace MODA.Impl
             inputGraphDegSeq = null;
             queryGraphVertices = null;
             inputGraphClone = null;
-            G_NodeNeighbours = null;
-            H_NodeNeighbours = null;
+            //G_NodeNeighbours = null;
+            //H_NodeNeighbours = null;
             MostConstrainedNeighbours = null;
             NeighboursOfRange = null;
             return toReturn;

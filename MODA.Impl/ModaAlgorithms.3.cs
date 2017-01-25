@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace MODA.Impl
 {
@@ -58,7 +59,6 @@ namespace MODA.Impl
                 // Reember, f(h) = g
                 // Remember, newInputSubgraph is a subgraph of inputGraph
                 Edge<string> edge;
-                //if (map.InputSubGraph.TryGetEdge(map.Function[newEdgeNodes[0]], map.Function[newEdgeNodes[1]], out edge))
                 if (map.InputSubGraph.TryGetEdge(map.Function[newEdgeNodes[0]], map.Function[newEdgeNodes[1]], out edge))
                 {
                     var mapping = new Mapping(map.Function)
@@ -106,6 +106,7 @@ namespace MODA.Impl
         /// <param name="queryGraph"></param>
         /// <param name="expansionTree"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static QueryGraph GetParent(QueryGraph queryGraph, AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> expansionTree)
         {
             var hasNode = expansionTree.ContainsVertex(new ExpansionTreeNode

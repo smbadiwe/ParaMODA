@@ -186,7 +186,7 @@ namespace QuickGraph.Contracts
             }
         }
 
-        IEnumerable<TEdge> IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentEdges(TVertex v)
+        IList<TEdge> IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentEdges(TVertex v)
         {
             throw new NotImplementedException();
         }

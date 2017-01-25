@@ -190,7 +190,7 @@ namespace MODA.Impl
         /// <param name="queryGraph">G</param>
         /// <param name="inputGraph">H</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
-        private static List<Mapping> IsomorphicExtension(Dictionary<string, string> partialMap, UndirectedGraph<string, Edge<string>> queryGraph
+        private static IList<Mapping> IsomorphicExtension(Dictionary<string, string> partialMap, UndirectedGraph<string, Edge<string>> queryGraph
             , UndirectedGraph<string, Edge<string>> inputGraph)
         {
             if (partialMap.Count == queryGraph.VertexCount)
@@ -235,7 +235,7 @@ namespace MODA.Impl
 
             // get m, most constrained neighbor
             string m = GetMostConstrainedNeighbour(partialMap.Keys.ToArray(), queryGraph);
-            if (string.IsNullOrWhiteSpace(m)) return new List<Mapping>();
+            if (string.IsNullOrWhiteSpace(m)) return new Mapping[0];
 
             var listOfIsomorphisms = new List<Mapping>();
 
@@ -306,8 +306,8 @@ namespace MODA.Impl
             //  RECALL: m is for Domain, the Key => the query graph
 
             //A: If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d)...
-            var neighboursOfN = GetNeighbors(inputGraph, n);
-            var neighborsOfM = GetNeighbors(queryGraph, m, false);
+            var neighboursOfN = inputGraph.GetNeighbors(n);
+            var neighborsOfM = queryGraph.GetNeighbors(m);
             for (int i = 0; i < neighborsOfM.Count; i++)
             {
                 if (!partialMap.ContainsKey(neighborsOfM[i]))
@@ -350,7 +350,7 @@ namespace MODA.Impl
                 var result = new HashSet<string>();
                 for (int i = usedRange.Length - 1; i >= 0; i--)
                 {
-                    var local = GetNeighbors(inputGraph, usedRange[i]);
+                    var local = inputGraph.GetNeighbors(usedRange[i]);
                     if (local.Count == 0)
                     {
                         local = null;
@@ -423,7 +423,7 @@ namespace MODA.Impl
                 var result = new List<string>();
                 for (int i = domain.Length - 1; i >= 0; i--)
                 {
-                    var local = GetNeighbors(queryGraph, domain[i], false);
+                    var local = queryGraph.GetNeighbors(domain[i]);
                     if (local.Count == 0)
                     {
                         local = null;
@@ -497,8 +497,8 @@ namespace MODA.Impl
 
             //So, deg(g) >= deg(h).
             //2. Based on the degree of their neighbors
-            var gNeighbors = GetNeighbors(inputGraph, node_G);
-            var hNeighbors = GetNeighbors(queryGraph, node_H);
+            var gNeighbors = inputGraph.GetNeighbors(node_G);
+            var hNeighbors = queryGraph.GetNeighbors(node_H);
             for (int i = hNeighbors.Count - 1; i >= 0; i--)
             {
                 for (int j = gNeighbors.Count - 1; j >= 0; j--)
@@ -515,45 +515,6 @@ namespace MODA.Impl
             hNeighbors = null;
             return false;
         }
-
-        private static List<string> GetNeighbors(UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG = true)
-        {
-            if (string.IsNullOrWhiteSpace(vertex)) return new List<string>();
-            List<string> neighbors;
-            if (isG)
-            {
-                if (G_NodeNeighbours.TryGetValue(vertex, out neighbors))
-                {
-                    return neighbors;
-                }
-                else
-                {
-                    var adjEdges = graph.AdjacentEdges(vertex);
-                    var set = new HashSet<string>(adjEdges.Select(x => x.Source).Union(adjEdges.Select(x => x.Target)));
-                    set.Remove(vertex);
-                    adjEdges = null;
-                    G_NodeNeighbours[vertex] = neighbors = set.ToList();
-                    return neighbors;
-                }
-            }
-            else
-            {
-                if (H_NodeNeighbours.TryGetValue(vertex, out neighbors))
-                {
-                    return neighbors;
-                }
-                else
-                {
-                    var adjEdges = graph.AdjacentEdges(vertex);
-                    var set = new HashSet<string>(adjEdges.Select(x => x.Source).Union(adjEdges.Select(x => x.Target)));
-                    set.Remove(vertex);
-                    adjEdges = null;
-                    H_NodeNeighbours[vertex] = neighbors = set.ToList();
-                    return neighbors;
-                }
-            }
-
-        }
-
+        
     }
 }

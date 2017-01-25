@@ -55,7 +55,7 @@ namespace MODA.Impl
                         {
                             // Modified Mapping module - MODA and Grockow & Kellis
                             mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations);
-                            //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraphClone);
+                            //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph);
                         }
                         else
                         {
