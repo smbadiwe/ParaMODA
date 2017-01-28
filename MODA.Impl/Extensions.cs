@@ -8,7 +8,8 @@ namespace MODA.Impl
     {
         public static IList<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG)
         {
-            if (string.IsNullOrWhiteSpace(vertex)) return new List<string>(1);
+            //if (string.IsNullOrWhiteSpace(vertex)) return new string[0];
+            //return graph.GetNeighbors(vertex);
             IList<string> neighbors;
             if (isG)
             {

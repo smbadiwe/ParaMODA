@@ -14,25 +14,9 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraphClone">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraphClone"/> size / 3</param>
-        /// <param name="isTree">Whether or not <paramref name="queryGraph"/> is a tree.</param>
-        private static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraphClone, int numberOfSamples = -1, bool isTree = true)
+        private static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraphClone, int numberOfSamples = -1)
         {
             var timer = System.Diagnostics.Stopwatch.StartNew();
-            if (isTree)
-            {
-                //This is already a tree
-                bool doNotAbort = false;
-                foreach (var vert in queryGraph.Vertices)
-                {
-                    if (queryGraph.AdjacentDegree(vert) > 2)
-                    {
-                        doNotAbort = true;
-                        break;
-                    }
-                }
-                if (doNotAbort == false) return null; 
-            }
-
             if (numberOfSamples <= 0) numberOfSamples = inputGraphClone.VertexCount / 3; // VertexCountDividend;
 
             // Do we need this clone? Can't we just remove the node directly from the graph? 
@@ -49,18 +33,18 @@ namespace MODA.Impl
             Console.WriteLine("Calling Algo 2:\n");
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
-                //var g = inputGraphDegSeq[i];
+                var g = inputGraphDegSeq[i];
                 //NeighboursOfRange = new Dictionary<string[], List<string>>(comparer);
                 G_NodeNeighbours = new Dictionary<string, IList<string>>();
                 for (int j = 0; j < subgraphSize; j++)
                 {
-                    //var h = queryGraphVertices[j];
-                    if (CanSupport(queryGraph, queryGraphVertices[j], inputGraphClone, inputGraphDegSeq[i]))
+                    var h = queryGraphVertices[j];
+                    if (CanSupport(queryGraph, h, inputGraphClone, g))
                     {
                         #region Can Support
                         //var sw = System.Diagnostics.Stopwatch.StartNew();
                         //Remember: f(h) = g, so h is Domain and g is Range
-                        var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { queryGraphVertices[j], inputGraphDegSeq[i] } }, queryGraph, inputGraphClone);
+                        var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { h, g } }, queryGraph, inputGraphClone);
 
                         //sw.Stop();
                         //Console.WriteLine("Time to do IsomorphicExtension: {0}\n", sw.Elapsed.ToString());
@@ -73,7 +57,8 @@ namespace MODA.Impl
                             {
                                 Mapping mapping = mappings[k];
                                 List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                                var g_key = mapping.Function.ElementAt(subgraphSize - 1).Value;
+                                //var g_key = mapping.Function.ElementAt(subgraphSize - 1).Value;
+                                var g_key = mapping.Function.Last().Value;
 
                                 if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                                 {
@@ -100,7 +85,7 @@ namespace MODA.Impl
                 }
 
                 //Remove g
-                inputGraphClone.RemoveVertex(inputGraphDegSeq[i]);
+                inputGraphClone.RemoveVertex(g);
                 //NeighboursOfRange = null;
                 G_NodeNeighbours = null;
             }

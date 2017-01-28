@@ -24,25 +24,9 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size / 3</param>
-        /// <param name="isTree">Whether or not <paramref name="queryGraph"/> is a tree.</param>
-        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1, bool isTree = true)
+        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
         {
             //var timer = System.Diagnostics.Stopwatch.StartNew();
-            if (isTree)
-            {
-                //This is already a tree
-                bool doNotAbort = false;
-                foreach (var vert in queryGraph.Vertices)
-                {
-                    if (queryGraph.AdjacentDegree(vert) > 2)
-                    {
-                        doNotAbort = true;
-                        break;
-                    }
-                }
-                if (doNotAbort == false) return null;
-            }
-
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
 
             var comparer = new MappingNodesComparer();

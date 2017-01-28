@@ -28,11 +28,11 @@ namespace MODA.Impl
             Dictionary<QueryGraph, List<Mapping>> allMappings;
             int numIterations = -1;
             if (inputGraph.VertexCount < 121) numIterations = inputGraph.VertexCount;
-            
+
             if (qGraph == null) // Use MODA's expansion tree
             {
                 var inputGraphClone = inputGraph.Clone();
-                allMappings = new Dictionary<QueryGraph, List<Mapping>>(); // _builder.NumberOfQueryGraphs);
+                allMappings = new Dictionary<QueryGraph, List<Mapping>>(_builder.NumberOfQueryGraphs);
                 do
                 {
                     qGraph = GetNextNode()?.QueryGraph;
@@ -62,23 +62,7 @@ namespace MODA.Impl
                         List<Mapping> parentGraphMappings;
                         if (allMappings.TryGetValue(parentQueryGraph, out parentGraphMappings))
                         {
-                            if (parentGraphMappings == null)
-                            {
-                                if (UseModifiedGrochow)
-                                {
-                                    // Modified Mapping module - MODA and Grockow & Kellis
-                                    mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations, false);
-                                    //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph);
-                                }
-                                else
-                                {
-                                    mappings = Algorithm2(qGraph, inputGraphClone, numIterations, false);
-                                }
-                            }
-                            else
-                            {
-                                mappings = Algorithm3(qGraph, _builder.ExpansionTree, parentQueryGraph, parentGraphMappings);
-                            }
+                            mappings = Algorithm3(qGraph, _builder.ExpansionTree, parentQueryGraph, parentGraphMappings);
                         }
                         else
                         {

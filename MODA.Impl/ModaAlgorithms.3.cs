@@ -68,7 +68,8 @@ namespace MODA.Impl
                     };
                     mapping.MapOnInputSubGraph.AddEdge(edge);
                     List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                    var g_key = mapping.Function.ElementAt(subgraphSize - 1).Value;
+                    //var g_key = mapping.Function.ElementAt(subgraphSize - 1).Value;
+                    var g_key = mapping.Function.Last().Value;
                     if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
                     {
                         if (!mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))

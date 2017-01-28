@@ -148,8 +148,8 @@ namespace MODA.Impl
             //var newPartialMap = new Dictionary<string, string>(partialMap);
             for (int i = 0; i < neighbourRange.Count; i++) //foreach neighbour n of f(D)
             {
-                //var n = neighbourRange[i];
-                if (IsNeighbourIncompatible(inputGraph, neighbourRange[i], partialMap, neighborsOfM))
+                var n = neighbourRange[i];
+                if (IsNeighbourIncompatible(inputGraph, n, partialMap, neighborsOfM))
                 {
                     continue;
                 }
@@ -158,7 +158,7 @@ namespace MODA.Impl
                 //Find all isomorphic extensions of f'.
                 //newPartialMap[m] = neighbourRange[i];
                 //var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);
-                var subList = IsomorphicExtension(new Dictionary<string, string>(partialMap) { { m, neighbourRange[i] } }, queryGraph, inputGraph);
+                var subList = IsomorphicExtension(new Dictionary<string, string>(partialMap) { { m, n } }, queryGraph, inputGraph);
                 if (subList.Count == 0) continue;
 
                 if (listOfIsomorphisms.Count > 0)
@@ -206,8 +206,7 @@ namespace MODA.Impl
             //A: If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d)...
             string val;
             var neighboursOfN = inputGraph.GetNeighbors(n, true);
-            for (int i = neighborsOfM.Count - 1; i >= 0; i--)
-            //for (int i = 0; i < neighborsOfM.Count; i++)
+            for (int i = 0; i < neighborsOfM.Count; i++)
             {
                 if (!partialMap.TryGetValue(neighborsOfM[i], out val))
                 {
@@ -224,7 +223,7 @@ namespace MODA.Impl
             neighboursOfN = null;
             return false;
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static List<string> ChooseNeighboursOfRange(IEnumerable<string> used_range, UndirectedGraph<string, Edge<string>> inputGraph)
         {
@@ -271,13 +270,11 @@ namespace MODA.Impl
                 var local = queryGraph.GetNeighbors(item, false);
                 if (local.Count > 0)
                 {
-                    //for (int j = local.Count - 1; j >= 0; j--)
                     for (int j = 0; j < local.Count; j++)
                     {
                         if (!domain.Contains(local[j]))
                         {
-                            //toReturn = local[j];
-                            return local[j]; // toReturn;
+                            return local[j];
                         }
                     }
                 }
@@ -365,13 +362,12 @@ namespace MODA.Impl
             var gNeighbors = inputGraph.GetNeighbors(node_G, true);
             var hNeighbors = queryGraph.GetNeighbors(node_H, false);
             //TODO: either review or remove this test
-            //for (int i = hNeighbors.Count - 1; i >= 0; i--)
             for (int i = 0; i < hNeighbors.Count; i++)
             {
-                //for (int j = gNeighbors.Count - 1; j >= 0; j--)
+                var hNode = hNeighbors[i];
                 for (int j = 0; j < gNeighbors.Count; j++)
                 {
-                    if (inputGraph.AdjacentDegree(gNeighbors[j]) >= queryGraph.AdjacentDegree(hNeighbors[i]))
+                    if (inputGraph.AdjacentDegree(gNeighbors[j]) >= queryGraph.AdjacentDegree(hNode))
                     {
                         gNeighbors = null;
                         hNeighbors = null;
