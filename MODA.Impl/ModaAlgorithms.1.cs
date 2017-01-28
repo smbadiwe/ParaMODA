@@ -1,5 +1,6 @@
 ﻿using QuickGraph;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace MODA.Impl
 {
@@ -16,37 +17,25 @@ namespace MODA.Impl
         /// Algo 1: Find subgraph frequency (mappings help in memory)
         /// </summary>
         /// <param name="inputGraph"></param>
+        /// <param name="qGraph">The query graph to be searched for. If not available, we use expansion trees (MODA). Otherwise, we use Grochow's (Algo 2)</param>
         /// <param name="subgraphSize"></param>
-        /// <param name="thresholdValue"></param>
+        /// <param name="thresholdValue">Frequency value, above which we can comsider the subgraph a "frequent subgraph"</param>
         /// <returns>Fg, frequent subgraph list. NB: The dictionary .Value is an <see cref="object"/> which will be either a list of <see cref="Mapping"/> or a <see cref="long"/>
         /// depending on the value of <see cref="GetOnlyMappingCounts"/>.</returns>
-        public static Dictionary<QueryGraph, object> Algorithm1(UndirectedGraph<string, Edge<string>> inputGraph, int subgraphSize, int thresholdValue = 0)
+        public static Dictionary<QueryGraph, List<Mapping>> Algorithm1(UndirectedGraph<string, Edge<string>> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
         {
             // The enumeration module (Algo 3) needs the mappings generated from the previous run(s)
-            var allMappings = new Dictionary<QueryGraph, List<Mapping>>();
+            Dictionary<QueryGraph, List<Mapping>> allMappings;
             int numIterations = -1;
             if (inputGraph.VertexCount < 121) numIterations = inputGraph.VertexCount;
-            if (QueryGraph != null)
-            {
-                List<Mapping> mappings;
-                if (UseModifiedGrochow)
-                {
-                    // Modified Mapping module - MODA and Grockow & Kellis
-                    mappings = Algorithm2_Modified(QueryGraph, inputGraph, numIterations);
-                    //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph, numIterations);
-                }
-                else
-                {
-                    mappings = Algorithm2(QueryGraph, inputGraph, numIterations);
-                }
-                allMappings.Add(QueryGraph, mappings);
-            }
-            else // Use MODA's expansion tree
+            
+            if (qGraph == null) // Use MODA's expansion tree
             {
                 var inputGraphClone = inputGraph.Clone();
+                allMappings = new Dictionary<QueryGraph, List<Mapping>>(); // _builder.NumberOfQueryGraphs);
                 do
                 {
-                    var qGraph = GetNextNode()?.QueryGraph;
+                    qGraph = GetNextNode()?.QueryGraph;
                     if (qGraph == null) break;
                     List<Mapping> mappings;
                     if (qGraph.EdgeCount == (subgraphSize - 1))
@@ -71,12 +60,32 @@ namespace MODA.Impl
                         // This is part of Algo 3; but performance tweaks makes it more useful to get it here
                         var parentQueryGraph = GetParent(qGraph, _builder.ExpansionTree);
                         List<Mapping> parentGraphMappings;
-                        allMappings.TryGetValue(parentQueryGraph, out parentGraphMappings);
-                        if (parentGraphMappings?.Count == 0) continue;
-                        mappings = Algorithm3(qGraph, _builder.ExpansionTree, parentQueryGraph, parentGraphMappings);
+                        if (allMappings.TryGetValue(parentQueryGraph, out parentGraphMappings))
+                        {
+                            if (parentGraphMappings == null)
+                            {
+                                if (UseModifiedGrochow)
+                                {
+                                    // Modified Mapping module - MODA and Grockow & Kellis
+                                    mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations, false);
+                                    //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph);
+                                }
+                                else
+                                {
+                                    mappings = Algorithm2(qGraph, inputGraphClone, numIterations, false);
+                                }
+                            }
+                            else
+                            {
+                                mappings = Algorithm3(qGraph, _builder.ExpansionTree, parentQueryGraph, parentGraphMappings);
+                            }
+                        }
+                        else
+                        {
+                            mappings = null;
+                        }
                     }
-                    if (mappings == null) continue;
-                    if (mappings.Count > Threshold)
+                    if (mappings != null && mappings.Count > thresholdValue)
                     {
                         qGraph.IsFrequentSubgraph = true;
                     }
@@ -85,7 +94,7 @@ namespace MODA.Impl
 
                     mappings = null;
 
-                    //Check for complete-ness; if complete, break
+                    // Check for complete-ness; if complete, break
                     if (qGraph.EdgeCount == ((qGraph.VertexCount * (qGraph.VertexCount - 1)) / 2))
                     {
                         qGraph = null;
@@ -95,31 +104,31 @@ namespace MODA.Impl
                 }
                 while (true);
             }
-            var toReturn = new Dictionary<QueryGraph, object>();
-
-            if (GetOnlyMappingCounts)
-            {
-                foreach (var item in allMappings)
-                {
-                    toReturn.Add(item.Key, item.Value.Count);
-                } 
-            }
             else
             {
-                foreach (var item in allMappings)
+                List<Mapping> mappings;
+                if (UseModifiedGrochow)
                 {
-                    toReturn.Add(item.Key, item.Value);
+                    // Modified Mapping module - MODA and Grockow & Kellis
+                    mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations);
+                    // mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph, numIterations);
                 }
+                else
+                {
+                    mappings = Algorithm2(qGraph, inputGraph, numIterations);
+                }
+                allMappings = new Dictionary<QueryGraph, List<Mapping>>(1) { { qGraph, mappings } };
             }
-            allMappings = null;
-            return toReturn;
+
+            return allMappings;
         }
-        
+
         /// <summary>
         /// Helper method for algorithm 1
         /// </summary>
         /// <param name="extTreeNodesQueued"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ExpansionTreeNode GetNextNode()
         {
             foreach (var node in _builder.VerticesSorted)

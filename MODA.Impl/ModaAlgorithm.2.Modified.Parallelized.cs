@@ -306,8 +306,8 @@ namespace MODA.Impl
             //  RECALL: m is for Domain, the Key => the query graph
 
             //A: If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d)...
-            var neighboursOfN = inputGraph.GetNeighbors(n);
-            var neighborsOfM = queryGraph.GetNeighbors(m);
+            var neighboursOfN = inputGraph.GetNeighbors(n, true);
+            var neighborsOfM = queryGraph.GetNeighbors(m, false);
             for (int i = 0; i < neighborsOfM.Count; i++)
             {
                 if (!partialMap.ContainsKey(neighborsOfM[i]))
@@ -350,7 +350,7 @@ namespace MODA.Impl
                 var result = new HashSet<string>();
                 for (int i = usedRange.Length - 1; i >= 0; i--)
                 {
-                    var local = inputGraph.GetNeighbors(usedRange[i]);
+                    var local = inputGraph.GetNeighbors(usedRange[i], true);
                     if (local.Count == 0)
                     {
                         local = null;
@@ -423,7 +423,7 @@ namespace MODA.Impl
                 var result = new List<string>();
                 for (int i = domain.Length - 1; i >= 0; i--)
                 {
-                    var local = queryGraph.GetNeighbors(domain[i]);
+                    var local = queryGraph.GetNeighbors(domain[i], false);
                     if (local.Count == 0)
                     {
                         local = null;
@@ -497,8 +497,8 @@ namespace MODA.Impl
 
             //So, deg(g) >= deg(h).
             //2. Based on the degree of their neighbors
-            var gNeighbors = inputGraph.GetNeighbors(node_G);
-            var hNeighbors = queryGraph.GetNeighbors(node_H);
+            var gNeighbors = inputGraph.GetNeighbors(node_G, true);
+            var hNeighbors = queryGraph.GetNeighbors(node_H, false);
             for (int i = hNeighbors.Count - 1; i >= 0; i--)
             {
                 for (int j = gNeighbors.Count - 1; j >= 0; j--)

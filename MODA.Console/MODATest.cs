@@ -5,6 +5,7 @@ using System;
 using System.Text;
 using StdConsole = System.Console;
 using MODA.Impl.Graphics;
+using System.Runtime.InteropServices;
 
 namespace MODA.Console
 {
@@ -14,6 +15,8 @@ namespace MODA.Console
         {
             try
             {
+                //MinimizeFootprint(); //MinimizeMemory();
+
                 #region Process input parameters
                 if (args == null || args.Length != 6)
                 {
@@ -123,14 +126,11 @@ namespace MODA.Console
                 {
                     ModaAlgorithms.BuildTree(subGraphSize);
                 }
-                ModaAlgorithms.Threshold = threshold;
-                ModaAlgorithms.QueryGraph = queryGraph;
-
                 #endregion
 
                 var sw = Stopwatch.StartNew();
 
-                var frequentSubgraphs = ModaAlgorithms.Algorithm1(inputGraph, subGraphSize);
+                var frequentSubgraphs = ModaAlgorithms.Algorithm1(inputGraph, queryGraph, subGraphSize, threshold);
 
                 sw.Stop();
 
@@ -142,22 +142,36 @@ namespace MODA.Console
                 {
                     foreach (var qGraph in frequentSubgraphs)
                     {
-                        int count = (int)qGraph.Value;
-                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
-                        totalMappings += count;
+                        if (qGraph.Value == null)
+                        {
+                            sb.AppendFormat("\tSub-graph: {0}\t Is Frequent Subgraph? false\n", qGraph.Key.ToString());
+                        }
+                        else
+                        {
+                            int count = qGraph.Value.Count;
+                            sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
+                            totalMappings += count;
+                        }
                     }
                 }
                 else
                 {
                     foreach (var qGraph in frequentSubgraphs)
                     {
-                        int count = ((System.Collections.Generic.List<Mapping>)qGraph.Value).Count;
-                        sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
-                        foreach (var mapping in ((System.Collections.Generic.List<Mapping>)qGraph.Value))
+                        if (qGraph.Value == null)
                         {
-                            sb.AppendFormat("\t\t{0}", mapping);
+                            sb.AppendFormat("\tSub-graph: {0}\t Is Frequent Subgraph? false\n", qGraph.Key.ToString());
                         }
-                        totalMappings += count;
+                        else
+                        {
+                            int count = qGraph.Value.Count;
+                            sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
+                            foreach (var mapping in qGraph.Value)
+                            {
+                                sb.AppendFormat("\t\t{0}", mapping);
+                            }
+                            totalMappings += count;
+                        }
                     }
                 }
                 sb.AppendFormat("\nTime Taken: {0} ({1}ms)\nNetwork: Nodes - {2}; Edges: {3};\nTotal Mappings found: {4}\nSubgraph Size: {5}\n", sw.Elapsed, sw.ElapsedMilliseconds.ToString("N"), inputGraph.VertexCount, inputGraph.EdgeCount, totalMappings, subGraphSize);
@@ -190,5 +204,27 @@ namespace MODA.Console
             StdConsole.ReadKey();
 #endif
         }
+
+        private static void MinimizeMemory()
+        {
+            GC.Collect(GC.MaxGeneration);
+            GC.WaitForPendingFinalizers();
+            SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle,
+                (UIntPtr)0xFFFFFFFF, (UIntPtr)0xFFFFFFFF);
+        }
+
+        [DllImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetProcessWorkingSetSize(IntPtr process,
+            UIntPtr minimumWorkingSetSize, UIntPtr maximumWorkingSetSize);
+
+        private static void MinimizeFootprint()
+        {
+            EmptyWorkingSet(Process.GetCurrentProcess().Handle);
+        }
+
+        [DllImport("psapi.dll")]
+        private static extern int EmptyWorkingSet(IntPtr hwProc);
+
     }
 }

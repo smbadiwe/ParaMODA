@@ -21,5 +21,14 @@ namespace MODA.Impl
 
         public bool IsFrequentSubgraph { get; set; }
 
+        public override int GetHashCode()
+        {
+            return Label.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Label.Equals(((QueryGraph)obj).Label);
+        }
     }
 }

@@ -51,7 +51,7 @@ namespace MODA.Impl
             //newEdgeNodes = null;
 
             var theMappings = new Dictionary<string, List<Mapping>>();
-
+            var subgraphSize = queryGraph.VertexCount;
             for (int i = 0; i < parentGraphMappings.Count; i++)
             {
                 var map = parentGraphMappings[i];
@@ -68,10 +68,11 @@ namespace MODA.Impl
                     };
                     mapping.MapOnInputSubGraph.AddEdge(edge);
                     List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                    var g_key = mapping.Function.ElementAt(map.Function.Count - 1).Value;
+                    var g_key = mapping.Function.ElementAt(subgraphSize - 1).Value;
                     if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
                     {
                         if (!mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
+                        //if (mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping)) == null)
                         {
                             theMappings[g_key].Add(mapping);
                         }
@@ -90,7 +91,7 @@ namespace MODA.Impl
             {
                 toReturn.AddRange(mapping.Value);
             }
-            Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\n", theMappings.Count);
+            Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
 
             //timer.Stop();
             //Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", theMappings.Count, timer.Elapsed);

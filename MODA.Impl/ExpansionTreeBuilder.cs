@@ -12,6 +12,7 @@ namespace MODA.Impl
             DFS
         }
 
+        public int NumberOfQueryGraphs { get; private set; }
         private int _numberOfNodes;
         private TreeTraversalType _traversalType;
         private IVertexListGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> _graph;
@@ -28,7 +29,8 @@ namespace MODA.Impl
         {
             _numberOfNodes = numberOfNodes;
             _traversalType = traversalType;
-            ExpansionTree = new AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>>(false);
+            NumberOfQueryGraphs = 1;
+            ExpansionTree = new AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>>();
 
             ExpansionTree.EdgeAdded += e => e.Target.ParentNode = e.Source;
         }
@@ -40,15 +42,17 @@ namespace MODA.Impl
             {
                 case 3:
                     rootNode = ExpansionTree.BuildThreeNodesTree();
+                    NumberOfQueryGraphs = 2;
                     break;
                 case 4:
                     rootNode = ExpansionTree.BuildFourNodesTree();
+                    NumberOfQueryGraphs = 6;
                     break;
                 case 5:
                     rootNode = ExpansionTree.BuildFiveNodesTree();
+                    NumberOfQueryGraphs = 21;
                     break;
-                default: //Do for 4
-                    //rootNode = ExpansionTree.BuildFourNodesTree();
+                default: 
                     throw new System.NotSupportedException("Subgraph sizes below 3 and above 5 are not supported, unless you supply a query graph.");
             }
             //TODO: Construct the tree.

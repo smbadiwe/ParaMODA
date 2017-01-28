@@ -24,9 +24,25 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size / 3</param>
-        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
+        /// <param name="isTree">Whether or not <paramref name="queryGraph"/> is a tree.</param>
+        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1, bool isTree = true)
         {
             //var timer = System.Diagnostics.Stopwatch.StartNew();
+            if (isTree)
+            {
+                //This is already a tree
+                bool doNotAbort = false;
+                foreach (var vert in queryGraph.Vertices)
+                {
+                    if (queryGraph.AdjacentDegree(vert) > 2)
+                    {
+                        doNotAbort = true;
+                        break;
+                    }
+                }
+                if (doNotAbort == false) return null;
+            }
+
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
 
             var comparer = new MappingNodesComparer();
@@ -40,7 +56,7 @@ namespace MODA.Impl
             Console.WriteLine("Calling Algo 2-Modified: Number of Iterations: {0}.\n", numberOfSamples);
 
             var h = queryGraph.Vertices.ElementAt(0);
-
+            var subgraphSize = queryGraph.VertexCount;
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
                 if (CanSupport(queryGraph, h, inputGraph, inputGraphDegSeq[i]))
@@ -59,12 +75,10 @@ namespace MODA.Impl
                     foreach (Mapping mapping in mappings)
                     {
                         List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                        var g_key = mapping.Function.Last().Value;
+                        var g_key = mapping.Function.ElementAt(subgraphSize - 1).Value;
                         if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                         {
-                            Mapping existing = mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping));
-
-                            if (existing == null)
+                            if (!mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
                             {
                                 theMappings[g_key].Add(mapping);
                             }

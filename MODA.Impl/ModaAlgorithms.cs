@@ -8,10 +8,6 @@ namespace MODA.Impl
     public partial class ModaAlgorithms
     {
         /// <summary>
-        /// Frequency value, above which we can comsider the subgraph a "frequent subgraph"
-        /// </summary>
-        public static int Threshold { get; set; }
-        /// <summary>
         /// If true, it means we only care about how many mappings are found for each subgraph, not info about the mappings themselves.
         /// </summary>
         public static bool GetOnlyMappingCounts { get; set; }
@@ -19,10 +15,6 @@ namespace MODA.Impl
         /// If true, the program will use my modified Grochow's algorithm (Algo 2)
         /// </summary>
         public static bool UseModifiedGrochow { get; set; }
-        /// <summary>
-        /// The query graph to be searched for. If not available, we use expansion trees (MODA). Otherwise, we use Grochow's (Algo 2)
-        /// </summary>
-        public static QueryGraph QueryGraph { get; set; }
 
         #region Useful mainly for the Algorithm 2 versions
 
@@ -41,11 +33,11 @@ namespace MODA.Impl
         /// <summary>
         /// Used to cache 
         /// </summary>
-        public static Dictionary<string, List<string>> G_NodeNeighbours;
+        public static Dictionary<string, IList<string>> G_NodeNeighbours;
         /// <summary>
         /// Used to cache 
         /// </summary>
-        public static Dictionary<string, List<string>> H_NodeNeighbours;
+        public static Dictionary<string, IList<string>> H_NodeNeighbours;
 
         /// <summary>
         /// 
@@ -111,7 +103,7 @@ namespace MODA.Impl
         /// <param name="queryGraph">G</param>
         /// <param name="inputGraph">H</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
-        private static List<Mapping> IsomorphicExtension(Dictionary<string, string> partialMap, UndirectedGraph<string, Edge<string>> queryGraph
+        private static IList<Mapping> IsomorphicExtension(Dictionary<string, string> partialMap, UndirectedGraph<string, Edge<string>> queryGraph
             , UndirectedGraph<string, Edge<string>> inputGraph)
         {
             if (partialMap.Count == queryGraph.VertexCount)
@@ -122,12 +114,12 @@ namespace MODA.Impl
                 {
                     map.MapOnInputSubGraph.AddVerticesAndEdge(new Edge<string>(partialMap[qEdge.Source], partialMap[qEdge.Target]));
                 }
-                int counter = 0, count = partialMap.Count;
+                int counter = 0, subgraphSize = partialMap.Count;
+                Edge<string> edge_;
                 foreach (var node in map.MapOnInputSubGraph.Vertices)
                 {
-                    for (int j = (counter + 1); j < count; j++)
+                    for (int j = (counter + 1); j < subgraphSize; j++)
                     {
-                        Edge<string> edge_;
                         if (inputGraph.TryGetEdge(node, map.MapOnInputSubGraph.Vertices.ElementAt(j), out edge_))
                         {
                             map.InputSubGraph.AddVerticesAndEdge(edge_);
@@ -146,36 +138,36 @@ namespace MODA.Impl
 
             // get m, most constrained neighbor
             string m = GetMostConstrainedNeighbour(partialMap.Keys, queryGraph);
-            if (string.IsNullOrWhiteSpace(m)) return null;
+            if (string.IsNullOrWhiteSpace(m)) return new Mapping[0];
 
             var listOfIsomorphisms = new List<Mapping>();
 
             var neighbourRange = ChooseNeighboursOfRange(partialMap.Values, inputGraph);
 
-            var neighborsOfM = queryGraph.GetNeighbors(m);
+            var neighborsOfM = queryGraph.GetNeighbors(m, false);
+            //var newPartialMap = new Dictionary<string, string>(partialMap);
             for (int i = 0; i < neighbourRange.Count; i++) //foreach neighbour n of f(D)
             {
-                var n = neighbourRange[i];
-                if (IsNeighbourIncompatible(inputGraph, queryGraph, n, m, partialMap, neighborsOfM))
+                //var n = neighbourRange[i];
+                if (IsNeighbourIncompatible(inputGraph, neighbourRange[i], partialMap, neighborsOfM))
                 {
                     continue;
                 }
                 //It's not; so, let f' = f on D, and f'(m) = n.
 
                 //Find all isomorphic extensions of f'.
-                var subList = IsomorphicExtension(new Dictionary<string, string>(partialMap) { { m, n } }, queryGraph, inputGraph);
-                if (subList == null || subList.Count == 0) continue;
+                //newPartialMap[m] = neighbourRange[i];
+                //var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);
+                var subList = IsomorphicExtension(new Dictionary<string, string>(partialMap) { { m, neighbourRange[i] } }, queryGraph, inputGraph);
+                if (subList.Count == 0) continue;
 
-                if (listOfIsomorphisms.Count == 0)
+                if (listOfIsomorphisms.Count > 0)
                 {
-                    listOfIsomorphisms.AddRange(subList);
-                }
-                else
-                {
-                    var notIsoWithAnyExisting = new List<Mapping>();
+                    var notIsoWithAnyExisting = new List<Mapping>(subList.Count);
                     for (int j = 0; j < subList.Count; j++)
                     {
                         if (!listOfIsomorphisms.Exists(x => x.IsIsomorphicWith(subList[j])))
+                        //if (listOfIsomorphisms.Find(x => x.IsIsomorphicWith(subList[j])) == null)
                         {
                             notIsoWithAnyExisting.Add(subList[j]); // is NOT part of Iso
                         }
@@ -184,6 +176,10 @@ namespace MODA.Impl
                     {
                         listOfIsomorphisms.AddRange(notIsoWithAnyExisting);
                     }
+                }
+                else
+                {
+                    listOfIsomorphisms.AddRange(subList);
                 }
             }
             return listOfIsomorphisms;
@@ -195,25 +191,24 @@ namespace MODA.Impl
         /// [or if assigning f(m) = n would violate a symmetry-breaking condition in C(h)]
         /// then contiue with the next n
         /// </summary>
-        /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="n">g_node, pass in 'neighbour'; n in Grochow</param>
-        /// <param name="m">h_node; the most constrained neighbor of any d ∈ D</param>
         /// <param name="domain">domain_in_H</param>
         /// <param name="partialMap">function</param>
-        /// <param name="neighborsOfM">neighbors of <paramref name="m"/> iin the <paramref name="queryGraph"/></param>
+        /// <param name="neighborsOfM">neighbors of h_node in the queryGraph/></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsNeighbourIncompatible(UndirectedGraph<string, Edge<string>> inputGraph, UndirectedGraph<string, Edge<string>> queryGraph,
-            string n, string m, Dictionary<string, string> partialMap, IList<string> neighborsOfM)
+        private static bool IsNeighbourIncompatible(UndirectedGraph<string, Edge<string>> inputGraph,
+            string n, Dictionary<string, string> partialMap, IList<string> neighborsOfM)
         {
             //  RECALL: m is for Domain, the Key => the query graph
 
             //A: If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d)...
-            var neighboursOfN = inputGraph.GetNeighbors(n);
-            for (int i = 0; i < neighborsOfM.Count; i++)
+            string val;
+            var neighboursOfN = inputGraph.GetNeighbors(n, true);
+            for (int i = neighborsOfM.Count - 1; i >= 0; i--)
+            //for (int i = 0; i < neighborsOfM.Count; i++)
             {
-                string val;
                 if (!partialMap.TryGetValue(neighborsOfM[i], out val))
                 {
                     neighboursOfN = null;
@@ -225,67 +220,36 @@ namespace MODA.Impl
                     return true;
                 }
             }
-            
+
             neighboursOfN = null;
             return false;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static List<string> ChooseNeighboursOfRange(IEnumerable<string> used_range, UndirectedGraph<string, Edge<string>> inputGraph)
         {
             List<string> toReturn = new List<string>();
             foreach (var rangeVal in used_range)
             {
-                var local = inputGraph.GetNeighbors(rangeVal);
-                if (local.Count == 0)
+                var local = inputGraph.GetNeighbors(rangeVal, true);
+                if (local.Count > 0)
                 {
-                    local = null;
-                    continue;
-                }
-                for (int j = 0; j < local.Count; j++)
-                {
-                    if (!used_range.Contains(local[j]))
+                    List<string> batch = new List<string>(local.Count);
+                    for (int j = 0; j < local.Count; j++)
                     {
-                        toReturn.Add(local[j]);
+                        if (!used_range.Contains(local[j]))
+                        {
+                            batch.Add(local[j]);
+                        }
                     }
+                    toReturn.AddRange(batch);
+                    batch = null;
+                    local = null;
                 }
-                local = null;
             }
 
             return toReturn;
         }
-
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //private static List<string> ChooseNeighboursOfRange(string[] used_range, UndirectedGraph<string, Edge<string>> inputGraph)
-        //{
-        //    List<string> toReturn;
-        //    if (!NeighboursOfRange.TryGetValue(used_range, out toReturn))
-        //    {
-        //        toReturn = new List<string>();
-        //        for (int i = used_range.Length - 1; i >= 0; i--)
-        //        {
-        //            var local = new List<string>(inputGraph.GetNeighbors(used_range[i]));
-        //            if (local.Count == 0)
-        //            {
-        //                local = null;
-        //                continue;
-        //            }
-        //            //for (int j = 0; j < local.Count; j++)
-        //            foreach (var item in local)
-        //            {
-        //                if (!used_range.Contains(item))
-        //                {
-        //                    toReturn.Add(item);
-        //                }
-        //            }
-        //            local = null;
-        //        }
-        //        NeighboursOfRange[used_range] = toReturn;
-
-        //    }
-
-        //    return toReturn; //.ToArray();
-        //}
 
         /// <summary>
         /// 
@@ -304,18 +268,17 @@ namespace MODA.Impl
              * */
             foreach (var item in domain)
             {
-                var local = queryGraph.GetNeighbors(item);
-                if (local.Count == 0)
+                var local = queryGraph.GetNeighbors(item, false);
+                if (local.Count > 0)
                 {
-                    local = null;
-                    continue;
-                }
-                for (int j = 0; j < local.Count; j++)
-                {
-                    if (!domain.Contains(local[j]))
+                    //for (int j = local.Count - 1; j >= 0; j--)
+                    for (int j = 0; j < local.Count; j++)
                     {
-                        //toReturn = local[j];
-                        return local[j]; // toReturn;
+                        if (!domain.Contains(local[j]))
+                        {
+                            //toReturn = local[j];
+                            return local[j]; // toReturn;
+                        }
                     }
                 }
                 local = null;
@@ -399,12 +362,14 @@ namespace MODA.Impl
             //So, deg(g) >= deg(h).
 
             //2. Based on the degree of their neighbors
-            var gNeighbors = inputGraph.GetNeighbors(node_G);
-            var hNeighbors = queryGraph.GetNeighbors(node_H);
+            var gNeighbors = inputGraph.GetNeighbors(node_G, true);
+            var hNeighbors = queryGraph.GetNeighbors(node_H, false);
             //TODO: either review or remove this test
-            for (int i = hNeighbors.Count - 1; i >= 0; i--)
+            //for (int i = hNeighbors.Count - 1; i >= 0; i--)
+            for (int i = 0; i < hNeighbors.Count; i++)
             {
-                for (int j = gNeighbors.Count - 1; j >= 0; j--)
+                //for (int j = gNeighbors.Count - 1; j >= 0; j--)
+                for (int j = 0; j < gNeighbors.Count; j++)
                 {
                     if (inputGraph.AdjacentDegree(gNeighbors[j]) >= queryGraph.AdjacentDegree(hNeighbors[i]))
                     {

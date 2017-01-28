@@ -128,10 +128,10 @@ namespace QuickGraph
         {
             var inputGraphClone = new UndirectedGraph<TVertex, TEdge>();
             inputGraphClone.AddVerticesAndEdgeRange(this.Edges);
-            Debug.Assert(inputGraphClone.EdgeCount == this.EdgeCount && inputGraphClone.VertexCount == this.VertexCount);
+
             return inputGraphClone;
         }
-
+        
         public override string ToString()
         {
             if (this.IsEdgesEmpty) return "";
