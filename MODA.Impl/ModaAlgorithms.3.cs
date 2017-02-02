@@ -12,8 +12,8 @@ namespace MODA.Impl
         /// <summary>
         /// Enumeration module
         /// </summary>
-        /// <param name="queryGraph"></param>
-        /// <param name="expansionTree"></param>
+        /// <param name="queryGraph">H</param>
+        /// <param name="expansionTree">T_k</param>
         /// <param name="parentQueryGraph"></param>
         /// <param name="parentGraphMappings"></param>
         private static List<Mapping> Algorithm3(QueryGraph queryGraph,
@@ -35,26 +35,30 @@ namespace MODA.Impl
                 {
                     var mapping = new Mapping(map.Function)
                     {
-                        MapOnInputSubGraph = map.MapOnInputSubGraph,
-                        InputSubGraph = map.InputSubGraph
+                        InducedSubGraph = map.InducedSubGraph
                     };
-                    mapping.MapOnInputSubGraph.AddEdge(edge);
-
                     bool treated = false; string g_key_last = null;
-                    foreach (var g_key in mapping.Function.Values)
+                    if (theMappings.Count > 0)
                     {
-                        g_key_last = g_key;
-                        List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                        if (theMappings.TryGetValue(g_key, out mappingsToSearch))
+                        foreach (var g_key in mapping.Function.Values)
                         {
-                            if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
+                            g_key_last = g_key;
+                            List<Mapping> mappingsToSearch; //Recall: f(h) = g
+                            if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                             {
-                                treated = true;
-                                break;
+                                if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
+                                {
+                                    treated = true;
+                                    break;
+                                }
+                                // else continue since it may exist in the other keys
                             }
-                            // else continue since it may exist in the other keys
+                            mappingsToSearch = null;
                         }
-                        mappingsToSearch = null;
+                    }
+                    else
+                    {
+                        g_key_last = mapping.Function.Last().Value;
                     }
                     if (!treated)
                     {

@@ -110,19 +110,15 @@ namespace MODA.Impl
             {
                 #region Return base case
                 var map = new Mapping(partialMap);
-                foreach (var qEdge in queryGraph.Edges)
-                {
-                    map.MapOnInputSubGraph.AddVerticesAndEdge(new Edge<string>(partialMap[qEdge.Source], partialMap[qEdge.Target]));
-                }
                 int counter = 0, subgraphSize = partialMap.Count;
                 Edge<string> edge_;
-                foreach (var node in map.MapOnInputSubGraph.Vertices)
+                foreach (var node in partialMap.Values) // Remember, f(h) = g, so .Values is for g's
                 {
                     for (int j = (counter + 1); j < subgraphSize; j++)
                     {
-                        if (inputGraph.TryGetEdge(node, map.MapOnInputSubGraph.Vertices.ElementAt(j), out edge_))
+                        if (inputGraph.TryGetEdge(node, partialMap.Values.ElementAt(j), out edge_))
                         {
-                            map.InputSubGraph.AddVerticesAndEdge(edge_);
+                            map.InducedSubGraph.AddVerticesAndEdge(edge_);
                         }
                     }
                     counter++;

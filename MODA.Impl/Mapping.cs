@@ -10,8 +10,7 @@ namespace MODA.Impl
         public Mapping(Dictionary<string, string> function)
         {
             Function = function;
-            InputSubGraph = new UndirectedGraph<string, Edge<string>>();
-            MapOnInputSubGraph = new UndirectedGraph<string, Edge<string>>();
+            InducedSubGraph = new UndirectedGraph<string, Edge<string>>();
         }
 
         /// <summary>
@@ -20,17 +19,12 @@ namespace MODA.Impl
         public Dictionary<string, string> Function { get; private set; }
         
         /// <summary>
-        /// The subgraph (with mapped edges) in the input graph G that fit the query graph (---Function.Keys)
-        /// </summary>
-        public UndirectedGraph<string, Edge<string>> MapOnInputSubGraph { get; set; }
-        
-        /// <summary>
         /// The subgraph (with all edges) in the input graph G that fit the query graph (---Function.Keys)
         /// </summary>
-        public UndirectedGraph<string, Edge<string>> InputSubGraph { get; set; }
-        
+        public UndirectedGraph<string, Edge<string>> InducedSubGraph { get; set; }
+
         /// <summary>
-        /// Returns the edge in <see cref="InputSubGraph"/> that is not present in <see cref="MapOnInputSubGraph"/>
+        /// Returns the edge in <paramref="currentQueryGraph"/>'s image that is not present in <paramref="parentQueryGraph"/>'s image
         /// </summary>
         /// <param name="currentQueryGraph">The current subgraph being queried</param>
         /// <param name="parentQueryGraph">The parent to <paramref name="currentQueryGraph"/>. This parent is also a subset, meaning it has one edge less.</param>
@@ -41,7 +35,12 @@ namespace MODA.Impl
             {
                 if (!parentQueryGraph.ContainsEdge(edge))
                 {
-                    return new Edge<string>(Function[edge.Source], Function[edge.Target]);
+                    Edge<string> edgeImage;
+                    if (InducedSubGraph.TryGetEdge(Function[edge.Source], Function[edge.Target], out edgeImage))
+                    {
+                        return edgeImage;
+                    }
+                    return null;
                 }
             }
             return null;
@@ -50,10 +49,10 @@ namespace MODA.Impl
         public bool IsIsomorphicWith(Mapping otherMapping)
         {
             //NB: Node and edge count already guaranteed to be equal
-            foreach (var node in InputSubGraph.Vertices)
+            foreach (var node in InducedSubGraph.Vertices)
             {
                 //Test 1 - Vertices - sameness
-                if (!otherMapping.MapOnInputSubGraph.ContainsVertex(node)) //Remember, f(h) = g. So, key is h and value is g
+                if (!otherMapping.InducedSubGraph.ContainsVertex(node)) //Remember, f(h) = g. So, key is h and value is g
                 {
                     return false;
                 }

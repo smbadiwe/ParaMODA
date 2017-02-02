@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace MODA.Impl
 {
+    /// <summary>
+    /// DO NOT USE: This class is full is bugs and bad ideas!
+    /// </summary>
     public class ModaAlgorithm2Parallelized
     {
         private static ConcurrentDictionary<string, List<string>> G_NodeNeighbours;
@@ -197,11 +200,6 @@ namespace MODA.Impl
             {
                 #region Return base case
                 var map = new Mapping(partialMap);
-                foreach (var qEdge in queryGraph.Edges)
-                {
-                    map.MapOnInputSubGraph.AddVerticesAndEdge(new Edge<string>(partialMap[qEdge.Source], partialMap[qEdge.Target]));
-                }
-
                 string[] inputSubgraphKey = partialMap.Values.ToArray();
                 var keys = InputSubgraphs.Keys.ToArray();
                 bool exists = keys.Any(x => new HashSet<string>(x).SetEquals(inputSubgraphKey));
@@ -209,16 +207,19 @@ namespace MODA.Impl
                 if (!exists)
                 {
                     var newInputSubgraph = new UndirectedGraph<string, Edge<string>>();
-                    for (int i = 0; i < inputSubgraphKey.Length; i++)
+
+                    int counter = 0, subgraphSize = partialMap.Count;
+                    Edge<string> edge_;
+                    foreach (var node in partialMap.Values) // Remember, f(h) = g, so .Values is for g's
                     {
-                        for (int j = (i + 1); j < inputSubgraphKey.Length; j++)
+                        for (int j = (counter + 1); j < subgraphSize; j++)
                         {
-                            Edge<string> edge;
-                            if (inputGraph.TryGetEdge(inputSubgraphKey[i], inputSubgraphKey[j], out edge))
+                            if (inputGraph.TryGetEdge(node, partialMap.Values.ElementAt(j), out edge_))
                             {
-                                newInputSubgraph.AddVerticesAndEdge(edge);
+                                newInputSubgraph.AddVerticesAndEdge(edge_);
                             }
                         }
+                        counter++;
                     }
                     InputSubgraphs[inputSubgraphKey] = newInputSubgraph;
 
