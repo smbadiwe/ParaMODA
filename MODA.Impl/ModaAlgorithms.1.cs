@@ -43,7 +43,7 @@ namespace MODA.Impl
                         if (UseModifiedGrochow)
                         {
                             // Modified Mapping module - MODA and Grockow & Kellis
-                            mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations);
+                            mappings = Algorithm2_Modified(qGraph, inputGraphClone, numIterations);
                             //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph);
                         }
                         else
@@ -79,7 +79,7 @@ namespace MODA.Impl
                     mappings = null;
 
                     // Check for complete-ness; if complete, break
-                    if (qGraph.EdgeCount == ((qGraph.VertexCount * (qGraph.VertexCount - 1)) / 2))
+                    if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))
                     {
                         qGraph = null;
                         break;

@@ -21,10 +21,7 @@ namespace MODA.Impl
 
             // Do we need this clone? Can't we just remove the node directly from the graph? 
             // We do need it.
-
-            //var comparer = new MappingNodesComparer();
-            //InputSubgraphs = new Dictionary<string[], UndirectedGraph<string, Edge<string>>>(comparer);
-            //MostConstrainedNeighbours = new Dictionary<string[], string>(comparer);
+            
             H_NodeNeighbours = new Dictionary<string, IList<string>>();
             var theMappings = new Dictionary<string, List<Mapping>>();
             var inputGraphDegSeq = inputGraphClone.GetDegreeSequence(numberOfSamples);
@@ -34,7 +31,6 @@ namespace MODA.Impl
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
                 var g = inputGraphDegSeq[i];
-                //NeighboursOfRange = new Dictionary<string[], List<string>>(comparer);
                 G_NodeNeighbours = new Dictionary<string, IList<string>>();
                 for (int j = 0; j < subgraphSize; j++)
                 {
@@ -44,7 +40,9 @@ namespace MODA.Impl
                         #region Can Support
                         //var sw = System.Diagnostics.Stopwatch.StartNew();
                         //Remember: f(h) = g, so h is Domain and g is Range
-                        var mappings = IsomorphicExtension(new Dictionary<string, string>(1) { { h, g } }, queryGraph, inputGraphClone);
+                        var f = new Dictionary<string, string>(1);
+                        f[h] = g;
+                        var mappings = IsomorphicExtension(f, queryGraph, inputGraphClone);
 
                         //sw.Stop();
                         //Console.WriteLine("Time to do IsomorphicExtension: {0}\n", sw.Elapsed.ToString());
@@ -56,23 +54,34 @@ namespace MODA.Impl
                             for (int k = 0; k < mappings.Count; k++)
                             {
                                 Mapping mapping = mappings[k];
-                                List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                                //var g_key = mapping.Function.ElementAt(subgraphSize - 1).Value;
-                                var g_key = mapping.Function.Last().Value;
 
-                                if (theMappings.TryGetValue(g_key, out mappingsToSearch))
+                                bool treated = false; string g_key_last = null;
+                                foreach (var g_key in mapping.Function.Values)
                                 {
-                                    if (!mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
-                                    //if (mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping)) == null)
+                                    g_key_last = g_key;
+                                    List<Mapping> mappingsToSearch; //Recall: f(h) = g
+                                    if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                                     {
-                                        theMappings[g_key].Add(mapping);
+                                        if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
+                                        {
+                                            treated = true;
+                                            break;
+                                        }
+                                        // else continue since it may exist in the other keys
+                                    }
+                                    mappingsToSearch = null;
+                                }
+                                if (!treated)
+                                {
+                                    if (theMappings.ContainsKey(g_key_last))
+                                    {
+                                        theMappings[g_key_last].Add(mapping);
+                                    }
+                                    else
+                                    {
+                                        theMappings[g_key_last] = new List<Mapping> { mapping };
                                     }
                                 }
-                                else
-                                {
-                                    theMappings[g_key] = new List<Mapping> { mapping };
-                                }
-                                mappingsToSearch = null;
                             }
 
                             //sw.Stop();
@@ -86,7 +95,6 @@ namespace MODA.Impl
 
                 //Remove g
                 inputGraphClone.RemoveVertex(g);
-                //NeighboursOfRange = null;
                 G_NodeNeighbours = null;
             }
 

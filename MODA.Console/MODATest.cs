@@ -32,9 +32,13 @@ namespace MODA.Console
                     StdConsole.ForegroundColor = ConsoleColor.White;
                     return;
                 }
-                string graphFolder = args[0]; // @"C:\SOMA\Drive\MyUW\Research\Kim\remodaalgorithmimplementation";
-                string filename = args[1]; // "QueryGraph.txt"; // "Ecoli20141001CR_idx.txt";
-                var inputGraphFile = Path.Combine(graphFolder, filename);
+                //arg[0] - graphFolder
+                //arg[1] - filename
+                //arg[2] - subGraphSize
+                //arg[3] - threshold
+                //arg[4] - getOnlyMappingCounts
+                //arg[5] - useModifiedGrochow
+                var inputGraphFile = Path.Combine(args[0], args[1]);
                 int subGraphSize;
                 if (!int.TryParse(args[2], out subGraphSize) || subGraphSize <= 2)
                 {
@@ -45,13 +49,13 @@ namespace MODA.Console
                 {
                     throw new ArgumentException("Invalid input for <threshold> argument (arg[3])");
                 }
-                string getOnlyMappingCounts = args[4];
-                if (getOnlyMappingCounts == "y" || getOnlyMappingCounts == "Y")
+                //string getOnlyMappingCounts = args[4];
+                if (args[4] == "y" || args[4] == "Y")
                 {
                     ModaAlgorithms.GetOnlyMappingCounts = true;
                 }
-                string useModifiedGrochow = args[5];
-                if (useModifiedGrochow == "y" || useModifiedGrochow == "Y")
+                //string useModifiedGrochow = args[5];
+                if (args[5] == "y" || args[5] == "Y")
                 {
                     ModaAlgorithms.UseModifiedGrochow = true;
                 }
@@ -60,10 +64,8 @@ namespace MODA.Console
                 sb.AppendLine("==============================================================\n");
                 StdConsole.WriteLine(sb);
                 sb.Clear();
-
+                
                 var inputGraph = GraphProcessor.LoadGraph(inputGraphFile);
-                string queryGraphFile = null;
-                QueryGraph queryGraph = null;
                 if (subGraphSize > 5)
                 {
                     StdConsole.WriteLine("You need a query graph to proceed. To supply the query graph file, type 'y' and press Enter.");
@@ -72,7 +74,9 @@ namespace MODA.Console
                 {
                     StdConsole.WriteLine("Do you have a particular size {0} query graph in mind? Y/N", subGraphSize);
                 }
-                string resp = StdConsole.ReadLine();
+                string queryGraphFile = null;
+                QueryGraph queryGraph = null;
+                var resp = StdConsole.ReadLine();
                 if (resp == "y" || resp == "Y" || subGraphSize > 5)
                 {
                     while (true)
@@ -108,18 +112,18 @@ namespace MODA.Console
                     StdConsole.WriteLine("Query Graph (H): Nodes - {0}; Edges: {1}\n", queryGraph.VertexCount, queryGraph.EdgeCount);
                 }
 
-                StdConsole.WriteLine("Do you want to generate an image of the input (and query) graph(s)? Y/N\nIf Y, you'll need to provide the path to dot.exe program on your machine");
-                resp = StdConsole.ReadLine();
-                if (resp == "y" || resp == "Y")
-                {
-                    StdConsole.WriteLine("Enter the path of the dot.exe program on your machine:");
-                    resp = StdConsole.ReadLine(); //the dot program's filename, including the path
-                    Visualizer.Visualize(inputGraph, resp, inputGraphFile + ".dot");
-                    if (queryGraph != null) // => queryGraphFile has a value
-                    {
-                        Visualizer.Visualize(queryGraph, resp, queryGraphFile + ".dot");
-                    }
-                }
+                //StdConsole.WriteLine("Do you want to generate an image of the input (and query) graph(s)? Y/N\nIf Y, you'll need to provide the path to dot.exe program on your machine");
+                //resp = StdConsole.ReadLine();
+                //if (resp == "y" || resp == "Y")
+                //{
+                //    StdConsole.WriteLine("Enter the path of the dot.exe program on your machine:");
+                //    resp = StdConsole.ReadLine(); //the dot program's filename, including the path
+                //    Visualizer.Visualize(inputGraph, resp, inputGraphFile + ".dot");
+                //    if (queryGraph != null) // => queryGraphFile has a value
+                //    {
+                //        Visualizer.Visualize(queryGraph, resp, queryGraphFile + ".dot");
+                //    }
+                //}
                 StdConsole.ForegroundColor = ConsoleColor.Green;
 
                 if (queryGraph == null)
@@ -135,7 +139,7 @@ namespace MODA.Console
                 sw.Stop();
 
                 #region Process output
-                long totalMappings = 0;
+                int totalMappings = 0;
                 sb.Append("\nCompleted. Result Summary\n");
                 sb.AppendLine("-------------------------------------------\n");
                 if (ModaAlgorithms.GetOnlyMappingCounts)

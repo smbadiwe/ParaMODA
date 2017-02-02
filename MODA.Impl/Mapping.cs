@@ -23,11 +23,29 @@ namespace MODA.Impl
         /// The subgraph (with mapped edges) in the input graph G that fit the query graph (---Function.Keys)
         /// </summary>
         public UndirectedGraph<string, Edge<string>> MapOnInputSubGraph { get; set; }
-
+        
         /// <summary>
         /// The subgraph (with all edges) in the input graph G that fit the query graph (---Function.Keys)
         /// </summary>
         public UndirectedGraph<string, Edge<string>> InputSubGraph { get; set; }
+        
+        /// <summary>
+        /// Returns the edge in <see cref="InputSubGraph"/> that is not present in <see cref="MapOnInputSubGraph"/>
+        /// </summary>
+        /// <param name="currentQueryGraph">The current subgraph being queried</param>
+        /// <param name="parentQueryGraph">The parent to <paramref name="currentQueryGraph"/>. This parent is also a subset, meaning it has one edge less.</param>
+        /// <returns></returns>
+        public Edge<string> GetEdgeDifference(QueryGraph currentQueryGraph, QueryGraph parentQueryGraph)
+        {
+            foreach (var edge in currentQueryGraph.Edges)
+            {
+                if (!parentQueryGraph.ContainsEdge(edge))
+                {
+                    return new Edge<string>(Function[edge.Source], Function[edge.Target]);
+                }
+            }
+            return null;
+        }
 
         public bool IsIsomorphicWith(Mapping otherMapping)
         {
@@ -40,22 +58,22 @@ namespace MODA.Impl
                     return false;
                 }
             }
-            int size = Function.Count;
-            bool isComplete = InputSubGraph.EdgeCount == ((size * (size - 1)) / 2);
-            foreach (var node in InputSubGraph.Vertices)
-            {
-                //Test 2 - Node degrees.
-                if (MapOnInputSubGraph.AdjacentDegree(node) != otherMapping.MapOnInputSubGraph.AdjacentDegree(node))
-                {
-                    //if input sub-graph is complete
-                    if (isComplete)
-                    {
-                        // Then the subgraphs is likely isomorphic, due to symmetry
-                        return true;
-                    }
-                    return false;
-                }
-            }
+            //int size = Function.Count;
+            //bool isComplete = InputSubGraph.EdgeCount == ((size * (size - 1)) / 2);
+            //foreach (var node in InputSubGraph.Vertices)
+            //{
+            //    //Test 2 - Node degrees.
+            //    if (MapOnInputSubGraph.AdjacentDegree(node) != otherMapping.MapOnInputSubGraph.AdjacentDegree(node))
+            //    {
+            //        //if input sub-graph is complete
+            //        if (isComplete)
+            //        {
+            //            // Then the subgraphs is likely isomorphic, due to symmetry
+            //            return true;
+            //        }
+            //        return false;
+            //    }
+            //}
             return true;
         }
 
@@ -68,15 +86,12 @@ namespace MODA.Impl
             {
                 sb.AppendFormat("{0}-", item.Key);
             }
-            //sb.AppendFormat("<{0}>] => [", this.MapOnInputSubGraph.AsString());
             sb.Append("] => [");
             foreach (var item in functionSorted)
             {
                 sb.AppendFormat("{0}-", item.Value);
             }
-            //sb.AppendFormat("] Exact map: <{0}>\n", this.MapOnInputSubGraph.AsString());
             sb.Append("]\n");
-            //sb.AppendLine("]");
             return sb.ToString();
         }
     }

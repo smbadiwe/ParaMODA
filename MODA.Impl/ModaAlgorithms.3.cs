@@ -21,45 +21,17 @@ namespace MODA.Impl
             QueryGraph parentQueryGraph, List<Mapping> parentGraphMappings)
         {
             //var timer = System.Diagnostics.Stopwatch.StartNew();
-            //var parentQueryGraph = GetParent(queryGraph, expansionTree);
-
-            //List<Mapping> mappings;
-            //mappingsInMemory.TryGetValue(parentQueryGraph, out mappings);
-            //if (mappings?.Count == 0) return mappings;
-
-            // Get the new edge in the queryGraph
-            // New Edge = E(G') - E(H)
-            var newEdgeNodes = new string[2];
-            int index = 0;
-            foreach (var node in queryGraph.Vertices)
-            {
-                //Trick: 
-                // Given two graphs where one is a super-graph of the other and they only differ by one edge,
-                // then we can be sure that there will be two nodes whose degrees changed.
-                // These two nodes form the new edge.
-                if (queryGraph.AdjacentDegree(node) == parentQueryGraph.AdjacentDegree(node)) continue;
-                
-                newEdgeNodes[index] = node;
-                index++;
-                if (index > 1) break;
-            }
-
-            // if no need to do new edge
-            if (index == 0) return null;
-
-            //var theNewEdge = new Edge<string>(newEdgeNodes[0], newEdgeNodes[1]);
-            //newEdgeNodes = null;
-
             var theMappings = new Dictionary<string, List<Mapping>>();
             var subgraphSize = queryGraph.VertexCount;
+            var toRemoveFromParent = new List<Mapping>();
             for (int i = 0; i < parentGraphMappings.Count; i++)
             {
                 var map = parentGraphMappings[i];
 
                 // Reember, f(h) = g
                 // Remember, newInputSubgraph is a subgraph of inputGraph
-                Edge<string> edge;
-                if (map.InputSubGraph.TryGetEdge(map.Function[newEdgeNodes[0]], map.Function[newEdgeNodes[1]], out edge))
+                Edge<string> edge = map.GetEdgeDifference(queryGraph, parentQueryGraph);
+                if (edge != null)
                 {
                     var mapping = new Mapping(map.Function)
                     {
@@ -67,26 +39,45 @@ namespace MODA.Impl
                         InputSubGraph = map.InputSubGraph
                     };
                     mapping.MapOnInputSubGraph.AddEdge(edge);
-                    List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                    //var g_key = mapping.Function.ElementAt(subgraphSize - 1).Value;
-                    var g_key = mapping.Function.Last().Value;
-                    if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
+
+                    bool treated = false; string g_key_last = null;
+                    foreach (var g_key in mapping.Function.Values)
                     {
-                        if (!mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
-                        //if (mappingsToSearch.Find(x => x.IsIsomorphicWith(mapping)) == null)
+                        g_key_last = g_key;
+                        List<Mapping> mappingsToSearch; //Recall: f(h) = g
+                        if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                         {
-                            theMappings[g_key].Add(mapping);
+                            if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
+                            {
+                                treated = true;
+                                break;
+                            }
+                            // else continue since it may exist in the other keys
                         }
+                        mappingsToSearch = null;
                     }
-                    else
+                    if (!treated)
                     {
-                        theMappings[g_key] = new List<Mapping> { mapping };
+                        if (theMappings.ContainsKey(g_key_last))
+                        {
+                            theMappings[g_key_last].Add(mapping);
+                        }
+                        else
+                        {
+                            theMappings[g_key_last] = new List<Mapping> { mapping };
+                        }
+                        toRemoveFromParent.Add(map);
                     }
                     mapping = null;
-                    mappingsToSearch = null;
                 }
             }
-
+            if (toRemoveFromParent.Count > 0)
+            {
+                for (int i = 0; i < toRemoveFromParent.Count; i++)
+                {
+                    parentGraphMappings.Remove(toRemoveFromParent[i]);
+                }
+            }
             var toReturn = new List<Mapping>();
             foreach (var mapping in theMappings)
             {

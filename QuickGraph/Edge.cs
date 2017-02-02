@@ -60,5 +60,18 @@ namespace QuickGraph
         {
             return this.source + "->" + this.target;
         }
+        
+        public override bool Equals(object obj)
+        {
+            var otherStr = obj?.ToString();
+            return !string.IsNullOrWhiteSpace(otherStr) &&
+                (string.Equals(ToString(), otherStr)
+                || string.Equals($"{target}->{source}", otherStr));
+        }
+        
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

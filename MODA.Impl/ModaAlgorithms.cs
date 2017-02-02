@@ -149,37 +149,23 @@ namespace MODA.Impl
             for (int i = 0; i < neighbourRange.Count; i++) //foreach neighbour n of f(D)
             {
                 var n = neighbourRange[i];
-                if (IsNeighbourIncompatible(inputGraph, n, partialMap, neighborsOfM))
+                if (false == IsNeighbourIncompatible(inputGraph, n, partialMap, neighborsOfM))
                 {
-                    continue;
-                }
-                //It's not; so, let f' = f on D, and f'(m) = n.
+                    //It's not; so, let f' = f on D, and f'(m) = n.
 
-                //Find all isomorphic extensions of f'.
-                //newPartialMap[m] = neighbourRange[i];
-                //var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);
-                var subList = IsomorphicExtension(new Dictionary<string, string>(partialMap) { { m, n } }, queryGraph, inputGraph);
-                if (subList.Count == 0) continue;
-
-                if (listOfIsomorphisms.Count > 0)
-                {
-                    var notIsoWithAnyExisting = new List<Mapping>(subList.Count);
-                    for (int j = 0; j < subList.Count; j++)
+                    //Find all isomorphic extensions of f'.
+                    //newPartialMap[m] = neighbourRange[i];
+                    var newPartialMap = new Dictionary<string, string>(partialMap.Count + 1);
+                    foreach (var item in partialMap)
                     {
-                        if (!listOfIsomorphisms.Exists(x => x.IsIsomorphicWith(subList[j])))
-                        //if (listOfIsomorphisms.Find(x => x.IsIsomorphicWith(subList[j])) == null)
-                        {
-                            notIsoWithAnyExisting.Add(subList[j]); // is NOT part of Iso
-                        }
+                        newPartialMap.Add(item.Key, item.Value);
                     }
-                    if (notIsoWithAnyExisting.Count > 0)
+                    newPartialMap[m] = n;
+                    var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);
+                    if (subList.Count > 0)
                     {
-                        listOfIsomorphisms.AddRange(notIsoWithAnyExisting);
+                        listOfIsomorphisms.AddRange(subList);
                     }
-                }
-                else
-                {
-                    listOfIsomorphisms.AddRange(subList);
                 }
             }
             return listOfIsomorphisms;
@@ -189,7 +175,7 @@ namespace MODA.Impl
         /// If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
         /// or if there is a NON-neighbor d ∈ D of m such that n is neighbors with f(d) 
         /// [or if assigning f(m) = n would violate a symmetry-breaking condition in C(h)]
-        /// then contiue with the next n
+        /// then neighbour is compatible. So contiue with the next n (as in, return false)
         /// </summary>
         /// <param name="inputGraph">G</param>
         /// <param name="n">g_node, pass in 'neighbour'; n in Grochow</param>
@@ -204,10 +190,27 @@ namespace MODA.Impl
             //  RECALL: m is for Domain, the Key => the query graph
 
             //A: If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d)...
-            string val;
+            //for (int i = 0; i < neighborsOfM.Count; i++)
+            //{
+            //    string val; // f(d)
+            //    if (!partialMap.TryGetValue(neighborsOfM[i], out val))
+            //    {
+            //        return true; //=> it's compatible
+            //    }
+            //    var neighboursOfN = inputGraph.GetNeighbors(val, true);
+            //    if (!neighboursOfN.Contains(n))
+            //    {
+            //        neighboursOfN = null;
+            //        return true; //=> it's compatible
+            //    }
+            //}
+
+            //return false;
+
             var neighboursOfN = inputGraph.GetNeighbors(n, true);
             for (int i = 0; i < neighborsOfM.Count; i++)
             {
+                string val;
                 if (!partialMap.TryGetValue(neighborsOfM[i], out val))
                 {
                     neighboursOfN = null;
@@ -223,7 +226,7 @@ namespace MODA.Impl
             neighboursOfN = null;
             return false;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static List<string> ChooseNeighboursOfRange(IEnumerable<string> used_range, UndirectedGraph<string, Edge<string>> inputGraph)
         {
@@ -244,6 +247,10 @@ namespace MODA.Impl
                     toReturn.AddRange(batch);
                     batch = null;
                     local = null;
+                }
+                else
+                {
+                    return toReturn;
                 }
             }
 
@@ -336,7 +343,7 @@ namespace MODA.Impl
 
         //    return toReturn;
         //}
-
+        
         /// <summary>
         /// We say that <paramref name="node_G"/> (g) of <paramref name="inputGraph"/> (G) can support <paramref name="node_H"/> (h) of <paramref name="queryGraph"/> (H)
         /// if we cannot rule out a subgraph isomorphism from H into G which maps h to g based on the degrees of h and g, and the degree of their neighbours
