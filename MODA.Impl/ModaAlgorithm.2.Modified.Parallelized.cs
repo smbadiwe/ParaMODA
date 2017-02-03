@@ -107,7 +107,7 @@ namespace MODA.Impl
                     {
                         var objectsSet = objects as object[];
                         var degSeqChunk_ = objectsSet[0] as string[];
-                        var queryGraph_ = objectsSet[1] as UndirectedGraph<string, Edge<string>>;
+                        var queryGraph_ = objectsSet[1] as QueryGraph;
                         var h = objectsSet[2] as string;
                         var inputGraph_ = objectsSet[3] as UndirectedGraph<string, Edge<string>>;
                         for (int i = 0; i < degSeqChunk_.Length; i++)
@@ -134,7 +134,7 @@ namespace MODA.Impl
                                     var g_key = mapping.Function.Last().Value;
                                     if (theMappings.TryGetValue(g_key, out mappingsToSearch) && mappingsToSearch != null)
                                     {
-                                        var existing = mappingsToSearch.Find(x => x != null && x.IsIsomorphicWith(mapping));
+                                        var existing = mappingsToSearch.Find(x => x != null && x.IsIsomorphicWith(mapping, queryGraph_));
 
                                         if (existing == null)
                                         {
@@ -193,7 +193,7 @@ namespace MODA.Impl
         /// <param name="queryGraph">G</param>
         /// <param name="inputGraph">H</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
-        private static IList<Mapping> IsomorphicExtension(Dictionary<string, string> partialMap, UndirectedGraph<string, Edge<string>> queryGraph
+        private static IList<Mapping> IsomorphicExtension(Dictionary<string, string> partialMap, QueryGraph queryGraph
             , UndirectedGraph<string, Edge<string>> inputGraph)
         {
             if (partialMap.Count == queryGraph.VertexCount)
@@ -269,7 +269,7 @@ namespace MODA.Impl
                         Mapping existing = null;
                         for (int j = 0; j < listOfIsomorphisms.Count; j++)
                         {
-                            if (listOfIsomorphisms[j].IsIsomorphicWith(item))
+                            if (listOfIsomorphisms[j].IsIsomorphicWith(item, queryGraph))
                             {
                                 existing = listOfIsomorphisms[j];
                                 break;

@@ -41,13 +41,13 @@ namespace MODA.Impl
             var subgraphSize = queryGraph.VertexCount;
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
-                if (CanSupport(queryGraph, h, inputGraph, inputGraphDegSeq[i]))
+                var g = inputGraphDegSeq[i];
+                if (CanSupport(queryGraph, h, inputGraph, g))
                 {
                     #region Can Support
                     //var sw = System.Diagnostics.Stopwatch.StartNew();
                     //Remember: f(h) = g, so h is Domain and g is Range
-                    //function, f = new Dictionary<string, string>(1) { { h, g } }
-                    f[h] = inputGraphDegSeq[i];
+                    f[h] = g;
                     var mappings = IsomorphicExtension(f, queryGraph, inputGraph);
                     if (mappings.Count > 0)
                     {
@@ -64,7 +64,7 @@ namespace MODA.Impl
                                 List<Mapping> mappingsToSearch; //Recall: f(h) = g
                                 if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                                 {
-                                    if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
+                                    if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
                                     {
                                         treated = true;
                                         break;
@@ -101,12 +101,12 @@ namespace MODA.Impl
             {
                 toReturn.AddRange(mapping.Value);
             }
-            Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
             theMappings = null;
             //InputSubgraphs = null;
             H_NodeNeighbours = null;
             G_NodeNeighbours = null;
             //timer = null;
+            Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
             return toReturn;
         }
 

@@ -14,10 +14,15 @@ namespace MODA.Impl
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
         /// This represents the [f(h) = g] relation. Meaning key is h and value is g.
         /// </summary>
         public Dictionary<string, string> Function { get; private set; }
-        
+
         /// <summary>
         /// The subgraph (with all edges) in the input graph G that fit the query graph (---Function.Keys)
         /// </summary>
@@ -31,49 +36,112 @@ namespace MODA.Impl
         /// <returns></returns>
         public Edge<string> GetEdgeDifference(QueryGraph currentQueryGraph, QueryGraph parentQueryGraph)
         {
-            foreach (var edge in currentQueryGraph.Edges)
+            if (InducedSubGraph.EdgeCount == currentQueryGraph.EdgeCount)
             {
-                if (!parentQueryGraph.ContainsEdge(edge))
+                var edgeImages = parentQueryGraph.Edges.Select(x => new Edge<string>(Function[x.Source], Function[x.Target]));
+                foreach (var edge in InducedSubGraph.Edges)
                 {
-                    Edge<string> edgeImage;
-                    if (InducedSubGraph.TryGetEdge(Function[edge.Source], Function[edge.Target], out edgeImage))
+                    if (!edgeImages.Contains(edge))
                     {
-                        return edgeImage;
+                        return edge;
                     }
-                    return null;
+                }
+            }
+            else if (InducedSubGraph.EdgeCount > currentQueryGraph.EdgeCount)
+            {
+                var edges = parentQueryGraph.Edges.Select(x => x);
+                foreach (var edge in currentQueryGraph.Edges)
+                {
+                    if (!edges.Contains(edge))
+                    {
+                        Edge<string> edgeImage;
+                        if (InducedSubGraph.TryGetEdge(Function[edge.Source], Function[edge.Target], out edgeImage))
+                        {
+                            return edgeImage;
+                        }
+                        return null;
+                    }
                 }
             }
             return null;
         }
 
-        public bool IsIsomorphicWith(Mapping otherMapping)
+        public bool IsIsomorphicWith(Mapping otherMapping, QueryGraph queryGraph)
         {
-            //NB: Node and edge count already guaranteed to be equal
+            if (InducedSubGraph.EdgeCount != otherMapping.InducedSubGraph.EdgeCount)
+            {
+                return false;
+            }
+            
+            var theNodes = new string[InducedSubGraph.VertexCount];
+            int index = 0;
             foreach (var node in InducedSubGraph.Vertices)
             {
+                theNodes[index] = node;
                 //Test 1 - Vertices - sameness
                 if (!otherMapping.InducedSubGraph.ContainsVertex(node)) //Remember, f(h) = g. So, key is h and value is g
                 {
                     return false;
                 }
+                index++;
             }
-            //int size = Function.Count;
-            //bool isComplete = InputSubGraph.EdgeCount == ((size * (size - 1)) / 2);
-            //foreach (var node in InputSubGraph.Vertices)
-            //{
-            //    //Test 2 - Node degrees.
-            //    if (MapOnInputSubGraph.AdjacentDegree(node) != otherMapping.MapOnInputSubGraph.AdjacentDegree(node))
-            //    {
-            //        //if input sub-graph is complete
-            //        if (isComplete)
-            //        {
-            //            // Then the subgraphs is likely isomorphic, due to symmetry
-            //            return true;
-            //        }
-            //        return false;
-            //    }
-            //}
+
+            // Since nodes are same for both mappings, the InducedSubgraphs must be same at this point
+            if (InducedSubGraph.EdgeCount < queryGraph.EdgeCount)
+            {
+                // check if the two are same
+                string[] mapSequence, otherMapSequence;
+                var thisSequence = GetStringifiedMapSequence(out mapSequence);
+                var otherSequence = otherMapping.GetStringifiedMapSequence(out otherMapSequence);
+                if (thisSequence == otherSequence)
+                {
+                    return true;
+                }
+
+                // check if one is a reversed reading of the other
+                bool isIso = true;
+                for (int i = 0; i < index; i++)
+                {
+                    if (mapSequence[i] != otherMapSequence[index - i - 1])
+                    {
+                        isIso = false;
+                        break;
+                    }
+                }
+                if (isIso)
+                {
+                    return true;
+                }
+
+                // compare corresponding edges
+                foreach (var edge in queryGraph.Edges)
+                {
+                    var edgeImage = new Edge<string>(Function[edge.Source], Function[edge.Target]);
+                    var otherEdgeImage = new Edge<string>(otherMapping.Function[edge.Source], otherMapping.Function[edge.Target]);
+                    if (edgeImage != otherEdgeImage)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            // let it go
             return true;
+        }
+
+        public string GetStringifiedMapSequence(out string[] mapSequence)
+        {
+            var sb = new StringBuilder();
+            mapSequence = new string[Function.Count];
+            var functionSorted = new SortedDictionary<string, string>(Function);
+            int index = 0;
+            foreach (var item in functionSorted)
+            {
+                mapSequence[index] = item.Value;
+                sb.AppendFormat("{0}|", item.Value);
+                index++;
+            }
+            return sb.ToString();
         }
 
         public override string ToString()

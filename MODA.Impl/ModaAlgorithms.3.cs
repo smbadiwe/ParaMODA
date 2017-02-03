@@ -16,85 +16,102 @@ namespace MODA.Impl
         /// <param name="expansionTree">T_k</param>
         /// <param name="parentQueryGraph"></param>
         /// <param name="parentGraphMappings"></param>
-        private static List<Mapping> Algorithm3(QueryGraph queryGraph,
+        private static IList<Mapping> Algorithm3(QueryGraph queryGraph,
             AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> expansionTree,
-            QueryGraph parentQueryGraph, List<Mapping> parentGraphMappings)
+            QueryGraph parentQueryGraph, IList<Mapping> parentGraphMappings)
         {
-            //var timer = System.Diagnostics.Stopwatch.StartNew();
-            var theMappings = new Dictionary<string, List<Mapping>>();
-            var subgraphSize = queryGraph.VertexCount;
-            var toRemoveFromParent = new List<Mapping>();
-            for (int i = 0; i < parentGraphMappings.Count; i++)
+            if (parentGraphMappings.Count > 0)
             {
-                var map = parentGraphMappings[i];
-
-                // Reember, f(h) = g
-                // Remember, newInputSubgraph is a subgraph of inputGraph
-                Edge<string> edge = map.GetEdgeDifference(queryGraph, parentQueryGraph);
-                if (edge != null)
+                //var timer = System.Diagnostics.Stopwatch.StartNew();
+                var theMappings = new Dictionary<string, List<Mapping>>();
+                var subgraphSize = queryGraph.VertexCount;
+                var list = new List<Mapping>();
+                for (int i = 0; i < parentGraphMappings.Count; i++)
                 {
-                    var mapping = new Mapping(map.Function)
+                    var map = parentGraphMappings[i];
+                    map.Id = i;
+                    // Reember, f(h) = g
+                    // Remember, newInputSubgraph is a subgraph of inputGraph
+                    Edge<string> edge = map.GetEdgeDifference(queryGraph, parentQueryGraph);
+                    if (edge != null)
                     {
-                        InducedSubGraph = map.InducedSubGraph
-                    };
-                    bool treated = false; string g_key_last = null;
-                    if (theMappings.Count > 0)
-                    {
-                        foreach (var g_key in mapping.Function.Values)
+                        var mapping = new Mapping(map.Function)
                         {
-                            g_key_last = g_key;
-                            List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                            if (theMappings.TryGetValue(g_key, out mappingsToSearch))
+                            InducedSubGraph = map.InducedSubGraph
+                        };
+                        bool treated = false; string g_key_last = null;
+                        if (theMappings.Count > 0)
+                        {
+                            foreach (var g_key in mapping.Function.Values)
                             {
-                                if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
+                                g_key_last = g_key;
+                                List<Mapping> mappingsToSearch; //Recall: f(h) = g
+                                if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                                 {
-                                    treated = true;
-                                    break;
+                                    if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
+                                    {
+                                        treated = true;
+                                        break;
+                                    }
+                                    // else continue since it may exist in the other keys
                                 }
-                                // else continue since it may exist in the other keys
+                                mappingsToSearch = null;
                             }
-                            mappingsToSearch = null;
-                        }
-                    }
-                    else
-                    {
-                        g_key_last = mapping.Function.Last().Value;
-                    }
-                    if (!treated)
-                    {
-                        if (theMappings.ContainsKey(g_key_last))
-                        {
-                            theMappings[g_key_last].Add(mapping);
                         }
                         else
                         {
-                            theMappings[g_key_last] = new List<Mapping> { mapping };
+                            g_key_last = mapping.Function.Last().Value;
                         }
-                        toRemoveFromParent.Add(map);
+                        if (!treated)
+                        {
+                            if (theMappings.ContainsKey(g_key_last))
+                            {
+                                theMappings[g_key_last].Add(mapping);
+                            }
+                            else
+                            {
+                                theMappings[g_key_last] = new List<Mapping> { mapping };
+                            }
+                            list.Add(map);
+                        }
+                        mapping = null;
                     }
-                    mapping = null;
                 }
-            }
-            if (toRemoveFromParent.Count > 0)
-            {
-                for (int i = 0; i < toRemoveFromParent.Count; i++)
+                if (list.Count > 0)
                 {
-                    parentGraphMappings.Remove(toRemoveFromParent[i]);
+                    var dict = parentGraphMappings.ToDictionary(x => x.Id);
+                    for (int i = 0; i < list.Count; i++)
+                    {
+                        if (dict.ContainsKey(list[i].Id))
+                        {
+                            dict.Remove(list[i].Id);
+                        }
+                        //parentGraphMappings.RemoveBySwap(list[i]);
+                    }
+                    parentGraphMappings.Clear();
+                    foreach (var item in dict)
+                    {
+                        parentGraphMappings.Add(item.Value);
+                    }
+                    list.Clear();
                 }
-            }
-            var toReturn = new List<Mapping>();
-            foreach (var mapping in theMappings)
-            {
-                toReturn.AddRange(mapping.Value);
-            }
-            Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
+                if (theMappings.Count > 0)
+                {
+                    foreach (var mapping in theMappings)
+                    {
+                        list.AddRange(mapping.Value);
+                    }
+                }
+                Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\n", list.Count);
 
-            //timer.Stop();
-            //Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", theMappings.Count, timer.Elapsed);
+                //timer.Stop();
+                //Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", theMappings.Count, timer.Elapsed);
 
-            //timer = null;
-            theMappings = null;
-            return toReturn;
+                //timer = null;
+                theMappings = null;
+                return list;
+            }
+            return new Mapping[0];
         }
 
         /// <summary>

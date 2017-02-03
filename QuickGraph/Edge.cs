@@ -65,7 +65,7 @@ namespace QuickGraph
         {
             var otherStr = obj?.ToString();
             return !string.IsNullOrWhiteSpace(otherStr) &&
-                (string.Equals(ToString(), otherStr)
+                (string.Equals($"{source}->{target}", otherStr)
                 || string.Equals($"{target}->{source}", otherStr));
         }
         

@@ -14,7 +14,7 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraphClone">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraphClone"/> size / 3</param>
-        private static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraphClone, int numberOfSamples = -1)
+        internal static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraphClone, int numberOfSamples = -1)
         {
             var timer = System.Diagnostics.Stopwatch.StartNew();
             if (numberOfSamples <= 0) numberOfSamples = inputGraphClone.VertexCount / 3; // VertexCountDividend;
@@ -62,7 +62,7 @@ namespace MODA.Impl
                                     List<Mapping> mappingsToSearch; //Recall: f(h) = g
                                     if (theMappings.TryGetValue(g_key, out mappingsToSearch))
                                     {
-                                        if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping)))
+                                        if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
                                         {
                                             treated = true;
                                             break;
@@ -73,9 +73,10 @@ namespace MODA.Impl
                                 }
                                 if (!treated)
                                 {
-                                    if (theMappings.ContainsKey(g_key_last))
+                                    List<Mapping> values;
+                                    if (theMappings.TryGetValue(g_key_last, out values))
                                     {
-                                        theMappings[g_key_last].Add(mapping);
+                                        values.Add(mapping);
                                     }
                                     else
                                     {

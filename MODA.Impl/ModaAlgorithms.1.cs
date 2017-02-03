@@ -22,24 +22,24 @@ namespace MODA.Impl
         /// <param name="thresholdValue">Frequency value, above which we can comsider the subgraph a "frequent subgraph"</param>
         /// <returns>Fg, frequent subgraph list. NB: The dictionary .Value is an <see cref="object"/> which will be either a list of <see cref="Mapping"/> or a <see cref="long"/>
         /// depending on the value of <see cref="GetOnlyMappingCounts"/>.</returns>
-        public static Dictionary<QueryGraph, List<Mapping>> Algorithm1(UndirectedGraph<string, Edge<string>> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
+        public static Dictionary<QueryGraph, IList<Mapping>> Algorithm1(UndirectedGraph<string, Edge<string>> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
         {
             // The enumeration module (Algo 3) needs the mappings generated from the previous run(s)
-            Dictionary<QueryGraph, List<Mapping>> allMappings;
+            Dictionary<QueryGraph, IList<Mapping>> allMappings;
             int numIterations = -1;
             if (inputGraph.VertexCount < 121) numIterations = inputGraph.VertexCount;
 
             if (qGraph == null) // Use MODA's expansion tree
             {
-                var inputGraphClone = inputGraph.Clone();
-                allMappings = new Dictionary<QueryGraph, List<Mapping>>(_builder.NumberOfQueryGraphs);
+                allMappings = new Dictionary<QueryGraph, IList<Mapping>>(_builder.NumberOfQueryGraphs);
                 do
                 {
                     qGraph = GetNextNode()?.QueryGraph;
                     if (qGraph == null) break;
-                    List<Mapping> mappings;
+                    IList<Mapping> mappings;
                     if (qGraph.EdgeCount == (subgraphSize - 1))
                     {
+                        var inputGraphClone = inputGraph.Clone();
                         if (UseModifiedGrochow)
                         {
                             // Modified Mapping module - MODA and Grockow & Kellis
@@ -59,7 +59,7 @@ namespace MODA.Impl
 
                         // This is part of Algo 3; but performance tweaks makes it more useful to get it here
                         var parentQueryGraph = GetParent(qGraph, _builder.ExpansionTree);
-                        List<Mapping> parentGraphMappings;
+                        IList<Mapping> parentGraphMappings;
                         if (allMappings.TryGetValue(parentQueryGraph, out parentGraphMappings))
                         {
                             mappings = Algorithm3(qGraph, _builder.ExpansionTree, parentQueryGraph, parentGraphMappings);
@@ -101,7 +101,7 @@ namespace MODA.Impl
                 {
                     mappings = Algorithm2(qGraph, inputGraph, numIterations);
                 }
-                allMappings = new Dictionary<QueryGraph, List<Mapping>>(1) { { qGraph, mappings } };
+                allMappings = new Dictionary<QueryGraph, IList<Mapping>>(1) { { qGraph, mappings } };
             }
 
             return allMappings;

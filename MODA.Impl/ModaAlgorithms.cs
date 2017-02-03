@@ -123,8 +123,6 @@ namespace MODA.Impl
                     }
                     counter++;
                 }
-                //map.InputSubGraph = GetInputSubgraph(inputGraph, map.MapOnInputSubGraph.Vertices, partialMap.Count);
-                //map.InputSubGraph = GetInputSubgraph(inputGraph, partialMap.Values.ToArray());
                 return new List<Mapping>(1) { map };
                 #endregion
             }
