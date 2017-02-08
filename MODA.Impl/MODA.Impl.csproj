@@ -96,7 +96,6 @@
     <Compile Include="GraphProcessor.cs" />
     <Compile Include="Mapping.cs" />
     <Compile Include="ModaAlgorithms.2.cs" />
-    <Compile Include="ModaAlgorithm.2.Modified.Parallelized.cs" />
     <Compile Include="ModaAlgorithms.cs" />
     <Compile Include="ModaAlgorithms.3.cs" />
     <Compile Include="ModaAlgorithms.2.Modified.cs" />

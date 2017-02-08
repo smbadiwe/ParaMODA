@@ -56,11 +56,11 @@ namespace MODA.Impl
                                 Mapping mapping = mappings[k];
 
                                 bool treated = false; string g_key_last = null;
-                                foreach (var g_key in mapping.Function.Values)
+                                foreach (var g_key in mapping.Function)
                                 {
-                                    g_key_last = g_key;
+                                    g_key_last = g_key.Value;
                                     List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                                    if (theMappings.TryGetValue(g_key, out mappingsToSearch))
+                                    if (theMappings.TryGetValue(g_key_last, out mappingsToSearch))
                                     {
                                         if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
                                         {

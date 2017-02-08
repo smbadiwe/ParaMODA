@@ -112,11 +112,11 @@ namespace MODA.Impl
                 var map = new Mapping(partialMap);
                 int counter = 0, subgraphSize = partialMap.Count;
                 Edge<string> edge_;
-                foreach (var node in partialMap.Values) // Remember, f(h) = g, so .Values is for g's
+                foreach (var node in partialMap) // Remember, f(h) = g, so .Values is for g's
                 {
                     for (int j = (counter + 1); j < subgraphSize; j++)
                     {
-                        if (inputGraph.TryGetEdge(node, partialMap.Values.ElementAt(j), out edge_))
+                        if (inputGraph.TryGetEdge(node.Value, partialMap.ElementAt(j).Value, out edge_))
                         {
                             map.InducedSubGraph.AddVerticesAndEdge(edge_);
                         }
@@ -131,12 +131,12 @@ namespace MODA.Impl
             //  In other words, Key is h and Value is g in the dictionary
 
             // get m, most constrained neighbor
-            string m = GetMostConstrainedNeighbour(partialMap.Keys, queryGraph);
+            string m = GetMostConstrainedNeighbour(partialMap.Keys.ToArray(), queryGraph);
             if (string.IsNullOrWhiteSpace(m)) return new Mapping[0];
 
             var listOfIsomorphisms = new List<Mapping>();
 
-            var neighbourRange = ChooseNeighboursOfRange(partialMap.Values, inputGraph);
+            var neighbourRange = ChooseNeighboursOfRange(partialMap.Values.ToArray(), inputGraph);
 
             var neighborsOfM = queryGraph.GetNeighbors(m, false);
             //var newPartialMap = new Dictionary<string, string>(partialMap);
@@ -221,13 +221,91 @@ namespace MODA.Impl
             return false;
         }
 
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="used_range"> Meaning that we're only interested in the Values. Remember: f(h) = g</param>
+        ///// <param name="inputGraph">G</param>
+        ///// <returns></returns>
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //private static List<string> ChooseNeighboursOfRange(Dictionary<string, string> used_range, UndirectedGraph<string, Edge<string>> inputGraph)
+        //{
+        //    List<string> toReturn = new List<string>();
+        //    foreach (var rangeVal in used_range)
+        //    {
+        //        var local = inputGraph.GetNeighbors(rangeVal.Value, true);
+        //        if (local.Count > 0)
+        //        {
+        //            List<string> batch = new List<string>(local.Count);
+        //            for (int j = 0; j < local.Count; j++)
+        //            {
+        //                if (!used_range.ContainsValue(local[j]))
+        //                {
+        //                    batch.Add(local[j]);
+        //                }
+        //            }
+        //            toReturn.AddRange(batch);
+        //            batch = null;
+        //            local = null;
+        //        }
+        //        else
+        //        {
+        //            return toReturn;
+        //        }
+        //    }
+
+        //    return toReturn;
+        //}
+
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="used_range"> Meaning that we're only interested in the Values. Remember: f(h) = g</param>
+        ///// <param name="inputGraph">G</param>
+        ///// <returns></returns>
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //private static List<string> ChooseNeighboursOfRange(IEnumerable<string> used_range, UndirectedGraph<string, Edge<string>> inputGraph)
+        //{
+        //    List<string> toReturn = new List<string>();
+        //    foreach (var rangeVal in used_range)
+        //    {
+        //        var local = inputGraph.GetNeighbors(rangeVal, true);
+        //        if (local.Count > 0)
+        //        {
+        //            List<string> batch = new List<string>(local.Count);
+        //            for (int j = 0; j < local.Count; j++)
+        //            {
+        //                if (!used_range.Contains(local[j]))
+        //                {
+        //                    batch.Add(local[j]);
+        //                }
+        //            }
+        //            toReturn.AddRange(batch);
+        //            batch = null;
+        //            local = null;
+        //        }
+        //        else
+        //        {
+        //            return toReturn;
+        //        }
+        //    }
+
+        //    return toReturn;
+        //}
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="used_range"> Meaning that we're only interested in the Values. Remember: f(h) = g</param>
+        /// <param name="inputGraph">G</param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static List<string> ChooseNeighboursOfRange(IEnumerable<string> used_range, UndirectedGraph<string, Edge<string>> inputGraph)
+        private static List<string> ChooseNeighboursOfRange(string[] used_range, UndirectedGraph<string, Edge<string>> inputGraph)
         {
             List<string> toReturn = new List<string>();
-            foreach (var rangeVal in used_range)
+            for (int i = 0; i < used_range.Length; i++)
             {
-                var local = inputGraph.GetNeighbors(rangeVal, true);
+                var local = inputGraph.GetNeighbors(used_range[i], true);
                 if (local.Count > 0)
                 {
                     List<string> batch = new List<string>(local.Count);
@@ -251,13 +329,79 @@ namespace MODA.Impl
             return toReturn;
         }
 
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="domain">Domain, D, of fumction f. Meaning that we're only interested in the Keys. Remember: f(h) = g</param>
+        ///// <param name="queryGraph">H</param>
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //private static string GetMostConstrainedNeighbour(Dictionary<string, string> domain, UndirectedGraph<string, Edge<string>> queryGraph)
+        //{
+        //    /*
+        //     * As is standard in backtracking searches, the algorithm uses the most constrained neighbor
+        //     * to eliminate maps that cannot be isomorphisms: that is, the neighbor of the already-mapped 
+        //     * nodes which is likely to have the fewest possible nodes it can be mapped to. First we select 
+        //     * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
+        //     * the highest degree and largest neighbor degree sequence.
+        //     * */
+        //    foreach (var item in domain)
+        //    {
+        //        var local = queryGraph.GetNeighbors(item.Key, false);
+        //        if (local.Count > 0)
+        //        {
+        //            for (int j = 0; j < local.Count; j++)
+        //            {
+        //                if (!domain.ContainsKey(local[j]))
+        //                {
+        //                    return local[j];
+        //                }
+        //            }
+        //        }
+        //        local = null;
+        //    }
+        //    return "";
+        //}
+        
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <param name="domain">Domain, D, of fumction f. Meaning that we're only interested in the Keys. Remember: f(h) = g</param>
+        ///// <param name="queryGraph">H</param>
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //private static string GetMostConstrainedNeighbour(IEnumerable<string> domain, UndirectedGraph<string, Edge<string>> queryGraph)
+        //{
+        //    /*
+        //     * As is standard in backtracking searches, the algorithm uses the most constrained neighbor
+        //     * to eliminate maps that cannot be isomorphisms: that is, the neighbor of the already-mapped 
+        //     * nodes which is likely to have the fewest possible nodes it can be mapped to. First we select 
+        //     * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
+        //     * the highest degree and largest neighbor degree sequence.
+        //     * */
+        //    foreach (var item in domain)
+        //    {
+        //        var local = queryGraph.GetNeighbors(item, false);
+        //        if (local.Count > 0)
+        //        {
+        //            for (int j = 0; j < local.Count; j++)
+        //            {
+        //                if (!domain.Contains(local[j]))
+        //                {
+        //                    return local[j];
+        //                }
+        //            }
+        //        }
+        //        local = null;
+        //    }
+        //    return "";
+        //}
+        
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="domain">Domain, D, of fumction f</param>
+        /// <param name="domain">Domain, D, of fumction f. Meaning that we're only interested in the Keys. Remember: f(h) = g</param>
         /// <param name="queryGraph">H</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string GetMostConstrainedNeighbour(IEnumerable<string> domain, UndirectedGraph<string, Edge<string>> queryGraph)
+        private static string GetMostConstrainedNeighbour(string[] domain, UndirectedGraph<string, Edge<string>> queryGraph)
         {
             /*
              * As is standard in backtracking searches, the algorithm uses the most constrained neighbor
@@ -266,9 +410,9 @@ namespace MODA.Impl
              * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
              * the highest degree and largest neighbor degree sequence.
              * */
-            foreach (var item in domain)
+            for (int i = 0; i < domain.Length; i++)
             {
-                var local = queryGraph.GetNeighbors(item, false);
+                var local = queryGraph.GetNeighbors(domain[i], false);
                 if (local.Count > 0)
                 {
                     for (int j = 0; j < local.Count; j++)
@@ -283,60 +427,6 @@ namespace MODA.Impl
             }
             return "";
         }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="domain">Domain, D, of fumction f</param>
-        ///// <param name="queryGraph">H</param>
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //private static string GetMostConstrainedNeighbour(string[] domain, UndirectedGraph<string, Edge<string>> queryGraph)
-        //{
-        //    /*
-        //     * As is standard in backtracking searches, the algorithm uses the most constrained neighbor
-        //     * to eliminate maps that cannot be isomorphisms: that is, the neighbor of the already-mapped 
-        //     * nodes which is likely to have the fewest possible nodes it can be mapped to. First we select 
-        //     * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
-        //     * the highest degree and largest neighbor degree sequence.
-        //     * */
-        //    string toReturn;
-        //    if (!MostConstrainedNeighbours.TryGetValue(domain, out toReturn))
-        //    {
-        //        toReturn = "";
-        //        for (int i = domain.Length - 1; i >= 0; i--)
-        //        {
-        //            var local = queryGraph.GetNeighbors(domain[i]);
-        //            if (local.Count == 0)
-        //            {
-        //                local = null;
-        //                continue;
-        //            }
-        //            for (int j = 0; j < local.Count; j++)
-        //            {
-        //                if (!domain.Contains(local[j]))
-        //                {
-        //                    //toReturn = local[j];
-        //                    MostConstrainedNeighbours[domain] = local[j]; // toReturn;
-        //                    return local[j]; // toReturn;
-        //                }
-        //            }
-        //            ////This was slowr
-        //            //foreach (var item in local)
-        //            //{
-        //            //    if (!domain.Contains(item))
-        //            //    {
-        //            //        MostConstrainedNeighbours[domain] = item;
-        //            //        return item;
-        //            //    }
-        //            //}
-        //            local = null;
-        //        }
-
-        //        MostConstrainedNeighbours[domain] = toReturn;
-        //    }
-
-        //    return toReturn;
-        //}
         
         /// <summary>
         /// We say that <paramref name="node_G"/> (g) of <paramref name="inputGraph"/> (G) can support <paramref name="node_H"/> (h) of <paramref name="queryGraph"/> (H)

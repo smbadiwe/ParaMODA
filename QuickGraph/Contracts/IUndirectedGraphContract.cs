@@ -4,7 +4,7 @@ using System.Diagnostics.Contracts;
 
 namespace QuickGraph.Contracts
 {
-    [ContractClassFor(typeof(IUndirectedGraph<,>))]
+    //[ContractClassFor(typeof(IUndirectedGraph<,>))]
     abstract class IUndirectedGraphContract<TVertex, TEdge>
         : IUndirectedGraph<TVertex, TEdge>
         where TEdge : IEdge<TVertex>

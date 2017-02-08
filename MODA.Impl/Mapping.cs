@@ -68,22 +68,20 @@ namespace MODA.Impl
 
         public bool IsIsomorphicWith(Mapping otherMapping, QueryGraph queryGraph)
         {
+            //NB: Node count is guaranteed to be same for both this and other mapping
+            // Test 0 - Edge count sameness
             if (InducedSubGraph.EdgeCount != otherMapping.InducedSubGraph.EdgeCount)
             {
                 return false;
             }
-            
-            var theNodes = new string[InducedSubGraph.VertexCount];
-            int index = 0;
+
+            // Test 1 - Vertices sameness
             foreach (var node in InducedSubGraph.Vertices)
             {
-                theNodes[index] = node;
-                //Test 1 - Vertices - sameness
                 if (!otherMapping.InducedSubGraph.ContainsVertex(node)) //Remember, f(h) = g. So, key is h and value is g
                 {
                     return false;
                 }
-                index++;
             }
 
             // Since nodes are same for both mappings, the InducedSubgraphs must be same at this point
@@ -100,6 +98,7 @@ namespace MODA.Impl
 
                 // check if one is a reversed reading of the other
                 bool isIso = true;
+                int index = mapSequence.Length;
                 for (int i = 0; i < index; i++)
                 {
                     if (mapSequence[i] != otherMapSequence[index - i - 1])
@@ -129,21 +128,6 @@ namespace MODA.Impl
             return true;
         }
 
-        public string GetStringifiedMapSequence(out string[] mapSequence)
-        {
-            var sb = new StringBuilder();
-            mapSequence = new string[Function.Count];
-            var functionSorted = new SortedDictionary<string, string>(Function);
-            int index = 0;
-            foreach (var item in functionSorted)
-            {
-                mapSequence[index] = item.Value;
-                sb.AppendFormat("{0}|", item.Value);
-                index++;
-            }
-            return sb.ToString();
-        }
-
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -161,5 +145,21 @@ namespace MODA.Impl
             sb.Append("]\n");
             return sb.ToString();
         }
+
+        private string GetStringifiedMapSequence(out string[] mapSequence)
+        {
+            var sb = new StringBuilder();
+            mapSequence = new string[Function.Count];
+            var functionSorted = new SortedDictionary<string, string>(Function);
+            int index = 0;
+            foreach (var item in functionSorted)
+            {
+                mapSequence[index] = item.Value;
+                sb.AppendFormat("{0}|", item.Value);
+                index++;
+            }
+            return sb.ToString();
+        }
+
     }
 }

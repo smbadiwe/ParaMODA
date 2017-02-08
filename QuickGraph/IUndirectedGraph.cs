@@ -8,7 +8,7 @@ namespace QuickGraph
     /// </summary>
     /// <typeparam name="TVertex"></typeparam>
     /// <typeparam name="TEdge"></typeparam>
-    [ContractClass(typeof(IUndirectedGraphContract<,>))]
+    //[ContractClass(typeof(IUndirectedGraphContract<,>))]
     public interface IUndirectedGraph<TVertex,TEdge> 
         : IImplicitUndirectedGraph<TVertex, TEdge>
         , IEdgeListGraph<TVertex,TEdge>

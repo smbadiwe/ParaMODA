@@ -8,8 +8,6 @@ namespace MODA.Impl
     {
         public static IList<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG)
         {
-            //if (string.IsNullOrWhiteSpace(vertex)) return new string[0];
-            //return graph.GetNeighbors(vertex);
             IList<string> neighbors;
             if (isG)
             {
@@ -17,7 +15,6 @@ namespace MODA.Impl
                 {
                     ModaAlgorithms.G_NodeNeighbours[vertex] = neighbors = graph.GetNeighbors(vertex);
                 }
-                return neighbors;
             }
             else
             {
@@ -25,8 +22,8 @@ namespace MODA.Impl
                 {
                     ModaAlgorithms.H_NodeNeighbours[vertex] = neighbors = graph.GetNeighbors(vertex);
                 }
-                return neighbors;
             }
+            return neighbors;
         }
 
         /// <summary>
