@@ -27,41 +27,36 @@ namespace MODA.Impl
         /// The subgraph (with all edges) in the input graph G that fit the query graph (---Function.Keys)
         /// </summary>
         public UndirectedGraph<string, Edge<string>> InducedSubGraph { get; set; }
-
+        
         /// <summary>
-        /// Returns the edge in <paramref="currentQueryGraph"/>'s image that is not present in <paramref="parentQueryGraph"/>'s image
+        /// Only for when (InducedSubGraph.EdgeCount == currentQueryGraphEdgeCount)
         /// </summary>
-        /// <param name="currentQueryGraph">The current subgraph being queried</param>
-        /// <param name="parentQueryGraph">The parent to <paramref name="currentQueryGraph"/>. This parent is also a subset, meaning it has one edge less.</param>
+        /// <param name="parentQueryGraphEdges"></param>
         /// <returns></returns>
-        public Edge<string> GetEdgeDifference(QueryGraph currentQueryGraph, QueryGraph parentQueryGraph)
+        public Edge<string> GetImage(IEnumerable<Edge<string>> parentQueryGraphEdges)
         {
-            if (InducedSubGraph.EdgeCount == currentQueryGraph.EdgeCount)
+            var edgeImages = parentQueryGraphEdges.Select(x => new Edge<string>(Function[x.Source], Function[x.Target]));
+            foreach (var edgex in InducedSubGraph.Edges)
             {
-                var edgeImages = parentQueryGraph.Edges.Select(x => new Edge<string>(Function[x.Source], Function[x.Target]));
-                foreach (var edge in InducedSubGraph.Edges)
+                if (!edgeImages.Contains(edgex))
                 {
-                    if (!edgeImages.Contains(edge))
-                    {
-                        return edge;
-                    }
+                    return edgex;
                 }
             }
-            else if (InducedSubGraph.EdgeCount > currentQueryGraph.EdgeCount)
+            return null;
+        }
+
+        /// <summary>
+        /// Only for when (InducedSubGraph.EdgeCount > currentQueryGraphEdgeCount)
+        /// </summary>
+        /// <param name="newlyAddedEdge"></param>
+        /// <returns></returns>
+        public Edge<string> GetImage(Edge<string> newlyAddedEdge)
+        {
+            Edge<string> edgeImage;
+            if (InducedSubGraph.TryGetEdge(Function[newlyAddedEdge.Source], Function[newlyAddedEdge.Target], out edgeImage))
             {
-                var edges = parentQueryGraph.Edges.Select(x => x);
-                foreach (var edge in currentQueryGraph.Edges)
-                {
-                    if (!edges.Contains(edge))
-                    {
-                        Edge<string> edgeImage;
-                        if (InducedSubGraph.TryGetEdge(Function[edge.Source], Function[edge.Target], out edgeImage))
-                        {
-                            return edgeImage;
-                        }
-                        return null;
-                    }
-                }
+                return edgeImage;
             }
             return null;
         }

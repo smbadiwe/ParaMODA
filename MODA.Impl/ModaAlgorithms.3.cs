@@ -23,58 +23,35 @@ namespace MODA.Impl
             if (parentGraphMappings.Count > 0)
             {
                 //var timer = System.Diagnostics.Stopwatch.StartNew();
-                var theMappings = new Dictionary<string, List<Mapping>>();
                 var subgraphSize = queryGraph.VertexCount;
+                var newEdge = GetEdgeDifference(queryGraph, parentQueryGraph);
+                Edge<string> newEdgeImage;
                 var list = new List<Mapping>();
                 for (int i = 0; i < parentGraphMappings.Count; i++)
                 {
                     var map = parentGraphMappings[i];
                     map.Id = i;
                     // Reember, f(h) = g
-                    // Remember, newInputSubgraph is a subgraph of inputGraph
-                    Edge<string> edge = map.GetEdgeDifference(queryGraph, parentQueryGraph);
-                    if (edge != null)
+
+                    // if (f(u), f(v)) ϵ G and meets the conditions, add to list
+                    if (map.InducedSubGraph.EdgeCount == queryGraph.EdgeCount)
                     {
-                        var mapping = new Mapping(map.Function)
+                        newEdgeImage = map.GetImage(parentQueryGraph.Edges);
+                    }
+                    else if (map.InducedSubGraph.EdgeCount > queryGraph.EdgeCount)
+                    {
+                        newEdgeImage = map.GetImage(newEdge);
+                    }
+                    else
+                    {
+                        newEdgeImage = null;
+                    }
+                    if (newEdgeImage != null)
+                    {
+                        if (map.InducedSubGraph.ContainsEdge(newEdgeImage))
                         {
-                            InducedSubGraph = map.InducedSubGraph
-                        };
-                        bool treated = false; string g_key_last = null;
-                        if (theMappings.Count > 0)
-                        {
-                            foreach (var g_key in mapping.Function)
-                            {
-                                g_key_last = g_key.Value;
-                                List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                                if (theMappings.TryGetValue(g_key_last, out mappingsToSearch))
-                                {
-                                    if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
-                                    {
-                                        treated = true;
-                                        break;
-                                    }
-                                    // else continue since it may exist in the other keys
-                                }
-                                mappingsToSearch = null;
-                            }
-                        }
-                        else
-                        {
-                            g_key_last = mapping.Function.Last().Value;
-                        }
-                        if (!treated)
-                        {
-                            if (theMappings.ContainsKey(g_key_last))
-                            {
-                                theMappings[g_key_last].Add(mapping);
-                            }
-                            else
-                            {
-                                theMappings[g_key_last] = new List<Mapping> { mapping };
-                            }
                             list.Add(map);
                         }
-                        mapping = null;
                     }
                 }
                 if (list.Count > 0)
@@ -93,14 +70,7 @@ namespace MODA.Impl
                     {
                         parentGraphMappings.Add(item.Value);
                     }
-                    list.Clear();
-                }
-                if (theMappings.Count > 0)
-                {
-                    foreach (var mapping in theMappings)
-                    {
-                        list.AddRange(mapping.Value);
-                    }
+
                 }
                 Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\n", list.Count);
 
@@ -108,8 +78,7 @@ namespace MODA.Impl
                 //Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", theMappings.Count, timer.Elapsed);
 
                 //timer = null;
-                theMappings = null;
-                return list;
+                return list.Select(x => new Mapping(x.Function) { InducedSubGraph = x.InducedSubGraph }).ToList();
             }
             return new Mapping[0];
         }
@@ -133,6 +102,30 @@ namespace MODA.Impl
             }
             return null;
         }
+
+
+        /// <summary>
+        /// Returns the edge in <paramref="currentQueryGraph"/> that is not present in <paramref="parentQueryGraph"/>
+        /// </summary>
+        /// <param name="currentQueryGraph">The current subgraph being queried</param>
+        /// <param name="parentQueryGraph">The parent to <paramref name="currentQueryGraph"/>. This parent is also a subset, meaning it has one edge less.</param>
+        /// <returns></returns>
+        private static Edge<string> GetEdgeDifference(QueryGraph currentQueryGraph, QueryGraph parentQueryGraph)
+        {
+            // Recall: currentQueryGraph is a super-graph of parentQueryGraph
+            if (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount != 1) throw new ArgumentException("Invalid arguments for the method: GetEdgeDifference");
+
+            var edges = parentQueryGraph.Edges;
+            foreach (var edge in currentQueryGraph.Edges)
+            {
+                if (!edges.Contains(edge))
+                {
+                    return edge;
+                }
+            }
+            throw new InvalidOperationException();
+        }
+
 
     }
 }
