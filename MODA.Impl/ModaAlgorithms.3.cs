@@ -56,6 +56,8 @@ namespace MODA.Impl
                 }
                 if (list.Count > 0)
                 {
+                    // Remove mappings from the parent qGraph that are found in this qGraph 
+                    // This is because we're only interested in induced subgraphs
                     var dict = parentGraphMappings.ToDictionary(x => x.Id);
                     for (int i = 0; i < list.Count; i++)
                     {
@@ -78,7 +80,16 @@ namespace MODA.Impl
                 //Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", theMappings.Count, timer.Elapsed);
 
                 //timer = null;
-                return list.Select(x => new Mapping(x.Function) { InducedSubGraph = x.InducedSubGraph }).ToList();
+                var toReturn = new List<Mapping>(list.Count);
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var map = list[i];
+                    toReturn.Add(new Mapping(map.Function)
+                    {
+                        InducedSubGraph = map.InducedSubGraph
+                    });
+                }
+                return toReturn;
             }
             return new Mapping[0];
         }
