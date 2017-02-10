@@ -21,7 +21,7 @@ namespace MODA.Impl
 
             // Do we need this clone? Can't we just remove the node directly from the graph? 
             // We do need it.
-            
+
             H_NodeNeighbours = new Dictionary<string, IList<string>>();
             var theMappings = new Dictionary<string, List<Mapping>>();
             var inputGraphDegSeq = inputGraphClone.GetDegreeSequence(numberOfSamples);
@@ -47,14 +47,16 @@ namespace MODA.Impl
                         //sw.Stop();
                         //Console.WriteLine("Time to do IsomorphicExtension: {0}\n", sw.Elapsed.ToString());
                         //Console.Write(".");
-                        if (mappings != null && mappings.Count > 0)
+                        if (mappings.Count > 0)
                         {
                             //sw.Restart();
 
-                            for (int k = 0; k < mappings.Count; k++)
-                            {
-                                Mapping mapping = mappings[k];
+                            //for (int k = 0; k < mappings.Count; k++)
+                            //{
+                            //    Mapping mapping = mappings[k];
 
+                            foreach (Mapping mapping in mappings.Distinct(new MappingNodesComparer()))
+                            {
                                 bool treated = false; string g_key_last = null;
                                 foreach (var g_key in mapping.Function)
                                 {

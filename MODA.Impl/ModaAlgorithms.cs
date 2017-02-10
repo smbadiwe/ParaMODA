@@ -139,7 +139,7 @@ namespace MODA.Impl
             var neighbourRange = ChooseNeighboursOfRange(partialMap.Values.ToArray(), inputGraph);
 
             var neighborsOfM = queryGraph.GetNeighbors(m, false);
-            //var newPartialMap = new Dictionary<string, string>(partialMap);
+            var newPartialMapCount = partialMap.Count + 1;
             for (int i = 0; i < neighbourRange.Count; i++) //foreach neighbour n of f(D)
             {
                 var n = neighbourRange[i];
@@ -149,7 +149,7 @@ namespace MODA.Impl
 
                     //Find all isomorphic extensions of f'.
                     //newPartialMap[m] = neighbourRange[i];
-                    var newPartialMap = new Dictionary<string, string>(partialMap.Count + 1);
+                    var newPartialMap = new Dictionary<string, string>(newPartialMapCount);
                     foreach (var item in partialMap)
                     {
                         newPartialMap.Add(item.Key, item.Value);
@@ -441,36 +441,49 @@ namespace MODA.Impl
         private static bool CanSupport(QueryGraph queryGraph, string node_H, UndirectedGraph<string, Edge<string>> inputGraph, string node_G)
         {
             // 1. Based on their degrees
-            if (inputGraph.AdjacentDegree(node_G) < queryGraph.AdjacentDegree(node_H))
+            if (inputGraph.AdjacentDegree(node_G) >= queryGraph.AdjacentDegree(node_H))
             {
-                // => we cannot map the querygraph unto the input graph, based on the nodes given.
-                // That means we are ruling out isomorphism. So...
-                return false;
+                // => we can map the querygraph unto the input graph, based on the nodes given.
+                // That means we are not ruling out isomorphism. So...
+                return true;
             }
-            //So, deg(g) >= deg(h).
 
-            //2. Based on the degree of their neighbors
-            var gNeighbors = inputGraph.GetNeighbors(node_G, true);
-            var hNeighbors = queryGraph.GetNeighbors(node_H, false);
-            //TODO: either review or remove this test
-            for (int i = 0; i < hNeighbors.Count; i++)
-            {
-                var hNode = hNeighbors[i];
-                for (int j = 0; j < gNeighbors.Count; j++)
-                {
-                    if (inputGraph.AdjacentDegree(gNeighbors[j]) >= queryGraph.AdjacentDegree(hNode))
-                    {
-                        gNeighbors = null;
-                        hNeighbors = null;
-                        return true;
-                    }
-                }
-            }
-            gNeighbors = null;
-            hNeighbors = null;
             return false;
         }
 
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //private static bool CanSupport(QueryGraph queryGraph, string node_H, UndirectedGraph<string, Edge<string>> inputGraph, string node_G)
+        //{
+        //    // 1. Based on their degrees
+        //    if (inputGraph.AdjacentDegree(node_G) < queryGraph.AdjacentDegree(node_H))
+        //    {
+        //        // => we cannot map the querygraph unto the input graph, based on the nodes given.
+        //        // That means we are ruling out isomorphism. So...
+        //        return false;
+        //    }
+        //    //So, deg(g) >= deg(h).
+
+        //    //2. Based on the degree of their neighbors
+        //    var gNeighbors = inputGraph.GetNeighbors(node_G, true);
+        //    var hNeighbors = queryGraph.GetNeighbors(node_H, false);
+        //    //TODO: either review or remove this test
+        //    for (int i = 0; i < hNeighbors.Count; i++)
+        //    {
+        //        var hNode = hNeighbors[i];
+        //        for (int j = 0; j < gNeighbors.Count; j++)
+        //        {
+        //            if (inputGraph.AdjacentDegree(gNeighbors[j]) >= queryGraph.AdjacentDegree(hNode))
+        //            {
+        //                gNeighbors = null;
+        //                hNeighbors = null;
+        //                return true;
+        //            }
+        //        }
+        //    }
+        //    gNeighbors = null;
+        //    hNeighbors = null;
+        //    return false;
+        //}
         #endregion
     }
 }

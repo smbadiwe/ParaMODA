@@ -56,7 +56,7 @@ namespace MODA.Impl
                         //sw.Restart();
 
                         bool treated = false; string g_key_last = null;
-                        foreach (Mapping mapping in mappings)
+                        foreach (Mapping mapping in mappings.Distinct(new MappingNodesComparer()))
                         {
                             foreach (var g_key in mapping.Function)
                             {
