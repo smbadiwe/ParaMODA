@@ -58,14 +58,18 @@ namespace MODA.Impl
                                 var key = mapping.Function.Values.ToArray();
                                 //var key = mapping.InducedSubGraph.Vertices.ToArray();
                                 List<Mapping> mappingsToSearch;
-                                if (theMappings.TryGetValue(key, out mappingsToSearch))
-                                {
-                                    if (false == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
-                                    {
-                                        theMappings[key].Add(mapping);
-                                    }
-                                }
-                                else
+                                //if (theMappings.TryGetValue(key, out mappingsToSearch))
+                                //{
+                                //    if (false == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
+                                //    {
+                                //        theMappings[key].Add(mapping);
+                                //    }
+                                //}
+                                //else
+                                //{
+                                //    theMappings[key] = new List<Mapping> { mapping };
+                                //}
+                                if (!theMappings.TryGetValue(key, out mappingsToSearch))
                                 {
                                     theMappings[key] = new List<Mapping> { mapping };
                                 }
