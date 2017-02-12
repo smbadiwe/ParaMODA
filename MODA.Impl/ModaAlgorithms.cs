@@ -17,19 +17,7 @@ namespace MODA.Impl
         public static bool UseModifiedGrochow { get; set; }
 
         #region Useful mainly for the Algorithm 2 versions
-
-        /// <summary>
-        /// Given a set of nodes(the Key), we find the subgraph in the input graph G that has those nodes.
-        /// </summary>
-        private static Dictionary<string[], UndirectedGraph<string, Edge<string>>> InputSubgraphs;
-        /// <summary>
-        /// Used to cache 
-        /// </summary>
-        private static Dictionary<string[], List<string>> NeighboursOfRange;
-        /// <summary>
-        /// Used to cache 
-        /// </summary>
-        private static Dictionary<string[], string> MostConstrainedNeighbours;
+        
         /// <summary>
         /// Used to cache 
         /// </summary>
@@ -66,36 +54,7 @@ namespace MODA.Impl
 
             return newInputSubgraph;
         }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="inputGraph"></param>
-        ///// <param name="g_nodes">Usually {Mapping Instance}.Function.Values.ToArray();</param>
-        ///// <returns></returns>
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //private static UndirectedGraph<string, Edge<string>> GetInputSubgraph(UndirectedGraph<string, Edge<string>> inputGraph, string[] g_nodes)
-        //{
-        //    UndirectedGraph<string, Edge<string>> newInputSubgraph;
-        //    if (!InputSubgraphs.TryGetValue(g_nodes, out newInputSubgraph))
-        //    {
-        //        newInputSubgraph = new UndirectedGraph<string, Edge<string>>();
-        //        for (int k = 0; k < g_nodes.Length; k++)
-        //        {
-        //            for (int j = (k + 1); j < g_nodes.Length; j++)
-        //            {
-        //                Edge<string> edge_;
-        //                if (inputGraph.TryGetEdge(g_nodes[k], g_nodes[j], out edge_))
-        //                {
-        //                    newInputSubgraph.AddVerticesAndEdge(edge_);
-        //                }
-        //            }
-        //        }
-        //        InputSubgraphs[g_nodes] = newInputSubgraph;
-        //    }
-        //    return newInputSubgraph;
-        //}
-
+        
         /// <summary>
         /// Algorithm taken from Grochow and Kellis. This is failing at the moment
         /// </summary>
@@ -103,7 +62,7 @@ namespace MODA.Impl
         /// <param name="queryGraph">G</param>
         /// <param name="inputGraph">H</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
-        private static IList<Mapping> IsomorphicExtension(Dictionary<string, string> partialMap, UndirectedGraph<string, Edge<string>> queryGraph
+        private static IList<Mapping> IsomorphicExtension(Dictionary<string, string> partialMap, QueryGraph queryGraph
             , UndirectedGraph<string, Edge<string>> inputGraph)
         {
             if (partialMap.Count == queryGraph.VertexCount)
@@ -361,7 +320,7 @@ namespace MODA.Impl
         //    }
         //    return "";
         //}
-        
+
         ///// <summary>
         ///// 
         ///// </summary>
@@ -394,7 +353,7 @@ namespace MODA.Impl
         //    }
         //    return "";
         //}
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -427,7 +386,7 @@ namespace MODA.Impl
             }
             return "";
         }
-        
+
         /// <summary>
         /// We say that <paramref name="node_G"/> (g) of <paramref name="inputGraph"/> (G) can support <paramref name="node_H"/> (h) of <paramref name="queryGraph"/> (H)
         /// if we cannot rule out a subgraph isomorphism from H into G which maps h to g based on the degrees of h and g, and the degree of their neighbours
@@ -450,40 +409,7 @@ namespace MODA.Impl
 
             return false;
         }
-
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //private static bool CanSupport(QueryGraph queryGraph, string node_H, UndirectedGraph<string, Edge<string>> inputGraph, string node_G)
-        //{
-        //    // 1. Based on their degrees
-        //    if (inputGraph.AdjacentDegree(node_G) < queryGraph.AdjacentDegree(node_H))
-        //    {
-        //        // => we cannot map the querygraph unto the input graph, based on the nodes given.
-        //        // That means we are ruling out isomorphism. So...
-        //        return false;
-        //    }
-        //    //So, deg(g) >= deg(h).
-
-        //    //2. Based on the degree of their neighbors
-        //    var gNeighbors = inputGraph.GetNeighbors(node_G, true);
-        //    var hNeighbors = queryGraph.GetNeighbors(node_H, false);
-        //    //TODO: either review or remove this test
-        //    for (int i = 0; i < hNeighbors.Count; i++)
-        //    {
-        //        var hNode = hNeighbors[i];
-        //        for (int j = 0; j < gNeighbors.Count; j++)
-        //        {
-        //            if (inputGraph.AdjacentDegree(gNeighbors[j]) >= queryGraph.AdjacentDegree(hNode))
-        //            {
-        //                gNeighbors = null;
-        //                hNeighbors = null;
-        //                return true;
-        //            }
-        //        }
-        //    }
-        //    gNeighbors = null;
-        //    hNeighbors = null;
-        //    return false;
-        //}
+        
         #endregion
     }
 }

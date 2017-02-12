@@ -23,7 +23,7 @@ namespace MODA.Impl
             // We do need it.
 
             H_NodeNeighbours = new Dictionary<string, IList<string>>();
-            var theMappings = new Dictionary<string, List<Mapping>>();
+            var theMappings = new Dictionary<string[], List<Mapping>>(new MappingNodesComparer());
             var inputGraphDegSeq = inputGraphClone.GetDegreeSequence(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
             var subgraphSize = queryGraphVertices.Length;
@@ -51,39 +51,23 @@ namespace MODA.Impl
                         {
                             //sw.Restart();
 
-                            //for (int k = 0; k < mappings.Count; k++)
-                            //{
-                            //    Mapping mapping = mappings[k];
-
-                            foreach (Mapping mapping in mappings.Distinct(new MappingNodesComparer()))
+                            for (int k = 0; k < mappings.Count; k++)
                             {
-                                bool treated = false; string g_key_last = null;
-                                foreach (var g_key in mapping.Function)
+                                Mapping mapping = mappings[k];
+                                //Recall: f(h) = g
+                                var key = mapping.Function.Values.ToArray();
+                                //var key = mapping.InducedSubGraph.Vertices.ToArray();
+                                List<Mapping> mappingsToSearch;
+                                if (theMappings.TryGetValue(key, out mappingsToSearch))
                                 {
-                                    g_key_last = g_key.Value;
-                                    List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                                    if (theMappings.TryGetValue(g_key_last, out mappingsToSearch))
+                                    if (false == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
                                     {
-                                        if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
-                                        {
-                                            treated = true;
-                                            break;
-                                        }
-                                        // else continue since it may exist in the other keys
+                                        theMappings[key].Add(mapping);
                                     }
-                                    mappingsToSearch = null;
                                 }
-                                if (!treated)
+                                else
                                 {
-                                    List<Mapping> values;
-                                    if (theMappings.TryGetValue(g_key_last, out values))
-                                    {
-                                        values.Add(mapping);
-                                    }
-                                    else
-                                    {
-                                        theMappings[g_key_last] = new List<Mapping> { mapping };
-                                    }
+                                    theMappings[key] = new List<Mapping> { mapping };
                                 }
                             }
 
@@ -116,8 +100,6 @@ namespace MODA.Impl
             inputGraphClone = null;
             G_NodeNeighbours = null;
             H_NodeNeighbours = null;
-            MostConstrainedNeighbours = null;
-            NeighboursOfRange = null;
             return toReturn;
         }
     }

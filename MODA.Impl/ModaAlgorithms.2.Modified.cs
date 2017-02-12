@@ -31,7 +31,7 @@ namespace MODA.Impl
 
             H_NodeNeighbours = new Dictionary<string, IList<string>>();
             G_NodeNeighbours = new Dictionary<string, IList<string>>();
-            var theMappings = new Dictionary<string, List<Mapping>>();
+            var theMappings = new Dictionary<string[], List<Mapping>>(new MappingNodesComparer());
             var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
 
             Console.WriteLine("Calling Algo 2-Modified: Number of Iterations: {0}.\n", numberOfSamples);
@@ -55,38 +55,26 @@ namespace MODA.Impl
                         //Console.WriteLine(".");
                         //sw.Restart();
 
-                        bool treated = false; string g_key_last = null;
-                        foreach (Mapping mapping in mappings.Distinct(new MappingNodesComparer()))
+                        for (int k = 0; k < mappings.Count; k++)
                         {
-                            foreach (var g_key in mapping.Function)
+                            Mapping mapping = mappings[k];
+                            //Recall: f(h) = g
+                            var key = mapping.Function.Values.ToArray();
+                            //var key = mapping.InducedSubGraph.Vertices.ToArray();
+                            List<Mapping> mappingsToSearch;
+                            if (theMappings.TryGetValue(key, out mappingsToSearch))
                             {
-                                g_key_last = g_key.Value;
-                                List<Mapping> mappingsToSearch; //Recall: f(h) = g
-                                if (theMappings.TryGetValue(g_key_last, out mappingsToSearch))
+                                if (false == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
                                 {
-                                    if (true == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
-                                    {
-                                        treated = true;
-                                        break;
-                                    }
-                                    // else continue since it may exist in the other keys
-                                }
-                                mappingsToSearch = null;
-                            }
-                            if (!treated)
-                            {
-                                List<Mapping> values;
-                                if (theMappings.TryGetValue(g_key_last, out values))
-                                {
-                                    values.Add(mapping);
-                                }
-                                else
-                                {
-                                    theMappings[g_key_last] = new List<Mapping> { mapping };
+                                    theMappings[key].Add(mapping);
                                 }
                             }
-                            treated = false;
+                            else
+                            {
+                                theMappings[key] = new List<Mapping> { mapping };
+                            }
                         }
+
                     }
                     //sw.Stop();
                     //logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
