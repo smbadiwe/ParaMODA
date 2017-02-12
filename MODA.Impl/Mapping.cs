@@ -62,7 +62,8 @@ namespace MODA.Impl
         }
 
         /// <summary>
-        /// NB: Image node set (hence induced subgraph) is guaranteed to be same for both this and other mapping
+        /// NB: Image node set (hence induced subgraph) is guaranteed to be same for both this and other mapping.
+        /// That's virtually all there is to do as isomorphism testing
         /// </summary>
         /// <param name="otherMapping"></param>
         /// <param name="queryGraph"></param>

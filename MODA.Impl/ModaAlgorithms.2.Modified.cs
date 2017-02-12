@@ -36,7 +36,6 @@ namespace MODA.Impl
 
             Console.WriteLine("Calling Algo 2-Modified: Number of Iterations: {0}.\n", numberOfSamples);
 
-            var toReturn = new List<Mapping>();
             var h = queryGraph.Vertices.ElementAt(0);
             var f = new Dictionary<string, string>(1);
             var subgraphSize = queryGraph.VertexCount;
@@ -52,12 +51,46 @@ namespace MODA.Impl
                     var mappings = IsomorphicExtension(f, queryGraph, inputGraph);
                     if (mappings.Count > 0)
                     {
-                        toReturn.AddRange(mappings);
+                        //sw.Stop();
+                        //Console.WriteLine(".");
+                        //sw.Restart();
+
+                        for (int k = 0; k < mappings.Count; k++)
+                        {
+                            Mapping mapping = mappings[k];
+                            //Recall: f(h) = g
+                            var key = mapping.Function.Values.ToArray();
+                            //var key = mapping.InducedSubGraph.Vertices.ToArray();
+                            List<Mapping> mappingsToSearch;
+                            if (theMappings.TryGetValue(key, out mappingsToSearch))
+                            {
+                                if (false == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
+                                {
+                                    theMappings[key].Add(mapping);
+                                }
+                            }
+                            else
+                            {
+                                theMappings[key] = new List<Mapping> { mapping };
+                            }
+                        }
+
                     }
+                    //sw.Stop();
+                    //logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
+                    //sw = null;
+                    mappings = null;
                     #endregion
                 }
             }
 
+            var toReturn = new List<Mapping>();
+            foreach (var mapping in theMappings)
+            {
+                toReturn.AddRange(mapping.Value);
+            }
+            theMappings = null;
+            //InputSubgraphs = null;
             H_NodeNeighbours = null;
             G_NodeNeighbours = null;
             //timer = null;
