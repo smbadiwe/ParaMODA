@@ -31,9 +31,10 @@ namespace MODA.Impl
         /// <summary>
         /// Only for when (InducedSubGraph.EdgeCount == currentQueryGraphEdgeCount)
         /// </summary>
+        /// <param name="newlyAddedEdge"></param>
         /// <param name="parentQueryGraphEdges"></param>
         /// <returns></returns>
-        public Edge<string> GetImage(IEnumerable<Edge<string>> parentQueryGraphEdges)
+        public Edge<string> GetImage(Edge<string> newlyAddedEdge, IEnumerable<Edge<string>> parentQueryGraphEdges)
         {
             var edgeImages = parentQueryGraphEdges.Select(x => new Edge<string>(Function[x.Source], Function[x.Target]));
             foreach (var edgex in InducedSubGraph.Edges)
@@ -61,6 +62,32 @@ namespace MODA.Impl
             return null;
         }
 
+        public bool IsCorrectMapping(QueryGraph queryGraph)
+        {
+            if (InducedSubGraph.EdgeCount > queryGraph.EdgeCount)
+            {
+                foreach (var edge in queryGraph.Edges)
+                {
+                    if (!InducedSubGraph.ContainsEdge(new Edge<string>(Function[edge.Source], Function[edge.Target])))
+                    {
+                        return false;
+                    }
+                } 
+            }
+            //else if (InducedSubGraph.EdgeCount == queryGraph.EdgeCount)
+            //{
+            //    var edgeImages = queryGraph.Edges.Select(x => new Edge<string>(Function[x.Source], Function[x.Target]));
+            //    foreach (var edgex in InducedSubGraph.Edges)
+            //    {
+            //        if (!edgeImages.Contains(edgex))
+            //        {
+            //            return false;
+            //        }
+            //    }
+            //}
+            return true;
+        }
+
         /// <summary>
         /// NB: Image node set (hence induced subgraph) is guaranteed to be same for both this and other mapping.
         /// That's virtually all there is to do as isomorphism testing
@@ -76,7 +103,10 @@ namespace MODA.Impl
             //    // Recall that image node set (hence induced subgraph) is guaranteed to be same for both this and other mapping.
             //    // So, I'm returning true here so that the mapping can be ignored, ie, not added to the list of mappings
             //    return true;
-
+            //}
+            
+            //if (queryGraph.EdgeCount > InducedSubGraph.EdgeCount)
+            //{
             //    #region This is what was here before. Review, even though the app gives correct results based on the test data - largely because this code never runs
             //    ////Test 2 - check if the two are same
             //    //string[] mapSequence, otherMapSequence;

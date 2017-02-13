@@ -66,10 +66,10 @@ namespace MODA.Impl
                         }
                         else
                         {
-                            mappings = null;
+                            mappings = new Mapping[0];
                         }
                     }
-                    if (mappings != null && mappings.Count > thresholdValue)
+                    if (mappings.Count > thresholdValue)
                     {
                         qGraph.IsFrequentSubgraph = true;
                     }

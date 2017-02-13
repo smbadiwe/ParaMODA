@@ -54,30 +54,30 @@ namespace MODA.Impl
                         //sw.Stop();
                         //Console.WriteLine(".");
                         //sw.Restart();
-
+                        string[] key;
                         for (int k = 0; k < mappings.Count; k++)
                         {
                             Mapping mapping = mappings[k];
                             //Recall: f(h) = g
-                            var key = mapping.Function.Values.ToArray();
+                            key = mapping.Function.Values.ToArray();
                             //var key = mapping.InducedSubGraph.Vertices.ToArray();
                             List<Mapping> mappingsToSearch;
-                            //if (theMappings.TryGetValue(key, out mappingsToSearch))
-                            //{
-                            //    if (false == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
-                            //    {
-                            //        theMappings[key].Add(mapping);
-                            //    }
-                            //}
-                            //else
-                            //{
-                            //    theMappings[key] = new List<Mapping> { mapping };
-                            //}
                             if (!theMappings.TryGetValue(key, out mappingsToSearch))
                             {
                                 theMappings[key] = new List<Mapping> { mapping };
                             }
+                            else
+                            {
+                                // Do the Isomorphism thing
+                                if (false == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
+                                {
+                                    theMappings[key].Add(mapping);
+                                }
+                            }
+                            mappingsToSearch = null;
+                            mapping = null;
                         }
+                        key = null;
 
                     }
                     //sw.Stop();
@@ -87,7 +87,8 @@ namespace MODA.Impl
                     #endregion
                 }
             }
-
+            f = null;
+            inputGraphDegSeq = null;
             var toReturn = new List<Mapping>();
             foreach (var mapping in theMappings)
             {

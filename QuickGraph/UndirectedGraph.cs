@@ -121,9 +121,9 @@ namespace QuickGraph
             }
 
             tempList = null;
-            return listToReturn; //.ToArray();
+            return listToReturn;
         }
-
+        
         public UndirectedGraph<TVertex, TEdge> Clone()
         {
             var inputGraphClone = new UndirectedGraph<TVertex, TEdge>();
@@ -290,7 +290,9 @@ namespace QuickGraph
         {
             foreach (var e in this.AdjacentEdges(source))
             {
-                if (this.edgeEqualityComparer(e, source, target))
+                //if (this.edgeEqualityComparer(e, source, target))
+                if ((e.Source.Equals(source) && e.Target.Equals(target)) 
+                    || (e.Target.Equals(source) && e.Source.Equals(target)))
                 {
                     edge = e;
                     return true;
