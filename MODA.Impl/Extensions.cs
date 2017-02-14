@@ -10,22 +10,22 @@ namespace MODA.Impl
 {
     public static class Extensions
     {
-        public static HashSet<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG)
+        public static IList<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG)
         {
             //return graph.GetNeighbors(vertex);
-            HashSet<string> neighbors;
+            IList<string> neighbors;
             if (isG)
             {
                 if (!ModaAlgorithms.G_NodeNeighbours.TryGetValue(vertex, out neighbors))
                 {
-                    ModaAlgorithms.G_NodeNeighbours[vertex] = neighbors = graph.GetNeighbors(vertex);
+                    ModaAlgorithms.G_NodeNeighbours[vertex] = neighbors = graph.GetNeighbors(vertex).ToList();
                 }
             }
             else
             {
                 if (!ModaAlgorithms.H_NodeNeighbours.TryGetValue(vertex, out neighbors))
                 {
-                    ModaAlgorithms.H_NodeNeighbours[vertex] = neighbors = graph.GetNeighbors(vertex);
+                    ModaAlgorithms.H_NodeNeighbours[vertex] = neighbors = graph.GetNeighbors(vertex).ToList();
                 }
             }
             return neighbors;

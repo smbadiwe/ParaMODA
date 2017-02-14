@@ -48,7 +48,7 @@ namespace MODA.Impl
                     }
                     if (newEdgeImage != null)
                     {
-                        if (map.InducedSubGraph.ContainsEdge(newEdgeImage))
+                        if (map.InducedSubGraphEdges.Contains(newEdgeImage))
                         {
                             list.Add(map);
                         }

@@ -77,7 +77,7 @@ namespace MODA.Impl
                     {
                         if (inputGraph.TryGetEdge(node.Value, partialMap.ElementAt(j).Value, out edge_))
                         {
-                            map.InducedSubGraph.AddVerticesAndEdge(edge_);
+                            map.InducedSubGraphEdges.Add(edge_);
                         }
                     }
                     counter++;
