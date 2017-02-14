@@ -4,7 +4,7 @@ namespace MODA.Impl
 {
     /// <summary>
     /// This compares two <see cref="Mapping"/> nodes are equal. Used in dictionary where these nodes form the key.
-    /// The node set of interest is that of the mapping images on G; i.e. the set that form the nodes in the <see cref="Mapping.InducedSubGraph"/>
+    /// The node set of interest is that of the mapping images on G; i.e. the set that form the nodes in the Mapping's InducedSubGraph
     /// </summary>
     public sealed class MappingNodesComparer : EqualityComparer<string[]>
     {

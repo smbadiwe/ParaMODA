@@ -1,4 +1,5 @@
 ﻿using QuickGraph;
+using System.Collections.Generic;
 
 namespace MODA.Impl
 {
@@ -11,9 +12,9 @@ namespace MODA.Impl
 
         public QueryGraph(bool allowParralelEdges) : base(allowParralelEdges)
         {
-            
-        }
 
+        }
+        
         /// <summary>
         /// A name to identify / refer to this query graph
         /// </summary>

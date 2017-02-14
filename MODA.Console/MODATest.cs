@@ -152,7 +152,7 @@ namespace MODA.Console
                         }
                         else
                         {
-                            int count = qGraph.Value.Count;
+                            int count = qGraph.Value.Count; //int.Parse(qGraph.Value.Split('#')[0]); // qGraph.Value.Count; //
                             sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
                             totalMappings += count;
                         }
@@ -168,7 +168,7 @@ namespace MODA.Console
                         }
                         else
                         {
-                            int count = qGraph.Value.Count;
+                            int count = qGraph.Value.Count; //int.Parse(qGraph.Value.Split('#')[0]); // qqGraph.Value.Count;
                             sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
                             foreach (var mapping in qGraph.Value)
                             {

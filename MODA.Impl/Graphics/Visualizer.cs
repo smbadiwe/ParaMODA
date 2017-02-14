@@ -90,7 +90,7 @@ namespace MODA.Impl.Graphics
 
         private static void NoOpEdgeFormatter<TVertex, TEdge>(object sender, FormatEdgeEventArgs<TVertex, TEdge> e)
             where TEdge : IEdge<TVertex>
-            where TVertex : ExpansionTreeNode
+            //where TVertex : ExpansionTreeNode
         {
             // noop
             //e.EdgeFormatter.Label.Value = e.Edge.Label;

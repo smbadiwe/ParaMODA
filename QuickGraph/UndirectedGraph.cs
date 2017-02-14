@@ -79,7 +79,7 @@ namespace QuickGraph
         /// <param name="vertex"></param>
         /// <param name="isG"></param>
         /// <returns></returns>
-        public IList<TVertex> GetNeighbors(TVertex vertex)
+        public HashSet<TVertex> GetNeighbors(TVertex vertex)
         {
             IEdgeList<TVertex, TEdge> adjEdges;
             if (this.adjacentEdges.TryGetValue(vertex, out adjEdges))
@@ -91,9 +91,9 @@ namespace QuickGraph
                     set.Add(adjEdges[i].Target);
                 }
                 set.Remove(vertex);
-                return set.ToList();
+                return set;
             }
-            return new TVertex[0];
+            return new HashSet<TVertex>();
         }
 
         /// <summary>

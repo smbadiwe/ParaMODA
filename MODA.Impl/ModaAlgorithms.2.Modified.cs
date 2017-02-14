@@ -29,8 +29,8 @@ namespace MODA.Impl
             //var timer = System.Diagnostics.Stopwatch.StartNew();
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
 
-            H_NodeNeighbours = new Dictionary<string, IList<string>>();
-            G_NodeNeighbours = new Dictionary<string, IList<string>>();
+            H_NodeNeighbours = new Dictionary<string, HashSet<string>>();
+            G_NodeNeighbours = new Dictionary<string, HashSet<string>>();
             var theMappings = new Dictionary<string[], List<Mapping>>(new MappingNodesComparer());
             var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
 
@@ -74,7 +74,6 @@ namespace MODA.Impl
                                     theMappings[key].Add(mapping);
                                 }
                             }
-                            mappingsToSearch = null;
                             mapping = null;
                         }
                         key = null;
@@ -83,21 +82,24 @@ namespace MODA.Impl
                     //sw.Stop();
                     //logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
                     //sw = null;
-                    mappings = null;
+                    mappings.Clear();
                     #endregion
                 }
             }
             f = null;
-            inputGraphDegSeq = null;
+            inputGraphDegSeq.Clear();
             var toReturn = new List<Mapping>();
             foreach (var mapping in theMappings)
             {
                 toReturn.AddRange(mapping.Value);
             }
-            theMappings = null;
             //InputSubgraphs = null;
-            H_NodeNeighbours = null;
-            G_NodeNeighbours = null;
+            //theMappings = null;
+            //H_NodeNeighbours = null;
+            //G_NodeNeighbours = null;
+            theMappings.Clear();
+            G_NodeNeighbours.Clear();
+            H_NodeNeighbours.Clear();
             //timer = null;
             Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
             return toReturn;

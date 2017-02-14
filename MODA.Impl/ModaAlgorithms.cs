@@ -21,11 +21,11 @@ namespace MODA.Impl
         /// <summary>
         /// Used to cache 
         /// </summary>
-        public static Dictionary<string, IList<string>> G_NodeNeighbours;
+        public static Dictionary<string, HashSet<string>> G_NodeNeighbours;
         /// <summary>
         /// Used to cache 
         /// </summary>
-        public static Dictionary<string, IList<string>> H_NodeNeighbours;
+        public static Dictionary<string, HashSet<string>> H_NodeNeighbours;
 
         /// <summary>
         /// 
@@ -79,7 +79,7 @@ namespace MODA.Impl
                     {
                         if (inputGraph.TryGetEdge(nodes[i], nodes[j], out edge_))
                         {
-                            map.InducedSubGraph.AddVerticesAndEdge(edge_);
+                            map.InducedSubGraphEdges.Add(edge_);
                         }
                     }
                 }
@@ -93,18 +93,17 @@ namespace MODA.Impl
             //  In other words, Key is h and Value is g in the dictionary
 
             // get m, most constrained neighbor
-            string m = GetMostConstrainedNeighbour(partialMap.Keys.ToArray(), queryGraph);
+            string m = GetMostConstrainedNeighbour(partialMap.Keys, queryGraph);
             if (string.IsNullOrWhiteSpace(m)) return new Mapping[0];
 
             var listOfIsomorphisms = new List<Mapping>();
 
-            var neighbours = ChooseNeighboursOfRange(partialMap.Values.ToArray(), inputGraph);
+            var neighbours = ChooseNeighboursOfRange(partialMap.Values, inputGraph);
 
             var neighborsOfM = queryGraph.GetNeighbors(m, false);
             var newPartialMapCount = partialMap.Count + 1;
-            for (int i = 0; i < neighbours.Length; i++) //foreach neighbour n of f(D)
+            foreach (var n in neighbours) //foreach neighbour n of f(D)
             {
-                var n = neighbours[i];
                 if (false == IsNeighbourIncompatible(inputGraph, n, partialMap, queryGraph, neighborsOfM))
                 {
                     //It's compatible; so, let f' = f on D, and f'(m) = n.
@@ -118,16 +117,15 @@ namespace MODA.Impl
                     }
                     newPartialMap[m] = n;
                     var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);
-                    newPartialMap = null;
                     if (subList.Count > 0)
                     {
                         listOfIsomorphisms.AddRange(subList);
+                        subList.Clear();
                     }
-                    subList = null;
+                    newPartialMap = null;
                 }
             }
-            neighbours = null;
-            neighborsOfM = null;
+            neighbours.Clear();
             return listOfIsomorphisms;
         }
 
@@ -146,7 +144,7 @@ namespace MODA.Impl
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsNeighbourIncompatible(UndirectedGraph<string, Edge<string>> inputGraph,
-            string n, Dictionary<string, string> partialMap, QueryGraph queryGraph, IList<string> neighborsOfM)
+            string n, Dictionary<string, string> partialMap, QueryGraph queryGraph, HashSet<string> neighborsOfM)
         {
             //  RECALL: m is for Domain, the Key => the query graph
             if (partialMap.ContainsValue(n))
@@ -157,10 +155,10 @@ namespace MODA.Impl
             //If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
             string val; // f(d)
             var neighboursOfN = inputGraph.GetNeighbors(n, true);
-            for (int i = 0; i < neighborsOfM.Count; i++)
+
+            foreach (var d in neighborsOfM)
             {
-                //var d = neighborsOfM[i];
-                if (!partialMap.TryGetValue(neighborsOfM[i], out val))
+                if (!partialMap.TryGetValue(d, out val))
                 {
                     neighboursOfN = null;
                     return false;
@@ -191,7 +189,7 @@ namespace MODA.Impl
             nonNeighborOfM = null;
             return false;
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -199,17 +197,17 @@ namespace MODA.Impl
         /// <param name="inputGraph">G</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string[] ChooseNeighboursOfRange(string[] used_range, UndirectedGraph<string, Edge<string>> inputGraph)
+        private static HashSet<string> ChooseNeighboursOfRange(IEnumerable<string> used_range, UndirectedGraph<string, Edge<string>> inputGraph)
         {
             var toReturn = new List<string>();
-            for (int i = 0; i < used_range.Length; i++)
+            foreach (var range in used_range)
             {
-                var local = inputGraph.GetNeighbors(used_range[i], true);
+                var local = inputGraph.GetNeighbors(range, true);
                 toReturn.AddRange(local);
                 local = null;
             }
 
-            return new HashSet<string>(toReturn).ToArray();
+            return new HashSet<string>(toReturn); //.ToArray();
         }
 
         /// <summary>
@@ -218,7 +216,7 @@ namespace MODA.Impl
         /// <param name="domain">Domain, D, of fumction f. Meaning that we're only interested in the Keys. Remember: f(h) = g</param>
         /// <param name="queryGraph">H</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string GetMostConstrainedNeighbour(string[] domain, UndirectedGraph<string, Edge<string>> queryGraph)
+        private static string GetMostConstrainedNeighbour(IEnumerable<string> domain, UndirectedGraph<string, Edge<string>> queryGraph)
         {
             /*
              * As is standard in backtracking searches, the algorithm uses the most constrained neighbor
@@ -234,7 +232,7 @@ namespace MODA.Impl
             }
             foreach (var item in tempList.OrderByDescending(x => x.Value))
             {
-                return item.Key;
+                return item.Key; // Only the first is needed
             }
             return "";
         }

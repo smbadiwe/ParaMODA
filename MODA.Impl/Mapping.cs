@@ -10,7 +10,7 @@ namespace MODA.Impl
         public Mapping(Dictionary<string, string> function)
         {
             Function = function;
-            InducedSubGraph = new UndirectedGraph<string, Edge<string>>();
+            InducedSubGraphEdges = new HashSet<Edge<string>>();
         }
 
         /// <summary>
@@ -22,11 +22,11 @@ namespace MODA.Impl
         /// This represents the [f(h) = g] relation. Meaning key is h and value is g.
         /// </summary>
         public Dictionary<string, string> Function { get; private set; }
-
+        
         /// <summary>
-        /// The subgraph (with all edges) in the input graph G that fit the query graph (---Function.Keys)
+        /// All the edges in the input subgraph G that fit the query graph (---Function.Keys)
         /// </summary>
-        public UndirectedGraph<string, Edge<string>> InducedSubGraph { get; set; }
+        public HashSet<Edge<string>> InducedSubGraphEdges { get; private set; }
 
         /// <summary>
         /// Only for when (InducedSubGraph.EdgeCount == currentQueryGraphEdgeCount)
@@ -37,7 +37,7 @@ namespace MODA.Impl
         public Edge<string> GetImage(Edge<string> newlyAddedEdge, IEnumerable<Edge<string>> parentQueryGraphEdges)
         {
             var edgeImages = parentQueryGraphEdges.Select(x => new Edge<string>(Function[x.Source], Function[x.Target]));
-            foreach (var edgex in InducedSubGraph.Edges)
+            foreach (var edgex in InducedSubGraphEdges)
             {
                 if (!edgeImages.Contains(edgex))
                 {
@@ -54,21 +54,19 @@ namespace MODA.Impl
         /// <returns></returns>
         public Edge<string> GetImage(Edge<string> newlyAddedEdge)
         {
-            Edge<string> edgeImage;
-            if (InducedSubGraph.TryGetEdge(Function[newlyAddedEdge.Source], Function[newlyAddedEdge.Target], out edgeImage))
-            {
-                return edgeImage;
-            }
+            var image = new Edge<string>(Function[newlyAddedEdge.Source], Function[newlyAddedEdge.Target]);
+            if (InducedSubGraphEdges.Contains(image)) return image;
+
             return null;
         }
 
         public bool IsCorrectMapping(QueryGraph queryGraph)
         {
-            if (InducedSubGraph.EdgeCount > queryGraph.EdgeCount)
+            if (InducedSubGraphEdges.Count > queryGraph.EdgeCount)
             {
                 foreach (var edge in queryGraph.Edges)
                 {
-                    if (!InducedSubGraph.ContainsEdge(new Edge<string>(Function[edge.Source], Function[edge.Target])))
+                    if (!InducedSubGraphEdges.Contains(new Edge<string>(Function[edge.Source], Function[edge.Target])))
                     {
                         return false;
                     }
@@ -169,6 +167,22 @@ namespace MODA.Impl
             }
             sb.Append("]\n");
             return sb.ToString();
+        }
+
+        public override bool Equals(object obj)
+        {
+            return ToString2().Equals(((Mapping)obj).ToString2());
+        }
+
+        private StringBuilder ToString2()
+        {
+            var sb = new StringBuilder();
+            var functionSorted = new SortedDictionary<string, string>(Function);
+            foreach (var item in functionSorted)
+            {
+                sb.AppendFormat("{0}-{1}", item.Key, item.Value);
+            }
+            return sb;
         }
 
         private string GetStringifiedMapSequence(out string[] mapSequence)

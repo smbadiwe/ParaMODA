@@ -22,7 +22,8 @@ namespace MODA.Impl
             // Do we need this clone? Can't we just remove the node directly from the graph? 
             // We do need it.
 
-            H_NodeNeighbours = new Dictionary<string, IList<string>>();
+            G_NodeNeighbours = new Dictionary<string, HashSet<string>>();
+            H_NodeNeighbours = new Dictionary<string, HashSet<string>>();
             var theMappings = new Dictionary<string[], List<Mapping>>(new MappingNodesComparer());
             var inputGraphDegSeq = inputGraphClone.GetDegreeSequence(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
@@ -31,7 +32,6 @@ namespace MODA.Impl
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
                 var g = inputGraphDegSeq[i];
-                G_NodeNeighbours = new Dictionary<string, IList<string>>();
                 for (int j = 0; j < subgraphSize; j++)
                 {
                     var h = queryGraphVertices[j];
@@ -70,7 +70,6 @@ namespace MODA.Impl
                                         theMappings[key].Add(mapping);
                                     }
                                 }
-                                mappingsToSearch = null;
                                 mapping = null;
                             }
                             key = null;
@@ -78,7 +77,7 @@ namespace MODA.Impl
                             //sw.Stop();
                             //Console.WriteLine("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), queryGraphVertices[j], inputGraphDegSeq[i]);
                             //sw = null;
-                            mappings = null;
+                            mappings.Clear();
                         }
                         #endregion
                     }
@@ -86,9 +85,9 @@ namespace MODA.Impl
 
                 //Remove g
                 inputGraphClone.RemoveVertex(g);
-                G_NodeNeighbours = null;
+                G_NodeNeighbours.Clear();
             }
-            inputGraphDegSeq = null;
+            inputGraphDegSeq.Clear();
             var toReturn = new List<Mapping>();
             foreach (var mapping in theMappings)
             {
@@ -98,11 +97,14 @@ namespace MODA.Impl
             timer.Stop();
             Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", toReturn.Count, timer.Elapsed.ToString());
             timer = null;
-            theMappings = null;
             queryGraphVertices = null;
             inputGraphClone = null;
-            G_NodeNeighbours = null;
-            H_NodeNeighbours = null;
+            theMappings.Clear();
+            G_NodeNeighbours.Clear();
+            H_NodeNeighbours.Clear();
+            //theMappings = null;
+            //G_NodeNeighbours = null;
+            //H_NodeNeighbours = null;
             return toReturn;
         }
     }
