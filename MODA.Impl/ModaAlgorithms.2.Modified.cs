@@ -29,8 +29,8 @@ namespace MODA.Impl
             //var timer = System.Diagnostics.Stopwatch.StartNew();
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
 
-            H_NodeNeighbours = new Dictionary<string, HashSet<string>>();
-            G_NodeNeighbours = new Dictionary<string, HashSet<string>>();
+            H_NodeNeighbours = new Dictionary<string, IList<string>>();
+            G_NodeNeighbours = new Dictionary<string, IList<string>>();
             var theMappings = new Dictionary<string[], List<Mapping>>(new MappingNodesComparer());
             var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
 
@@ -54,52 +54,49 @@ namespace MODA.Impl
                         //sw.Stop();
                         //Console.WriteLine(".");
                         //sw.Restart();
-                        string[] key;
+
                         for (int k = 0; k < mappings.Count; k++)
                         {
                             Mapping mapping = mappings[k];
                             //Recall: f(h) = g
-                            key = mapping.Function.Values.ToArray();
+                            var key = mapping.Function.Values.ToArray();
                             //var key = mapping.InducedSubGraph.Vertices.ToArray();
                             List<Mapping> mappingsToSearch;
+                            //if (theMappings.TryGetValue(key, out mappingsToSearch))
+                            //{
+                            //    if (false == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
+                            //    {
+                            //        theMappings[key].Add(mapping);
+                            //    }
+                            //}
+                            //else
+                            //{
+                            //    theMappings[key] = new List<Mapping> { mapping };
+                            //}
                             if (!theMappings.TryGetValue(key, out mappingsToSearch))
                             {
                                 theMappings[key] = new List<Mapping> { mapping };
                             }
-                            else
-                            {
-                                // Do the Isomorphism thing
-                                if (false == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
-                                {
-                                    theMappings[key].Add(mapping);
-                                }
-                            }
-                            mapping = null;
                         }
-                        key = null;
 
                     }
                     //sw.Stop();
                     //logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
                     //sw = null;
-                    mappings.Clear();
+                    mappings = null;
                     #endregion
                 }
             }
-            f = null;
-            inputGraphDegSeq.Clear();
+
             var toReturn = new List<Mapping>();
             foreach (var mapping in theMappings)
             {
                 toReturn.AddRange(mapping.Value);
             }
+            theMappings = null;
             //InputSubgraphs = null;
-            //theMappings = null;
-            //H_NodeNeighbours = null;
-            //G_NodeNeighbours = null;
-            theMappings.Clear();
-            G_NodeNeighbours.Clear();
-            H_NodeNeighbours.Clear();
+            H_NodeNeighbours = null;
+            G_NodeNeighbours = null;
             //timer = null;
             Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
             return toReturn;

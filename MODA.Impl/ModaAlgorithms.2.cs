@@ -22,8 +22,7 @@ namespace MODA.Impl
             // Do we need this clone? Can't we just remove the node directly from the graph? 
             // We do need it.
 
-            G_NodeNeighbours = new Dictionary<string, HashSet<string>>();
-            H_NodeNeighbours = new Dictionary<string, HashSet<string>>();
+            H_NodeNeighbours = new Dictionary<string, IList<string>>();
             var theMappings = new Dictionary<string[], List<Mapping>>(new MappingNodesComparer());
             var inputGraphDegSeq = inputGraphClone.GetDegreeSequence(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
@@ -32,6 +31,7 @@ namespace MODA.Impl
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
                 var g = inputGraphDegSeq[i];
+                G_NodeNeighbours = new Dictionary<string, IList<string>>();
                 for (int j = 0; j < subgraphSize; j++)
                 {
                     var h = queryGraphVertices[j];
@@ -43,41 +43,42 @@ namespace MODA.Impl
                         var f = new Dictionary<string, string>(1);
                         f[h] = g;
                         var mappings = IsomorphicExtension(f, queryGraph, inputGraphClone);
-                        f = null;
+
                         //sw.Stop();
                         //Console.WriteLine("Time to do IsomorphicExtension: {0}\n", sw.Elapsed.ToString());
                         //Console.Write(".");
                         if (mappings.Count > 0)
                         {
                             //sw.Restart();
-                            string[] key;
+
                             for (int k = 0; k < mappings.Count; k++)
                             {
                                 Mapping mapping = mappings[k];
                                 //Recall: f(h) = g
-                                key = mapping.Function.Values.ToArray();
+                                var key = mapping.Function.Values.ToArray();
                                 //var key = mapping.InducedSubGraph.Vertices.ToArray();
                                 List<Mapping> mappingsToSearch;
+                                //if (theMappings.TryGetValue(key, out mappingsToSearch))
+                                //{
+                                //    if (false == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
+                                //    {
+                                //        theMappings[key].Add(mapping);
+                                //    }
+                                //}
+                                //else
+                                //{
+                                //    theMappings[key] = new List<Mapping> { mapping };
+                                //}
                                 if (!theMappings.TryGetValue(key, out mappingsToSearch))
                                 {
                                     theMappings[key] = new List<Mapping> { mapping };
                                 }
-                                else
-                                {
-                                    // Do the Isomorphism thing
-                                    if (false == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
-                                    {
-                                        theMappings[key].Add(mapping);
-                                    }
-                                }
-                                mapping = null;
                             }
-                            key = null;
 
                             //sw.Stop();
                             //Console.WriteLine("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), queryGraphVertices[j], inputGraphDegSeq[i]);
                             //sw = null;
-                            mappings.Clear();
+                            mappings = null;
                         }
                         #endregion
                     }
@@ -85,9 +86,9 @@ namespace MODA.Impl
 
                 //Remove g
                 inputGraphClone.RemoveVertex(g);
-                G_NodeNeighbours.Clear();
+                G_NodeNeighbours = null;
             }
-            inputGraphDegSeq.Clear();
+
             var toReturn = new List<Mapping>();
             foreach (var mapping in theMappings)
             {
@@ -97,14 +98,12 @@ namespace MODA.Impl
             timer.Stop();
             Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.\nTotal time taken: {1}", toReturn.Count, timer.Elapsed.ToString());
             timer = null;
+            theMappings = null;
+            inputGraphDegSeq = null;
             queryGraphVertices = null;
             inputGraphClone = null;
-            theMappings.Clear();
-            G_NodeNeighbours.Clear();
-            H_NodeNeighbours.Clear();
-            //theMappings = null;
-            //G_NodeNeighbours = null;
-            //H_NodeNeighbours = null;
+            G_NodeNeighbours = null;
+            H_NodeNeighbours = null;
             return toReturn;
         }
     }

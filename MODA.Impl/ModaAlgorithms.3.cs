@@ -24,33 +24,19 @@ namespace MODA.Impl
             {
                 //var timer = System.Diagnostics.Stopwatch.StartNew();
                 var subgraphSize = queryGraph.VertexCount;
-                Edge<string> newEdge;
-                try
-                {
-                    newEdge = GetEdgeDifference(queryGraph, parentQueryGraph);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                    return new Mapping[0];
-                }
+                var newEdge = GetEdgeDifference(queryGraph, parentQueryGraph);
                 Edge<string> newEdgeImage;
                 var list = new List<Mapping>();
-                //var badMappings = new List<Mapping>();
                 for (int i = 0; i < parentGraphMappings.Count; i++)
                 {
                     var map = parentGraphMappings[i];
                     map.Id = i;
                     // Reember, f(h) = g
-                    //if (!map.IsCorrectMapping(parentQueryGraph))
-                    //{
-                    //    badMappings.Add(map);
-                    //    continue;
-                    //}
+
                     // if (f(u), f(v)) ϵ G and meets the conditions, add to list
                     if (map.InducedSubGraphEdges.Count == queryGraph.EdgeCount)
                     {
-                        newEdgeImage = map.GetImage(newEdge, parentQueryGraph.Edges);
+                        newEdgeImage = map.GetImage(parentQueryGraph.Edges);
                     }
                     else if (map.InducedSubGraphEdges.Count > queryGraph.EdgeCount)
                     {
@@ -62,25 +48,12 @@ namespace MODA.Impl
                     }
                     if (newEdgeImage != null)
                     {
-                        list.Add(map);
+                        if (map.InducedSubGraph.ContainsEdge(newEdgeImage))
+                        {
+                            list.Add(map);
+                        }
                     }
                 }
-                //if (badMappings.Count > 0)
-                //{
-                //    var dict = parentGraphMappings.ToDictionary(x => x.Id);
-                //    for (int i = 0; i < badMappings.Count; i++)
-                //    {
-                //        if (dict.ContainsKey(badMappings[i].Id))
-                //        {
-                //            dict.Remove(badMappings[i].Id);
-                //        }
-                //    }
-                //    parentGraphMappings.Clear();
-                //    foreach (var item in dict)
-                //    {
-                //        parentGraphMappings.Add(item.Value);
-                //    }
-                //}
                 if (list.Count > 0)
                 {
                     // Remove mappings from the parent qGraph that are found in this qGraph 
@@ -99,6 +72,7 @@ namespace MODA.Impl
                     {
                         parentGraphMappings.Add(item.Value);
                     }
+
                 }
                 Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\n", list.Count);
 
@@ -112,7 +86,6 @@ namespace MODA.Impl
                     var map = list[i];
                     toReturn.Add(new Mapping(map.Function));
                 }
-                list = null;
                 return toReturn;
             }
             return new Mapping[0];

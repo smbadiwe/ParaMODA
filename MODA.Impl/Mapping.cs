@@ -10,7 +10,7 @@ namespace MODA.Impl
         public Mapping(Dictionary<string, string> function)
         {
             Function = function;
-            InducedSubGraphEdges = new HashSet<Edge<string>>();
+            InducedSubGraph = new UndirectedGraph<string, Edge<string>>();
         }
 
         /// <summary>
@@ -22,22 +22,21 @@ namespace MODA.Impl
         /// This represents the [f(h) = g] relation. Meaning key is h and value is g.
         /// </summary>
         public Dictionary<string, string> Function { get; private set; }
-        
+
         /// <summary>
-        /// All the edges in the input subgraph G that fit the query graph (---Function.Keys)
+        /// The subgraph (with all edges) in the input graph G that fit the query graph (---Function.Keys)
         /// </summary>
-        public HashSet<Edge<string>> InducedSubGraphEdges { get; private set; }
+        public UndirectedGraph<string, Edge<string>> InducedSubGraph { get; set; }
 
         /// <summary>
         /// Only for when (InducedSubGraph.EdgeCount == currentQueryGraphEdgeCount)
         /// </summary>
-        /// <param name="newlyAddedEdge"></param>
         /// <param name="parentQueryGraphEdges"></param>
         /// <returns></returns>
-        public Edge<string> GetImage(Edge<string> newlyAddedEdge, IEnumerable<Edge<string>> parentQueryGraphEdges)
+        public Edge<string> GetImage(IEnumerable<Edge<string>> parentQueryGraphEdges)
         {
             var edgeImages = parentQueryGraphEdges.Select(x => new Edge<string>(Function[x.Source], Function[x.Target]));
-            foreach (var edgex in InducedSubGraphEdges)
+            foreach (var edgex in InducedSubGraph.Edges)
             {
                 if (!edgeImages.Contains(edgex))
                 {
@@ -54,36 +53,12 @@ namespace MODA.Impl
         /// <returns></returns>
         public Edge<string> GetImage(Edge<string> newlyAddedEdge)
         {
-            var image = new Edge<string>(Function[newlyAddedEdge.Source], Function[newlyAddedEdge.Target]);
-            if (InducedSubGraphEdges.Contains(image)) return image;
-
-            return null;
-        }
-
-        public bool IsCorrectMapping(QueryGraph queryGraph)
-        {
-            if (InducedSubGraphEdges.Count > queryGraph.EdgeCount)
+            Edge<string> edgeImage;
+            if (InducedSubGraph.TryGetEdge(Function[newlyAddedEdge.Source], Function[newlyAddedEdge.Target], out edgeImage))
             {
-                foreach (var edge in queryGraph.Edges)
-                {
-                    if (!InducedSubGraphEdges.Contains(new Edge<string>(Function[edge.Source], Function[edge.Target])))
-                    {
-                        return false;
-                    }
-                } 
+                return edgeImage;
             }
-            //else if (InducedSubGraph.EdgeCount == queryGraph.EdgeCount)
-            //{
-            //    var edgeImages = queryGraph.Edges.Select(x => new Edge<string>(Function[x.Source], Function[x.Target]));
-            //    foreach (var edgex in InducedSubGraph.Edges)
-            //    {
-            //        if (!edgeImages.Contains(edgex))
-            //        {
-            //            return false;
-            //        }
-            //    }
-            //}
-            return true;
+            return null;
         }
 
         /// <summary>
@@ -101,10 +76,7 @@ namespace MODA.Impl
             //    // Recall that image node set (hence induced subgraph) is guaranteed to be same for both this and other mapping.
             //    // So, I'm returning true here so that the mapping can be ignored, ie, not added to the list of mappings
             //    return true;
-            //}
-            
-            //if (queryGraph.EdgeCount > InducedSubGraph.EdgeCount)
-            //{
+
             //    #region This is what was here before. Review, even though the app gives correct results based on the test data - largely because this code never runs
             //    ////Test 2 - check if the two are same
             //    //string[] mapSequence, otherMapSequence;
@@ -167,22 +139,6 @@ namespace MODA.Impl
             }
             sb.Append("]\n");
             return sb.ToString();
-        }
-
-        public override bool Equals(object obj)
-        {
-            return ToString2().Equals(((Mapping)obj).ToString2());
-        }
-
-        private StringBuilder ToString2()
-        {
-            var sb = new StringBuilder();
-            var functionSorted = new SortedDictionary<string, string>(Function);
-            foreach (var item in functionSorted)
-            {
-                sb.AppendFormat("{0}-{1}", item.Key, item.Value);
-            }
-            return sb;
         }
 
         private string GetStringifiedMapSequence(out string[] mapSequence)
