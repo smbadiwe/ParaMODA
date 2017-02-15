@@ -122,7 +122,7 @@ namespace MODA.Impl
             }
             return listOfIsomorphisms;
         }
-        
+
         /// <summary>
         /// If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
         /// or if there is a NON-neighbor d ∈ D of m such that n is neighbors with f(d) 
@@ -147,15 +147,17 @@ namespace MODA.Impl
             }
 
             //If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
-            string val; // f(d)
             var neighboursOfN = inputGraph.GetNeighbors(n, true);
-
+            //bool doNext = false;
+            string val; // f(d)
             foreach (var d in neighborsOfM)
             {
                 if (!partialMap.TryGetValue(d, out val))
                 {
                     neighboursOfN = null;
                     return false;
+                    //doNext = true;
+                    //break;
                 }
                 if (!neighboursOfN.Contains(val))
                 {
@@ -165,25 +167,28 @@ namespace MODA.Impl
             }
 
             //// or if there is a NON - neighbor d ∈ D of m such that n IS neighbors with f(d)
-            //var nonNeighborOfM = queryGraph.Vertices.Except(neighborsOfM);
-            //foreach (var d in nonNeighborOfM)
+            //if (doNext)
             //{
-            //    if (!partialMap.TryGetValue(d, out val))
+            //    var nonNeighborOfM = queryGraph.Vertices.Except(neighborsOfM);
+            //    foreach (var d in nonNeighborOfM)
             //    {
-            //        neighboursOfN = null;
-            //        return false;
+            //        if (!partialMap.TryGetValue(d, out val))
+            //        {
+            //            neighboursOfN = null;
+            //            return false;
+            //        }
+            //        if (neighboursOfN.Contains(val))
+            //        {
+            //            neighboursOfN = null;
+            //            return true;
+            //        }
             //    }
-            //    if (neighboursOfN.Contains(val))
-            //    {
-            //        neighboursOfN = null;
-            //        return true;
-            //    }
+            //    nonNeighborOfM = null;
             //}
-            //nonNeighborOfM = null;
             neighboursOfN = null;
             return false;
         }
-        
+
         ///// <summary>
         ///// 
         ///// </summary>

@@ -31,7 +31,7 @@ namespace MODA.Impl
 
             H_NodeNeighbours = new Dictionary<string, HashSet<string>>();
             G_NodeNeighbours = new Dictionary<string, HashSet<string>>();
-            var theMappings = new Dictionary<string[], List<Mapping>>(new MappingNodesComparer());
+            var theMappings = new Dictionary<string[], Mapping>(new MappingNodesComparer());
             var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
 
             Console.WriteLine("Calling Algo 2-Modified: Number of Iterations: {0}.\n", numberOfSamples);
@@ -60,22 +60,9 @@ namespace MODA.Impl
                             Mapping mapping = mappings[k];
                             //Recall: f(h) = g
                             var key = mapping.Function.Values.ToArray();
-                            //var key = mapping.InducedSubGraph.Vertices.ToArray();
-                            List<Mapping> mappingsToSearch;
-                            //if (theMappings.TryGetValue(key, out mappingsToSearch))
-                            //{
-                            //    if (false == mappingsToSearch.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
-                            //    {
-                            //        theMappings[key].Add(mapping);
-                            //    }
-                            //}
-                            //else
-                            //{
-                            //    theMappings[key] = new List<Mapping> { mapping };
-                            //}
-                            if (!theMappings.TryGetValue(key, out mappingsToSearch))
+                            if (!theMappings.ContainsKey(key))
                             {
-                                theMappings[key] = new List<Mapping> { mapping };
+                                theMappings[key] = mapping;
                             }
                         }
 
@@ -91,7 +78,7 @@ namespace MODA.Impl
             var toReturn = new List<Mapping>();
             foreach (var mapping in theMappings)
             {
-                toReturn.AddRange(mapping.Value);
+                toReturn.Add(mapping.Value);
             }
             //InputSubgraphs = null;
             inputGraphDegSeq.Clear();
