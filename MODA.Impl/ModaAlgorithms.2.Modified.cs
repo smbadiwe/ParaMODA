@@ -54,8 +54,8 @@ namespace MODA.Impl
                         //sw.Stop();
                         //Console.WriteLine(".");
                         //sw.Restart();
-
-                        for (int k = 0; k < mappings.Count; k++)
+                        
+                        for (int k = mappings.Count - 1; k >= 0; k--)
                         {
                             Mapping mapping = mappings[k];
                             //Recall: f(h) = g
@@ -64,22 +64,18 @@ namespace MODA.Impl
                             {
                                 theMappings[key] = mapping;
                             }
+                            mappings.RemoveAt(k);
                         }
 
                     }
                     //sw.Stop();
                     //logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
                     //sw = null;
-                    mappings.Clear();
                     #endregion
                 }
             }
 
-            var toReturn = new List<Mapping>();
-            foreach (var mapping in theMappings)
-            {
-                toReturn.Add(mapping.Value);
-            }
+            var toReturn = theMappings.Values.ToList();
             //InputSubgraphs = null;
             inputGraphDegSeq.Clear();
             theMappings.Clear();

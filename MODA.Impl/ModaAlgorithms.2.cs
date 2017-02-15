@@ -51,8 +51,8 @@ namespace MODA.Impl
                         if (mappings.Count > 0)
                         {
                             //sw.Restart();
-
-                            for (int k = 0; k < mappings.Count; k++)
+                            
+                            for (int k = mappings.Count - 1; k >= 0; k--)
                             {
                                 Mapping mapping = mappings[k];
                                 //Recall: f(h) = g
@@ -61,12 +61,11 @@ namespace MODA.Impl
                                 {
                                     theMappings[key] = mapping;
                                 }
+                                mappings.RemoveAt(k);
                             }
-
                             //sw.Stop();
                             //Console.WriteLine("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), queryGraphVertices[j], inputGraphDegSeq[i]);
                             //sw = null;
-                            mappings.Clear();
                         }
                         #endregion
                     }
@@ -77,11 +76,7 @@ namespace MODA.Impl
                 G_NodeNeighbours.Clear();
             }
 
-            var toReturn = new List<Mapping>();
-            foreach (var mapping in theMappings)
-            {
-                toReturn.Add(mapping.Value);
-            }
+            var toReturn = theMappings.Values.ToList();
             //Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
             //timer.Stop();
             Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.", toReturn.Count);
