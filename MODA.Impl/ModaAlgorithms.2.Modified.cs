@@ -29,8 +29,8 @@ namespace MODA.Impl
             //var timer = System.Diagnostics.Stopwatch.StartNew();
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
 
-            H_NodeNeighbours = new Dictionary<string, IList<string>>();
-            G_NodeNeighbours = new Dictionary<string, IList<string>>();
+            H_NodeNeighbours = new Dictionary<string, HashSet<string>>();
+            G_NodeNeighbours = new Dictionary<string, HashSet<string>>();
             var theMappings = new Dictionary<string[], List<Mapping>>(new MappingNodesComparer());
             var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
 
@@ -83,7 +83,7 @@ namespace MODA.Impl
                     //sw.Stop();
                     //logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
                     //sw = null;
-                    mappings = null;
+                    mappings.Clear();
                     #endregion
                 }
             }
@@ -93,10 +93,11 @@ namespace MODA.Impl
             {
                 toReturn.AddRange(mapping.Value);
             }
-            theMappings = null;
             //InputSubgraphs = null;
-            H_NodeNeighbours = null;
-            G_NodeNeighbours = null;
+            inputGraphDegSeq.Clear();
+            theMappings.Clear();
+            H_NodeNeighbours.Clear();
+            G_NodeNeighbours.Clear();
             //timer = null;
             Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
             return toReturn;
