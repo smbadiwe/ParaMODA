@@ -101,7 +101,7 @@ namespace MODA.Impl
             var newPartialMapCount = partialMap.Count + 1;
             foreach (var n in neighbourRange) //foreach neighbour n of f(D)
             {
-                if (false == IsNeighbourIncompatible(inputGraph, n, partialMap, neighborsOfM))
+                if (false == IsNeighbourIncompatible(inputGraph, n, partialMap, queryGraph, neighborsOfM))
                 {
                     //It's not; so, let f' = f on D, and f'(m) = n.
 
@@ -122,46 +122,34 @@ namespace MODA.Impl
             }
             return listOfIsomorphisms;
         }
-
+        
         /// <summary>
         /// If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
         /// or if there is a NON-neighbor d ∈ D of m such that n is neighbors with f(d) 
         /// [or if assigning f(m) = n would violate a symmetry-breaking condition in C(h)]
-        /// then neighbour is compatible. So contiue with the next n (as in, return false)
+        /// then neighbour is incompatible. So contiue with the next n (as in, return true)
         /// </summary>
         /// <param name="inputGraph">G</param>
         /// <param name="n">g_node, pass in 'neighbour'; n in Grochow</param>
         /// <param name="domain">domain_in_H</param>
         /// <param name="partialMap">function</param>
-        /// <param name="neighborsOfM">neighbors of h_node in the queryGraph/></param>
+        /// <param name="queryGraph"></param>
+        /// <param name="neighborsOfM">neighbors of h_node in the <paramref name="queryGraph"/> /></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsNeighbourIncompatible(UndirectedGraph<string, Edge<string>> inputGraph,
-            string n, Dictionary<string, string> partialMap, HashSet<string> neighborsOfM)
+            string n, Dictionary<string, string> partialMap, QueryGraph queryGraph, HashSet<string> neighborsOfM)
         {
             //  RECALL: m is for Domain, the Key => the query graph
+            if (partialMap.ContainsValue(n))
+            {
+                return true; // cos it's already done
+            }
 
-            //A: If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d)...
-            //for (int i = 0; i < neighborsOfM.Count; i++)
-            //{
-            //    string val; // f(d)
-            //    if (!partialMap.TryGetValue(neighborsOfM[i], out val))
-            //    {
-            //        return true; //=> it's compatible
-            //    }
-            //    var neighboursOfN = inputGraph.GetNeighbors(val, true);
-            //    if (!neighboursOfN.Contains(n))
-            //    {
-            //        neighboursOfN = null;
-            //        return true; //=> it's compatible
-            //    }
-            //}
-
-            //return false;
-
+            //If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
+            string val; // f(d)
             var neighboursOfN = inputGraph.GetNeighbors(n, true);
 
-            string val;
             foreach (var d in neighborsOfM)
             {
                 if (!partialMap.TryGetValue(d, out val))
@@ -176,10 +164,26 @@ namespace MODA.Impl
                 }
             }
 
+            //// or if there is a NON - neighbor d ∈ D of m such that n IS neighbors with f(d)
+            //var nonNeighborOfM = queryGraph.Vertices.Except(neighborsOfM);
+            //foreach (var d in nonNeighborOfM)
+            //{
+            //    if (!partialMap.TryGetValue(d, out val))
+            //    {
+            //        neighboursOfN = null;
+            //        return false;
+            //    }
+            //    if (neighboursOfN.Contains(val))
+            //    {
+            //        neighboursOfN = null;
+            //        return true;
+            //    }
+            //}
+            //nonNeighborOfM = null;
             neighboursOfN = null;
             return false;
         }
-
+        
         ///// <summary>
         ///// 
         ///// </summary>
