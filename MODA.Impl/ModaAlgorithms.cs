@@ -15,6 +15,7 @@ namespace MODA.Impl
         /// If true, the program will use my modified Grochow's algorithm (Algo 2)
         /// </summary>
         public static bool UseModifiedGrochow { get; set; }
+        public static bool UsingAlgo3 { get; set; }
 
         #region Useful mainly for the Algorithm 2 versions
 
@@ -78,6 +79,7 @@ namespace MODA.Impl
                     g_nodes.Add(item.Value);
                 }
                 Edge<string> edge_g = null;
+                HashSet<Edge<string>> inducedSubGraphEdges = new HashSet<Edge<string>>();
                 var qEdges = queryGraph.Edges;
                 for (int i = 0; i < subgraphSize - 1; i++)
                 {
@@ -90,6 +92,10 @@ namespace MODA.Impl
                             {
                                 g_nodes.Clear();
                                 h_nodes.Clear();
+                                inducedSubGraphEdges.Clear();
+                                g_nodes = null;
+                                h_nodes = null;
+                                inducedSubGraphEdges = null;
                                 return new Mapping[0];
                             }
                         }
@@ -101,26 +107,38 @@ namespace MODA.Impl
                         {
                             if (inputGraph.TryGetEdge(g_nodes[i], g_nodes[j], out edge_g))
                             {
-                                map.InducedSubGraphEdges.Add(edge_g);
+                                inducedSubGraphEdges.Add(edge_g);
                             }
                         }
                         else
                         {
                             if (edge_g != null)
                             {
-                                map.InducedSubGraphEdges.Add(edge_g);
+                                inducedSubGraphEdges.Add(edge_g);
                             }
                         }
                     }
                 }
                 g_nodes.Clear();
                 h_nodes.Clear();
+                g_nodes = null;
+                h_nodes = null;
                 edge_g = null;
-                if (queryGraph.EdgeCount > map.InducedSubGraphEdges.Count) // this shouuld never happen; but just in case
+                if (queryGraph.EdgeCount > inducedSubGraphEdges.Count) // this shouuld never happen; but just in case
                 {
+                    inducedSubGraphEdges.Clear();
+                    inducedSubGraphEdges = null;
                     return new Mapping[0];
                 }
-
+                if (UsingAlgo3)
+                {
+                    map.InducedSubGraphEdges = inducedSubGraphEdges;
+                }
+                else
+                {
+                    inducedSubGraphEdges.Clear();
+                    inducedSubGraphEdges = null;
+                }
                 return new List<Mapping>(1) { map };
                 #endregion
 

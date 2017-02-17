@@ -59,7 +59,7 @@ namespace MODA.Impl
                                 List<Mapping> mapSet;
                                 if (!theMappings.TryGetValue(key, out mapSet))
                                 {
-                                    theMappings[key] = new List<Mapping> { mapping };
+                                    theMappings[key] = new List<Mapping> (1) { mapping };
                                 }
                                 else
                                 {

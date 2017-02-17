@@ -107,6 +107,7 @@ namespace MODA.Console
 
                 if (queryGraph == null)
                 {
+                    ModaAlgorithms.UsingAlgo3 = true;
                     ModaAlgorithms.BuildTree(subGraphSize);
                 }
                 #endregion

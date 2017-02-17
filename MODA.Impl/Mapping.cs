@@ -10,7 +10,6 @@ namespace MODA.Impl
         public Mapping(Dictionary<string, string> function)
         {
             Function = function;
-            InducedSubGraphEdges = new HashSet<Edge<string>>();
         }
 
         /// <summary>
@@ -26,7 +25,7 @@ namespace MODA.Impl
         /// <summary>
         /// All the edges in the input subgraph G that fit the query graph (---Function.Keys)
         /// </summary>
-        public HashSet<Edge<string>> InducedSubGraphEdges { get; private set; }
+        public HashSet<Edge<string>> InducedSubGraphEdges { get; set; }
 
         /// <summary>
         /// Only for when (InducedSubGraph.EdgeCount == currentQueryGraphEdgeCount)
