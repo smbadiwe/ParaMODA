@@ -121,7 +121,7 @@ namespace QuickGraph
             }
 
             tempList = null;
-            return listToReturn; //.ToArray();
+            return listToReturn;
         }
 
         public UndirectedGraph<TVertex, TEdge> Clone()

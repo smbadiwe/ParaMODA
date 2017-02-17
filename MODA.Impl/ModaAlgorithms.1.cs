@@ -6,10 +6,10 @@ namespace MODA.Impl
 {
     public partial class ModaAlgorithms
     {
-        private static ExpansionTreeBuilder<Edge<string>> _builder;
+        private static ExpansionTreeBuilder<string> _builder;
         public static void BuildTree(int subgraphSize)
         {
-            _builder = new ExpansionTreeBuilder<Edge<string>>(subgraphSize);
+            _builder = new ExpansionTreeBuilder<string>(subgraphSize);
             _builder.Build();
         }
 
@@ -191,6 +191,7 @@ namespace MODA.Impl
                         qGraph.IsFrequentSubgraph = true;
                     }
                     // Save mappings. Do we need to save to disk? Maybe not!
+                    
                     allMappings.Add(qGraph, mappings);
 
                     mappings = null; //.Clear();
@@ -232,13 +233,17 @@ namespace MODA.Impl
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ExpansionTreeNode GetNextNode()
         {
-            foreach (var node in _builder.VerticesSorted)
+            if (_builder.VerticesSorted.Count > 0)
             {
-                if (node.Value == GraphColor.White) continue;
-
-                _builder.VerticesSorted[node.Key] = GraphColor.White;
-                return node.Key;
+                return _builder.VerticesSorted.Dequeue();
             }
+            //foreach (var node in _builder.VerticesSorted)
+            //{
+            //    if (node.Value == GraphColor.White) continue;
+
+            //    _builder.VerticesSorted[node.Key] = GraphColor.White;
+            //    return node.Key;
+            //}
             return null;
         }
     }

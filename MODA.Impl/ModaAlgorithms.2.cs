@@ -23,8 +23,7 @@ namespace MODA.Impl
             // We do need it.
 
             H_NodeNeighbours = new Dictionary<string, HashSet<string>>();
-            //var theMappings = new Dictionary<string[], List<Mapping>>(new MappingNodesComparer());
-            var theMappings = new Dictionary<string[], Mapping>(new MappingNodesComparer());
+            var theMappings = new Dictionary<string[], List<Mapping>>(new MappingNodesComparer());
             var inputGraphDegSeq = inputGraphClone.GetDegreeSequence(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
             var subgraphSize = queryGraphVertices.Length;
@@ -51,15 +50,23 @@ namespace MODA.Impl
                         if (mappings.Count > 0)
                         {
                             //sw.Restart();
-                            
+
                             for (int k = mappings.Count - 1; k >= 0; k--)
                             {
                                 Mapping mapping = mappings[k];
                                 //Recall: f(h) = g
                                 var key = mapping.Function.Values.ToArray();
-                                if (!theMappings.ContainsKey(key))
+                                List<Mapping> mapSet;
+                                if (!theMappings.TryGetValue(key, out mapSet))
                                 {
-                                    theMappings[key] = mapping;
+                                    theMappings[key] = new List<Mapping> { mapping };
+                                }
+                                else
+                                {
+                                    if (false == mapSet.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
+                                    {
+                                        mapSet.Add(mapping);
+                                    }
                                 }
                                 mappings.RemoveAt(k);
                             }
@@ -76,17 +83,15 @@ namespace MODA.Impl
                 G_NodeNeighbours.Clear();
             }
 
-            var toReturn = theMappings.Values.ToList();
-            //Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
-            //timer.Stop();
-            Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.", toReturn.Count);
-            //timer = null;
+            var toReturn = new List<Mapping>(theMappings.Values.SelectMany(x => x));
+
+            theMappings.Clear();
             inputGraphDegSeq.Clear();
             queryGraphVertices = null;
             inputGraphClone = null;
-            theMappings.Clear();
             H_NodeNeighbours.Clear();
             G_NodeNeighbours.Clear();
+            Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.", toReturn.Count);
             return toReturn;
         }
     }

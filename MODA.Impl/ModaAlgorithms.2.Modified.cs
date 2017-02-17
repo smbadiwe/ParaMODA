@@ -31,7 +31,7 @@ namespace MODA.Impl
 
             H_NodeNeighbours = new Dictionary<string, HashSet<string>>();
             G_NodeNeighbours = new Dictionary<string, HashSet<string>>();
-            var theMappings = new Dictionary<string[], Mapping>(new MappingNodesComparer());
+            var theMappings = new Dictionary<string[], List<Mapping>>(new MappingNodesComparer());
             var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
 
             Console.WriteLine("Calling Algo 2-Modified: Number of Iterations: {0}.\n", numberOfSamples);
@@ -60,9 +60,17 @@ namespace MODA.Impl
                             Mapping mapping = mappings[k];
                             //Recall: f(h) = g
                             var key = mapping.Function.Values.ToArray();
-                            if (!theMappings.ContainsKey(key))
+                            List<Mapping> mapSet;
+                            if (!theMappings.TryGetValue(key, out mapSet))
                             {
-                                theMappings[key] = mapping;
+                                theMappings[key] = new List<Mapping> { mapping };
+                            }
+                            else
+                            {
+                                if (false == mapSet.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
+                                {
+                                    mapSet.Add(mapping);
+                                }
                             }
                             mappings.RemoveAt(k);
                         }
@@ -75,10 +83,10 @@ namespace MODA.Impl
                 }
             }
 
-            var toReturn = theMappings.Values.ToList();
+            var toReturn = new List<Mapping>(theMappings.Values.SelectMany(x => x));
             //InputSubgraphs = null;
-            inputGraphDegSeq.Clear();
             theMappings.Clear();
+            inputGraphDegSeq.Clear();
             H_NodeNeighbours.Clear();
             G_NodeNeighbours.Clear();
             //timer = null;

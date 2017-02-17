@@ -68,54 +68,49 @@ namespace MODA.Impl
         /// <returns></returns>
         public bool IsIsomorphicWith(Mapping otherMapping, QueryGraph queryGraph)
         {
-            //if (queryGraph.EdgeCount > InducedSubGraph.EdgeCount)
-            //{
-            //    //NB: This comdition being true means that the query graph cannot be mapped to the induced subgraph.
-            //    // Recall that image node set (hence induced subgraph) is guaranteed to be same for both this and other mapping.
-            //    // So, I'm returning true here so that the mapping can be ignored, ie, not added to the list of mappings
-            //    return true;
+            //if (true)
+            {
+                #region This is what was here before. Review, even though the app gives correct results based on the test data - largely because this code never runs
+                ////Test 2 - check if the two are same
+                //string[] mapSequence, otherMapSequence;
+                //var thisSequence = GetStringifiedMapSequence(out mapSequence);
+                //var otherSequence = otherMapping.GetStringifiedMapSequence(out otherMapSequence);
+                //if (thisSequence == otherSequence)
+                //{
+                //    //System.Console.WriteLine("thisSequence == otherSequence. Return true");
+                //    return true;
+                //}
 
-            //    #region This is what was here before. Review, even though the app gives correct results based on the test data - largely because this code never runs
-            //    ////Test 2 - check if the two are same
-            //    //string[] mapSequence, otherMapSequence;
-            //    //var thisSequence = GetStringifiedMapSequence(out mapSequence);
-            //    //var otherSequence = otherMapping.GetStringifiedMapSequence(out otherMapSequence);
-            //    //if (thisSequence == otherSequence)
-            //    //{
-            //    //    //System.Console.WriteLine("thisSequence == otherSequence. Return true");
-            //    //    return true;
-            //    //}
+                ////Test 3 - check if one is a reversed reading of the other
+                //bool isIso = true;
+                //int index = mapSequence.Length;
+                //for (int i = 0; i < index; i++)
+                //{
+                //    if (mapSequence[i] != otherMapSequence[index - i - 1])
+                //    {
+                //        isIso = false;
+                //        break;
+                //    }
+                //}
+                //if (isIso)
+                //{
+                //    //System.Console.WriteLine("isAlso == true. Return true");
+                //    return true;
+                //}
 
-            //    ////Test 3 - check if one is a reversed reading of the other
-            //    //bool isIso = true;
-            //    //int index = mapSequence.Length;
-            //    //for (int i = 0; i < index; i++)
-            //    //{
-            //    //    if (mapSequence[i] != otherMapSequence[index - i - 1])
-            //    //    {
-            //    //        isIso = false;
-            //    //        break;
-            //    //    }
-            //    //}
-            //    //if (isIso)
-            //    //{
-            //    //    //System.Console.WriteLine("isAlso == true. Return true");
-            //    //    return true;
-            //    //}
-
-            //    ////Test 4 - compare corresponding edges
-            //    //foreach (var edge in queryGraph.Edges)
-            //    //{
-            //    //    var edgeImage = new Edge<string>(Function[edge.Source], Function[edge.Target]);
-            //    //    var otherEdgeImage = new Edge<string>(otherMapping.Function[edge.Source], otherMapping.Function[edge.Target]);
-            //    //    if (edgeImage != otherEdgeImage)
-            //    //    {
-            //    //        System.Console.WriteLine("edgeImage != otherEdgeImage. Return false");
-            //    //        return false;
-            //    //    }
-            //    //}
-            //    #endregion
-            //}
+                ////Test 4 - compare corresponding edges
+                //foreach (var edge in queryGraph.Edges)
+                //{
+                //    var edgeImage = new Edge<string>(Function[edge.Source], Function[edge.Target]);
+                //    var otherEdgeImage = new Edge<string>(otherMapping.Function[edge.Source], otherMapping.Function[edge.Target]);
+                //    if (edgeImage != otherEdgeImage)
+                //    {
+                //        System.Console.WriteLine("edgeImage != otherEdgeImage. Return false");
+                //        return false;
+                //    }
+                //}
+                #endregion
+            }
 
             // let it go
             return true;

@@ -69,21 +69,61 @@ namespace MODA.Impl
             {
                 #region Return base case
                 var map = new Mapping(partialMap);
-                int counter = 0, subgraphSize = partialMap.Count;
-                Edge<string> edge_;
-                foreach (var node in partialMap) // Remember, f(h) = g, so .Values is for g's
+                int subgraphSize = partialMap.Count;
+                var g_nodes = new List<string>(subgraphSize); // Remember, f(h) = g, so .Values is for g's
+                var h_nodes = new List<string>(subgraphSize); // Remember, f(h) = g, so .Keys is for h's
+                foreach (var item in partialMap)
                 {
-                    for (int j = (counter + 1); j < subgraphSize; j++)
+                    h_nodes.Add(item.Key);
+                    g_nodes.Add(item.Value);
+                }
+                Edge<string> edge_g = null;
+                var qEdges = queryGraph.Edges;
+                for (int i = 0; i < subgraphSize - 1; i++)
+                {
+                    for (int j = (i + 1); j < subgraphSize; j++)
                     {
-                        if (inputGraph.TryGetEdge(node.Value, partialMap.ElementAt(j).Value, out edge_))
+                        var edge_h = new Edge<string>(h_nodes[i], h_nodes[j]);
+                        if (qEdges.Contains(edge_h))
                         {
-                            map.InducedSubGraphEdges.Add(edge_);
+                            if (!inputGraph.TryGetEdge(g_nodes[i], g_nodes[j], out edge_g))
+                            {
+                                g_nodes.Clear();
+                                h_nodes.Clear();
+                                return new Mapping[0];
+                            }
+                        }
+                        else
+                        {
+                            edge_h = null;
+                        }
+                        if (edge_h == null) // => edge_g was never evaluated because the first part of the AND statement was false
+                        {
+                            if (inputGraph.TryGetEdge(g_nodes[i], g_nodes[j], out edge_g))
+                            {
+                                map.InducedSubGraphEdges.Add(edge_g);
+                            }
+                        }
+                        else
+                        {
+                            if (edge_g != null)
+                            {
+                                map.InducedSubGraphEdges.Add(edge_g);
+                            }
                         }
                     }
-                    counter++;
                 }
+                g_nodes.Clear();
+                h_nodes.Clear();
+                edge_g = null;
+                if (queryGraph.EdgeCount > map.InducedSubGraphEdges.Count) // this shouuld never happen; but just in case
+                {
+                    return new Mapping[0];
+                }
+
                 return new List<Mapping>(1) { map };
                 #endregion
+
             }
 
             //Remember: f(h) = g, so h is Domain and g is Range.
@@ -148,16 +188,16 @@ namespace MODA.Impl
 
             //If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
             var neighboursOfN = inputGraph.GetNeighbors(n, true);
-            //bool doNext = false;
+            bool doNext = false;
             string val; // f(d)
             foreach (var d in neighborsOfM)
             {
                 if (!partialMap.TryGetValue(d, out val))
                 {
-                    neighboursOfN = null;
-                    return false;
-                    //doNext = true;
-                    //break;
+                    //neighboursOfN = null;
+                    //return false;
+                    doNext = true;
+                    break;
                 }
                 if (!neighboursOfN.Contains(val))
                 {
@@ -166,25 +206,23 @@ namespace MODA.Impl
                 }
             }
 
-            //// or if there is a NON - neighbor d ∈ D of m such that n IS neighbors with f(d)
-            //if (doNext)
-            //{
-            //    var nonNeighborOfM = queryGraph.Vertices.Except(neighborsOfM);
-            //    foreach (var d in nonNeighborOfM)
-            //    {
-            //        if (!partialMap.TryGetValue(d, out val))
-            //        {
-            //            neighboursOfN = null;
-            //            return false;
-            //        }
-            //        if (neighboursOfN.Contains(val))
-            //        {
-            //            neighboursOfN = null;
-            //            return true;
-            //        }
-            //    }
-            //    nonNeighborOfM = null;
-            //}
+            // or if there is a NON - neighbor d ∈ D of m such that n IS neighbors with f(d)
+            if (doNext && queryGraph.VertexCount > 4)
+            {
+                foreach (var d in queryGraph.Vertices.Except(neighborsOfM))
+                {
+                    if (!partialMap.TryGetValue(d, out val))
+                    {
+                        neighboursOfN = null;
+                        return false;
+                    }
+                    if (neighboursOfN.Contains(val))
+                    {
+                        neighboursOfN = null;
+                        return true;
+                    }
+                }
+            }
             neighboursOfN = null;
             return false;
         }

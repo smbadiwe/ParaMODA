@@ -18,7 +18,7 @@ namespace MODA.Console
                 //MinimizeFootprint(); //MinimizeMemory();
 
                 #region Process input parameters
-                if (args == null || args.Length != 6)
+                if (args == null || args.Length < 6)
                 {
                     StdConsole.ForegroundColor = ConsoleColor.Red;
                     try
@@ -49,15 +49,25 @@ namespace MODA.Console
                 {
                     throw new ArgumentException("Invalid input for <threshold> argument (arg[3])");
                 }
-                //string getOnlyMappingCounts = args[4];
                 if (args[4] == "y" || args[4] == "Y")
                 {
                     ModaAlgorithms.GetOnlyMappingCounts = true;
                 }
-                //string useModifiedGrochow = args[5];
                 if (args[5] == "y" || args[5] == "Y")
                 {
                     ModaAlgorithms.UseModifiedGrochow = true;
+                }
+                //string queryGraphFile = null;
+                QueryGraph queryGraph = null;
+                if (args.Length > 6)
+                {
+                    //arg[6] - queryGraphFile
+                    //queryGraphFile = args[6];
+                    queryGraph = GraphProcessor.LoadGraph(args[6], true) as QueryGraph;
+                    if (queryGraph.VertexCount != subGraphSize)
+                    {
+                        throw new ArgumentException("The specified subgraph size does not match with the query graph size. \nDo you want to use the size of the specified query graph instead? Y/N");
+                    }
                 }
                 var sb = new StringBuilder("Processing Graph...");
                 sb.AppendFormat("Network File: {0}\nSub-graph Size: {1}\n", inputGraphFile, subGraphSize);
@@ -66,40 +76,9 @@ namespace MODA.Console
                 sb.Clear();
                 
                 var inputGraph = GraphProcessor.LoadGraph(inputGraphFile);
-                if (subGraphSize > 5)
+                if (subGraphSize > 5 && queryGraph == null)
                 {
-                    StdConsole.WriteLine("You need a query graph to proceed. To supply the query graph file, type 'y' and press Enter.");
-                }
-                else
-                {
-                    StdConsole.WriteLine("Do you have a particular size {0} query graph in mind? Y/N", subGraphSize);
-                }
-                string queryGraphFile = null;
-                QueryGraph queryGraph = null;
-                var resp = StdConsole.ReadLine();
-                if (resp == "y" || resp == "Y" || subGraphSize > 5)
-                {
-                    while (true)
-                    {
-                        StdConsole.WriteLine("Enter the (relative or absolute) path to the query graph file");
-                        queryGraphFile = StdConsole.ReadLine();
-                        queryGraph = GraphProcessor.LoadGraph(queryGraphFile, true) as QueryGraph;
-                        if (queryGraph.VertexCount != subGraphSize)
-                        {
-                            StdConsole.WriteLine("The specified subgraph size does not match with the query graph size. \nDo you want to use the size of the specified query graph instead? Y/N");
-                            resp = StdConsole.ReadLine();
-                            if (resp == "y" || resp == "Y")
-                            {
-                                subGraphSize = queryGraph.VertexCount;
-                                break;
-                            }
-                            // else contiue;
-                        }
-                        else // we're good. So,
-                        {
-                            break;
-                        }
-                    }
+                    throw new ArgumentException("You need a query graph to proceed.");
                 }
 
                 if (subGraphSize >= inputGraph.VertexCount)
@@ -152,7 +131,7 @@ namespace MODA.Console
                         }
                         else
                         {
-                            int count = qGraph.Value.Count; //int.Parse(qGraph.Value.Split('#')[0]); // qGraph.Value.Count; //
+                            int count = qGraph.Value.Count; //int.Parse(qGraph.Value.Split('#')[0]); // 
                             sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
                             totalMappings += count;
                         }
@@ -168,7 +147,7 @@ namespace MODA.Console
                         }
                         else
                         {
-                            int count = qGraph.Value.Count; //int.Parse(qGraph.Value.Split('#')[0]); // qqGraph.Value.Count;
+                            int count = qGraph.Value.Count; //int.Parse(qGraph.Value.Split('#')[0]); // 
                             sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
                             foreach (var mapping in qGraph.Value)
                             {
@@ -204,9 +183,6 @@ namespace MODA.Console
                 StdConsole.WriteLine(ex);
                 StdConsole.ForegroundColor = ConsoleColor.White;
             }
-#if !DEBUG
-            StdConsole.ReadKey();
-#endif
         }
 
         private static void MinimizeMemory()
