@@ -80,14 +80,15 @@ namespace MODA.Impl
                 }
                 Edge<string> edge_g = null;
                 HashSet<Edge<string>> inducedSubGraphEdges = new HashSet<Edge<string>>();
-                var qEdges = queryGraph.Edges;
+                //var qEdges = queryGraph.Edges2;
                 for (int i = 0; i < subgraphSize - 1; i++)
                 {
                     for (int j = (i + 1); j < subgraphSize; j++)
                     {
-                        var edge_h = new Edge<string>(h_nodes[i], h_nodes[j]);
-                        if (qEdges.Contains(edge_h))
+                        var edge_h = false;
+                        if (queryGraph.ContainsEdge(h_nodes[i], h_nodes[j]))
                         {
+                            edge_h = true;
                             if (!inputGraph.TryGetEdge(g_nodes[i], g_nodes[j], out edge_g))
                             {
                                 g_nodes.Clear();
@@ -99,11 +100,7 @@ namespace MODA.Impl
                                 return new Mapping[0];
                             }
                         }
-                        else
-                        {
-                            edge_h = null;
-                        }
-                        if (edge_h == null) // => edge_g was never evaluated because the first part of the AND statement was false
+                        if (edge_h == false) // => edge_g was never evaluated because the first part of the AND statement was false
                         {
                             if (inputGraph.TryGetEdge(g_nodes[i], g_nodes[j], out edge_g))
                             {

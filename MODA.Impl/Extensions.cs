@@ -1,9 +1,11 @@
 ﻿using QuickGraph;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace MODA.Impl
@@ -12,22 +14,23 @@ namespace MODA.Impl
     {
         public static HashSet<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG)
         {
-            HashSet<string> neighbors;
-            if (isG)
-            {
-                if (!ModaAlgorithms.G_NodeNeighbours.TryGetValue(vertex, out neighbors))
-                {
-                    ModaAlgorithms.G_NodeNeighbours[vertex] = neighbors = graph.GetNeighbors(vertex);
-                }
-            }
-            else
-            {
-                if (!ModaAlgorithms.H_NodeNeighbours.TryGetValue(vertex, out neighbors))
-                {
-                    ModaAlgorithms.H_NodeNeighbours[vertex] = neighbors = graph.GetNeighbors(vertex);
-                }
-            }
-            return neighbors;
+            return graph.GetNeighbors(vertex);
+            //HashSet<string> neighbors;
+            //if (isG)
+            //{
+            //    if (!ModaAlgorithms.G_NodeNeighbours.TryGetValue(vertex, out neighbors))
+            //    {
+            //        ModaAlgorithms.G_NodeNeighbours[vertex] = neighbors = graph.GetNeighbors(vertex);
+            //    }
+            //}
+            //else
+            //{
+            //    if (!ModaAlgorithms.H_NodeNeighbours.TryGetValue(vertex, out neighbors))
+            //    {
+            //        ModaAlgorithms.H_NodeNeighbours[vertex] = neighbors = graph.GetNeighbors(vertex);
+            //    }
+            //}
+            //return neighbors;
         }
 
         /// <summary>
@@ -112,5 +115,28 @@ namespace MODA.Impl
                 return Encoding.UTF8.GetString(buffer);
             }
         }
+
+
+        private static void MinimizeMemory()
+        {
+            GC.Collect(GC.MaxGeneration);
+            GC.WaitForPendingFinalizers();
+            SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle,
+                (UIntPtr)0xFFFFFFFF, (UIntPtr)0xFFFFFFFF);
+        }
+
+        [DllImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetProcessWorkingSetSize(IntPtr process,
+            UIntPtr minimumWorkingSetSize, UIntPtr maximumWorkingSetSize);
+
+        private static void MinimizeFootprint()
+        {
+            EmptyWorkingSet(Process.GetCurrentProcess().Handle);
+        }
+
+        [DllImport("psapi.dll")]
+        private static extern int EmptyWorkingSet(IntPtr hwProc);
+
     }
 }

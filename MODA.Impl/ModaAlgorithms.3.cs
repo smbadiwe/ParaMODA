@@ -36,7 +36,7 @@ namespace MODA.Impl
                 // if (f(u), f(v)) ϵ G and meets the conditions, add to list
                 if (map.InducedSubGraphEdges.Count == queryGraph.EdgeCount)
                 {
-                    newEdgeImage = map.GetImage(parentQueryGraph.Edges);
+                    newEdgeImage = map.GetImage(parentQueryGraph.Edges2);
                 }
                 else if (map.InducedSubGraphEdges.Count > queryGraph.EdgeCount)
                 {
@@ -76,7 +76,10 @@ namespace MODA.Impl
                 var toReturn = new List<Mapping>(list.Count);
                 for (int i = list.Count - 1; i >= 0; i--)
                 {
-                    toReturn.Add(new Mapping(list[i].Function));
+                    toReturn.Add(new Mapping(list[i].Function)
+                    {
+                        InducedSubGraphEdges = list[i].InducedSubGraphEdges
+                    });
                     list.RemoveAt(i);
                 }
                 Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
@@ -122,8 +125,8 @@ namespace MODA.Impl
             // Recall: currentQueryGraph is a super-graph of parentQueryGraph
             if (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount != 1) throw new ArgumentException("Invalid arguments for the method: GetEdgeDifference");
 
-            var edges = parentQueryGraph.Edges;
-            foreach (var edge in currentQueryGraph.Edges)
+            var edges = parentQueryGraph.Edges2;
+            foreach (var edge in currentQueryGraph.Edges2)
             {
                 if (!edges.Contains(edge))
                 {

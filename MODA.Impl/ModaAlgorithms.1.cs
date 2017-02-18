@@ -79,7 +79,7 @@ namespace MODA.Impl
                                 System.IO.File.WriteAllText(_filename, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(parentGraphMappings)));
                                 allMappings[parentQueryGraph] = _filename;
                             }
-                            parentGraphMappings.Clear();
+                            if (parentGraphMappings.Count > 0) parentGraphMappings.Clear();
                         }
                         else
                         {
@@ -94,7 +94,7 @@ namespace MODA.Impl
 
                     var fileName = $"{mappings.Count}#{qGraph.Label}.ser";
                     System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(mappings)));
-                    mappings.Clear();
+                    if (mappings.Count > 0) mappings.Clear();
                     allMappings.Add(qGraph, fileName);
 
 
@@ -194,7 +194,7 @@ namespace MODA.Impl
                     
                     allMappings.Add(qGraph, mappings);
 
-                    mappings = null; //.Clear();
+                    mappings = null;
 
                     // Check for complete-ness; if complete, break
                     if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))

@@ -74,7 +74,8 @@ namespace MODA.Impl
                 tmp = line.Split(new string[] { " ", "\t" }, StringSplitOptions.RemoveEmptyEntries);
                 if (tmp.Length < 2) continue;
 
-                newGraphInstance.AddVerticesAndEdge(new Edge<string>(tmp[0], tmp[1]));
+                //newGraphInstance.AddVerticesAndEdge(new Edge<string>(tmp[0], tmp[1]));
+                newGraphInstance.AddVerticesAndEdge(tmp[0], tmp[1]);
             }
             return newGraphInstance;
         }

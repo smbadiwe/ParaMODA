@@ -57,24 +57,35 @@ namespace MODA.Console
                 {
                     ModaAlgorithms.UseModifiedGrochow = true;
                 }
-                //string queryGraphFile = null;
+
+                bool saveMappingsToDisk = false;
                 QueryGraph queryGraph = null;
                 if (args.Length > 6)
                 {
-                    //arg[6] - queryGraphFile
-                    //queryGraphFile = args[6];
-                    queryGraph = GraphProcessor.LoadGraph(args[6], true) as QueryGraph;
-                    if (queryGraph.VertexCount != subGraphSize)
+                    //arg[6] - saveMappingsToDisk
+                    if (args[6] == "y" || args[6] == "Y")
                     {
-                        throw new ArgumentException("The specified subgraph size does not match with the query graph size. \nDo you want to use the size of the specified query graph instead? Y/N");
+                        saveMappingsToDisk = true;
+                    }
+
+                    if (args.Length > 7)
+                    {
+                        //arg[7] - queryGraphFile
+                        //queryGraphFile = args[6];
+                        queryGraph = GraphProcessor.LoadGraph(args[7], true) as QueryGraph;
+                        if (queryGraph.VertexCount != subGraphSize)
+                        {
+                            throw new ArgumentException("The specified subgraph size does not match with the query graph size. \nDo you want to use the size of the specified query graph instead? Y/N");
+                        }
                     }
                 }
+
                 var sb = new StringBuilder("Processing Graph...");
                 sb.AppendFormat("Network File: {0}\nSub-graph Size: {1}\n", inputGraphFile, subGraphSize);
                 sb.AppendLine("==============================================================\n");
                 StdConsole.WriteLine(sb);
                 sb.Clear();
-                
+
                 var inputGraph = GraphProcessor.LoadGraph(inputGraphFile);
                 if (subGraphSize > 5 && queryGraph == null)
                 {
@@ -112,67 +123,132 @@ namespace MODA.Console
                 }
                 #endregion
 
-                var sw = Stopwatch.StartNew();
-
-                var frequentSubgraphs = ModaAlgorithms.Algorithm1(inputGraph, queryGraph, subGraphSize, threshold);
-
-                sw.Stop();
-
-                #region Process output
-                int totalMappings = 0;
-                sb.Append("\nCompleted. Result Summary\n");
-                sb.AppendLine("-------------------------------------------\n");
-                if (ModaAlgorithms.GetOnlyMappingCounts)
+                if (saveMappingsToDisk)
                 {
-                    foreach (var qGraph in frequentSubgraphs)
+                    var sw = Stopwatch.StartNew();
+
+                    var frequentSubgraphs = ModaAlgorithms.Algorithm1(inputGraph, queryGraph, subGraphSize, threshold);
+
+                    sw.Stop();
+
+                    #region Process output
+                    int totalMappings = 0;
+                    sb.Append("\nCompleted. Result Summary\n");
+                    sb.AppendLine("-------------------------------------------\n");
+                    if (ModaAlgorithms.GetOnlyMappingCounts)
                     {
-                        if (qGraph.Value == null)
+                        foreach (var qGraph in frequentSubgraphs)
                         {
-                            sb.AppendFormat("\tSub-graph: {0}\t Is Frequent Subgraph? false\n", qGraph.Key.ToString());
-                        }
-                        else
-                        {
-                            int count = qGraph.Value.Count; //int.Parse(qGraph.Value.Split('#')[0]); // 
-                            sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
-                            totalMappings += count;
+                            if (qGraph.Value == null)
+                            {
+                                sb.AppendFormat("\tSub-graph: {0}\t Is Frequent Subgraph? false\n", qGraph.Key.ToString());
+                            }
+                            else
+                            {
+                                int count = qGraph.Value.Count; //int.Parse(qGraph.Value.Split('#')[0]); // 
+                                sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
+                                totalMappings += count;
+                            }
                         }
                     }
+                    else
+                    {
+                        foreach (var qGraph in frequentSubgraphs)
+                        {
+                            if (qGraph.Value == null)
+                            {
+                                sb.AppendFormat("\tSub-graph: {0}\t Is Frequent Subgraph? false\n", qGraph.Key.ToString());
+                            }
+                            else
+                            {
+                                int count = qGraph.Value.Count; //int.Parse(qGraph.Value.Split('#')[0]); // 
+                                sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
+                                foreach (var mapping in qGraph.Value)
+                                {
+                                    sb.AppendFormat("\t\t{0}", mapping);
+                                }
+                                totalMappings += count;
+                            }
+                        }
+                    }
+                    sb.AppendFormat("\nTime Taken: {0} ({1}ms)\nNetwork: Nodes - {2}; Edges: {3};\nTotal Mappings found: {4}\nSubgraph Size: {5}\n", sw.Elapsed, sw.ElapsedMilliseconds.ToString("N"), inputGraph.VertexCount, inputGraph.EdgeCount, totalMappings, subGraphSize);
+                    sb.AppendLine("-------------------------------------------\n");
+                    inputGraph = null;
+                    frequentSubgraphs.Clear();
+                    StdConsole.ForegroundColor = ConsoleColor.Blue;
+                    StdConsole.WriteLine(sb);
+
+                    try
+                    {
+                        File.WriteAllText(inputGraphFile + ".OUT", sb.ToString());
+                    }
+                    catch { }
+
+                    #endregion 
                 }
                 else
                 {
-                    foreach (var qGraph in frequentSubgraphs)
+                    var sw = Stopwatch.StartNew();
+
+                    var frequentSubgraphs = ModaAlgorithms.Algorithm1_C(inputGraph, queryGraph, subGraphSize, threshold);
+
+                    sw.Stop();
+
+                    #region Process output
+                    int totalMappings = 0;
+                    sb.Append("\nCompleted. Result Summary\n");
+                    sb.AppendLine("-------------------------------------------\n");
+                    if (ModaAlgorithms.GetOnlyMappingCounts)
                     {
-                        if (qGraph.Value == null)
+                        foreach (var qGraph in frequentSubgraphs)
                         {
-                            sb.AppendFormat("\tSub-graph: {0}\t Is Frequent Subgraph? false\n", qGraph.Key.ToString());
-                        }
-                        else
-                        {
-                            int count = qGraph.Value.Count; //int.Parse(qGraph.Value.Split('#')[0]); // 
-                            sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
-                            foreach (var mapping in qGraph.Value)
+                            if (qGraph.Value == null)
                             {
-                                sb.AppendFormat("\t\t{0}", mapping);
+                                sb.AppendFormat("\tSub-graph: {0}\t Is Frequent Subgraph? false\n", qGraph.Key.ToString());
                             }
-                            totalMappings += count;
+                            else
+                            {
+                                int count = int.Parse(qGraph.Value.Split('#')[0]);
+                                sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
+                                totalMappings += count;
+                            }
                         }
                     }
+                    else
+                    {
+                        foreach (var qGraph in frequentSubgraphs)
+                        {
+                            if (qGraph.Value == null)
+                            {
+                                sb.AppendFormat("\tSub-graph: {0}\t Is Frequent Subgraph? false\n", qGraph.Key.ToString());
+                            }
+                            else
+                            {
+                                int count = int.Parse(qGraph.Value.Split('#')[0]);
+                                sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
+                                foreach (var mapping in qGraph.Value)
+                                {
+                                    sb.AppendFormat("\t\t{0}", mapping);
+                                }
+                                totalMappings += count;
+                            }
+                        }
+                    }
+                    sb.AppendFormat("\nTime Taken: {0} ({1}ms)\nNetwork: Nodes - {2}; Edges: {3};\nTotal Mappings found: {4}\nSubgraph Size: {5}\n", sw.Elapsed, sw.ElapsedMilliseconds.ToString("N"), inputGraph.VertexCount, inputGraph.EdgeCount, totalMappings, subGraphSize);
+                    sb.AppendLine("-------------------------------------------\n");
+                    inputGraph = null;
+                    frequentSubgraphs.Clear();
+                    StdConsole.ForegroundColor = ConsoleColor.Blue;
+                    StdConsole.WriteLine(sb);
+
+                    try
+                    {
+                        File.WriteAllText(inputGraphFile + ".OUT", sb.ToString());
+                    }
+                    catch { }
+
+                    #endregion
                 }
-                sb.AppendFormat("\nTime Taken: {0} ({1}ms)\nNetwork: Nodes - {2}; Edges: {3};\nTotal Mappings found: {4}\nSubgraph Size: {5}\n", sw.Elapsed, sw.ElapsedMilliseconds.ToString("N"), inputGraph.VertexCount, inputGraph.EdgeCount, totalMappings, subGraphSize);
-                sb.AppendLine("-------------------------------------------\n");
-                inputGraph = null;
-                frequentSubgraphs = null;
-                StdConsole.ForegroundColor = ConsoleColor.Blue;
-                StdConsole.WriteLine(sb);
-
-                try
-                {
-                    File.WriteAllText(inputGraphFile + ".OUT", sb.ToString());
-                }
-                catch { }
-
-                #endregion
-
                 StdConsole.ForegroundColor = ConsoleColor.White;
 #if !DEBUG
                 StdConsole.WriteLine("Done! Press any key to exit.");
@@ -185,27 +261,6 @@ namespace MODA.Console
                 StdConsole.ForegroundColor = ConsoleColor.White;
             }
         }
-
-        private static void MinimizeMemory()
-        {
-            GC.Collect(GC.MaxGeneration);
-            GC.WaitForPendingFinalizers();
-            SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle,
-                (UIntPtr)0xFFFFFFFF, (UIntPtr)0xFFFFFFFF);
-        }
-
-        [DllImport("kernel32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetProcessWorkingSetSize(IntPtr process,
-            UIntPtr minimumWorkingSetSize, UIntPtr maximumWorkingSetSize);
-
-        private static void MinimizeFootprint()
-        {
-            EmptyWorkingSet(Process.GetCurrentProcess().Handle);
-        }
-
-        [DllImport("psapi.dll")]
-        private static extern int EmptyWorkingSet(IntPtr hwProc);
 
     }
 }
