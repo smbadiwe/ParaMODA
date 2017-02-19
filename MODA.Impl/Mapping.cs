@@ -21,40 +21,68 @@ namespace MODA.Impl
         /// This represents the [f(h) = g] relation. Meaning key is h and value is g.
         /// </summary>
         public Dictionary<string, string> Function { get; private set; }
-        
-        /// <summary>
-        /// All the edges in the input subgraph G that fit the query graph (---Function.Keys)
-        /// </summary>
-        public HashSet<Edge<string>> InducedSubGraphEdges { get; set; }
 
         /// <summary>
-        /// Only for when (InducedSubGraph.EdgeCount == currentQueryGraphEdgeCount)
+        /// Count of all the edges in the input subgraph G that fit the query graph (---Function.Keys)
+        /// </summary>
+        public int InducedSubGraphEdgesCount { get; set; }
+
+        /// <summary>
+        /// Only for when (InducedSubGraphEdgesCount == currentQueryGraphEdgeCount)
         /// </summary>
         /// <param name="parentQueryGraphEdges"></param>
         /// <returns></returns>
-        public Edge<string> GetImage(IEnumerable<Edge<string>> parentQueryGraphEdges)
+        public Edge<string> GetImage(UndirectedGraph<string, Edge<string>> inputGraph, IEnumerable<Edge<string>> parentQueryGraphEdges)
         {
-            var edgeImages = parentQueryGraphEdges.Select(x => new Edge<string>(Function[x.Source], Function[x.Target]));
-            foreach (var edgex in InducedSubGraphEdges)
+            int subgraphSize = Function.Count;
+            var g_nodes = new List<string>(Function.Values); // Remember, f(h) = g, so .Values is for g's
+            Edge<string> edge_g = null;
+            var inducedSubGraphEdges = new List<Edge<string>>(InducedSubGraphEdgesCount);
+            for (int i = 0; i < subgraphSize - 1; i++)
+            {
+                for (int j = (i + 1); j < subgraphSize; j++)
+                {
+                    if (inputGraph.TryGetEdge(g_nodes[i], g_nodes[j], out edge_g))
+                    {
+                        inducedSubGraphEdges.Add(edge_g);
+                    }
+                }
+            }
+            g_nodes.Clear();
+            g_nodes = null;
+
+            var edgeImages = new HashSet<Edge<string>>(parentQueryGraphEdges.Select(x => new Edge<string>(Function[x.Source], Function[x.Target])));
+            foreach (var edgex in inducedSubGraphEdges)
             {
                 if (!edgeImages.Contains(edgex))
                 {
+                    inducedSubGraphEdges.Clear();
+                    edgeImages.Clear();
+                    inducedSubGraphEdges = null;
+                    edgeImages = null;
                     return edgex;
                 }
             }
+            inducedSubGraphEdges.Clear();
+            edgeImages.Clear();
+            inducedSubGraphEdges = null;
+            edgeImages = null;
             return null;
         }
 
         /// <summary>
         /// Only for when (InducedSubGraph.EdgeCount > currentQueryGraphEdgeCount)
         /// </summary>
+        /// <param name="inputGraph"></param>
         /// <param name="newlyAddedEdge"></param>
         /// <returns></returns>
-        public Edge<string> GetImage(Edge<string> newlyAddedEdge)
+        public Edge<string> GetImage(UndirectedGraph<string, Edge<string>> inputGraph, Edge<string> newlyAddedEdge)
         {
-            var image = new Edge<string>(Function[newlyAddedEdge.Source], Function[newlyAddedEdge.Target]);
-            if (InducedSubGraphEdges.Contains(image)) return image;
-
+            Edge<string> image;
+            if (inputGraph.TryGetEdge(Function[newlyAddedEdge.Source], Function[newlyAddedEdge.Target], out image))
+            {
+                return image;
+            }
             return null;
         }
 

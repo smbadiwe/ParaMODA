@@ -79,8 +79,7 @@ namespace MODA.Impl
                     g_nodes.Add(item.Value);
                 }
                 Edge<string> edge_g = null;
-                HashSet<Edge<string>> inducedSubGraphEdges = new HashSet<Edge<string>>();
-                //var qEdges = queryGraph.Edges2;
+                var inducedSubGraphEdges = new List<Edge<string>>();
                 for (int i = 0; i < subgraphSize - 1; i++)
                 {
                     for (int j = (i + 1); j < subgraphSize; j++)
@@ -127,15 +126,11 @@ namespace MODA.Impl
                     inducedSubGraphEdges = null;
                     return new Mapping[0];
                 }
-                if (UsingAlgo3)
-                {
-                    map.InducedSubGraphEdges = inducedSubGraphEdges;
-                }
-                else
-                {
-                    inducedSubGraphEdges.Clear();
-                    inducedSubGraphEdges = null;
-                }
+
+                map.InducedSubGraphEdgesCount = inducedSubGraphEdges.Count;
+
+                inducedSubGraphEdges.Clear();
+                inducedSubGraphEdges = null;
                 return new List<Mapping>(1) { map };
                 #endregion
 
@@ -193,7 +188,7 @@ namespace MODA.Impl
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsNeighbourIncompatible(UndirectedGraph<string, Edge<string>> inputGraph,
-            string n, Dictionary<string, string> partialMap, QueryGraph queryGraph, HashSet<string> neighborsOfM)
+            string n, Dictionary<string, string> partialMap, QueryGraph queryGraph, IList<string> neighborsOfM)
         {
             //  RECALL: m is for Domain, the Key => the query graph
             if (partialMap.ContainsValue(n))

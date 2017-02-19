@@ -32,7 +32,7 @@ namespace QuickGraph
         {
             this.allowParallelEdges = allowParallelEdges;
             this.edgeEqualityComparer = EdgeExtensions.GetUndirectedVertexEquality<TVertex, TEdge>();
-            this.edges2 = new Dictionary<TVertex, HashSet<TVertex>>();
+            this.edges2 = new Dictionary<TVertex, List<TVertex>>();
             this.adjacentEdges = new VertexEdgeDictionary<TVertex, TEdge>(EqualityComparer<TVertex>.Default);
         }
 
@@ -82,26 +82,14 @@ namespace QuickGraph
         /// </summary>
         /// <param name="vertex"></param>
         /// <returns></returns>
-        public HashSet<TVertex> GetNeighbors(TVertex vertex)
+        public IList<TVertex> GetNeighbors(TVertex vertex)
         {
-            HashSet<TVertex> adjEdges;
+            List<TVertex> adjEdges;
             if (this.edges2.TryGetValue(vertex, out adjEdges))
             {
                 return adjEdges;
             }
-            //IEdgeList<TVertex, TEdge> adjEdges;
-            //if (this.adjacentEdges.TryGetValue(vertex, out adjEdges))
-            //{
-            //    var set = new HashSet<TVertex>();
-            //    for (int i = 0; i < adjEdges.Count; i++)
-            //    {
-            //        set.Add(adjEdges[i].Source);
-            //        set.Add(adjEdges[i].Target);
-            //    }
-            //    set.Remove(vertex);
-            //    return set;
-            //}
-            return new HashSet<TVertex>();
+            return new TVertex[0];
         }
 
         /// <summary>
@@ -267,7 +255,7 @@ namespace QuickGraph
             this.edgeCount -= ends.Count;
             foreach (var end in ends)
             {
-                HashSet<TVertex> otherEnds;
+                List<TVertex> otherEnds;
                 if (this.edges2.TryGetValue(end, out otherEnds))
                 {
                     otherEnds.Remove(v);
@@ -330,7 +318,7 @@ namespace QuickGraph
 
         public bool TryGetEdge(TVertex source, TVertex target, out Edge<TVertex> edge)
         {
-            HashSet<TVertex> ends;
+            List<TVertex> ends;
             if (this.edges2.TryGetValue(source, out ends) && ends.Contains(target))
             {
                 edge = new Edge<TVertex>(source, target);
@@ -343,7 +331,7 @@ namespace QuickGraph
 
         public bool ContainsEdge(TVertex source, TVertex target)
         {
-            HashSet<TVertex> ends;
+            List<TVertex> ends;
             if (this.edges2.TryGetValue(source, out ends) && ends.Contains(target))
             {
                 return true;
@@ -381,10 +369,10 @@ namespace QuickGraph
             return this.edges2.ContainsKey(vertex);
         }
         #endregion
-        private Dictionary<TVertex, HashSet<TVertex>> edges2;
+        private Dictionary<TVertex, List<TVertex>> edges2;
         public bool AddVerticesAndEdge(TVertex source, TVertex target)
         {
-            HashSet<TVertex> nodesConnectedToSource, nodesConnectedToTarget;
+            List<TVertex> nodesConnectedToSource, nodesConnectedToTarget;
             if (edges2.TryGetValue(source, out nodesConnectedToSource))
             {
                 //We've seen this source before. So...
@@ -398,11 +386,14 @@ namespace QuickGraph
                     //...and add the source to the list of targets too
                     if (edges2.TryGetValue(target, out nodesConnectedToTarget))
                     {
-                        nodesConnectedToTarget.Add(source);
+                        if (!nodesConnectedToTarget.Contains(source))
+                        {
+                            nodesConnectedToTarget.Add(source);
+                        }
                     }
                     else
                     {
-                        edges2[target] = new HashSet<TVertex> { source };
+                        edges2[target] = new List<TVertex> { source };
                     }
                 }
             }
@@ -419,18 +410,21 @@ namespace QuickGraph
 
                     if (edges2.TryGetValue(source, out nodesConnectedToSource))
                     {
-                        nodesConnectedToSource.Add(target);
+                        if (!nodesConnectedToSource.Contains(target))
+                        {
+                            nodesConnectedToSource.Add(target);
+                        }
                     }
                     else
                     {
-                        edges2[source] = new HashSet<TVertex> { target };
+                        edges2[source] = new List<TVertex> { target };
                     }
                 }
             }
             else // neither exists. So, add them
             {
-                edges2[source] = new HashSet<TVertex> { target };
-                edges2[target] = new HashSet<TVertex> { source };
+                edges2[source] = new List<TVertex> { target };
+                edges2[target] = new List<TVertex> { source };
             }
 
             this.edgeCount++;
@@ -567,15 +561,17 @@ namespace QuickGraph
         {
             get
             {
-                var edgeColors = new HashSet<Edge<TVertex>>();
+                var edgeColors = new Dictionary<Edge<TVertex>, GraphColor>(this.EdgeCount);
                 foreach (var vertsSet in this.edges2)
                 {
                     foreach (var vert in vertsSet.Value)
                     {
                         Edge<TVertex> edge = new Edge<TVertex>(vertsSet.Key, vert);
-                        if (!edgeColors.Add(edge))
+                        GraphColor c;
+                        if (edgeColors.TryGetValue(edge, out c))
                             continue;
 
+                        edgeColors.Add(edge, GraphColor.Black);
                         yield return edge;
                     }
                 }
@@ -641,22 +637,17 @@ namespace QuickGraph
 
         public int AdjacentDegree(TVertex v)
         {
-            HashSet<TVertex> edges;
+            List<TVertex> edges;
             if (this.edges2.TryGetValue(v, out edges))
             {
                 return edges.Count;
             }
-            //IEdgeList<TVertex, TEdge> edges;
-            //if (this.adjacentEdges.TryGetValue(v, out edges))
-            //{
-            //    return edges.Count;
-            //}
             return 0;
         }
 
         public bool IsAdjacentEdgesEmpty(TVertex v)
         {
-            HashSet<TVertex> edges;
+            List<TVertex> edges;
             if (this.edges2.TryGetValue(v, out edges))
             {
                 return edges.Count == 0;

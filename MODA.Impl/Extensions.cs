@@ -12,7 +12,7 @@ namespace MODA.Impl
 {
     public static class Extensions
     {
-        public static HashSet<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG)
+        public static IList<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG)
         {
             return graph.GetNeighbors(vertex);
             //HashSet<string> neighbors;

@@ -1,4 +1,5 @@
 ﻿using QuickGraph;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -72,7 +73,7 @@ namespace MODA.Impl
                                 parentGraphMappings = new Mapping[0];
                             }
                             int oldCount = parentGraphMappings.Count;
-                            mappings = Algorithm3(qGraph, _builder.ExpansionTree, parentQueryGraph, parentGraphMappings);
+                            mappings = Algorithm3(inputGraph, qGraph, _builder.ExpansionTree, parentQueryGraph, parentGraphMappings);
                             if (oldCount > parentGraphMappings.Count)
                             {
                                 _filename = $"{parentGraphMappings.Count}#{parentQueryGraph.Label}.ser";
@@ -96,8 +97,7 @@ namespace MODA.Impl
                     System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(mappings)));
                     if (mappings.Count > 0) mappings.Clear();
                     allMappings.Add(qGraph, fileName);
-
-
+                    
                     // Check for complete-ness; if complete, break
                     if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))
                     {
@@ -123,6 +123,7 @@ namespace MODA.Impl
                 }
                 var fileName = $"{mappings.Count}#{qGraph.Label}.ser";
                 System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(mappings)));
+                if (mappings.Count > 0) mappings.Clear();
                 allMappings = new Dictionary<QueryGraph, string>(1) { { qGraph, fileName } };
             }
 
@@ -179,7 +180,7 @@ namespace MODA.Impl
                         IList<Mapping> parentGraphMappings;
                         if (allMappings.TryGetValue(parentQueryGraph, out parentGraphMappings))
                         {
-                            mappings = Algorithm3(qGraph, _builder.ExpansionTree, parentQueryGraph, parentGraphMappings);
+                            mappings = Algorithm3(inputGraph, qGraph, _builder.ExpansionTree, parentQueryGraph, parentGraphMappings);
                         }
                         else
                         {
@@ -191,11 +192,10 @@ namespace MODA.Impl
                         qGraph.IsFrequentSubgraph = true;
                     }
                     // Save mappings. Do we need to save to disk? Maybe not!
-                    
+
                     allMappings.Add(qGraph, mappings);
 
                     mappings = null;
-
                     // Check for complete-ness; if complete, break
                     if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))
                     {
@@ -219,6 +219,7 @@ namespace MODA.Impl
                 {
                     mappings = Algorithm2(qGraph, inputGraph, numIterations);
                 }
+
                 allMappings = new Dictionary<QueryGraph, IList<Mapping>>(1) { { qGraph, mappings } };
             }
 
@@ -237,13 +238,6 @@ namespace MODA.Impl
             {
                 return _builder.VerticesSorted.Dequeue();
             }
-            //foreach (var node in _builder.VerticesSorted)
-            //{
-            //    if (node.Value == GraphColor.White) continue;
-
-            //    _builder.VerticesSorted[node.Key] = GraphColor.White;
-            //    return node.Key;
-            //}
             return null;
         }
     }

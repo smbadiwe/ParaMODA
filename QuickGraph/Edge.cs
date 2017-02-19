@@ -71,7 +71,7 @@ namespace QuickGraph
         
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return source.GetHashCode() + target.GetHashCode();
         }
     }
 }

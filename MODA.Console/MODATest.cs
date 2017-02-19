@@ -123,7 +123,7 @@ namespace MODA.Console
                 }
                 #endregion
 
-                if (saveMappingsToDisk)
+                if (saveMappingsToDisk == false)
                 {
                     var sw = Stopwatch.StartNew();
 

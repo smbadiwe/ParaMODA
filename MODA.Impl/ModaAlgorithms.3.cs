@@ -12,11 +12,12 @@ namespace MODA.Impl
         /// <summary>
         /// Enumeration module
         /// </summary>
+        /// <param name="inputGraph">G</param>
         /// <param name="queryGraph">H</param>
         /// <param name="expansionTree">T_k</param>
         /// <param name="parentQueryGraph"></param>
         /// <param name="parentGraphMappings">NB: This param is still used even outside this method is call. So, be careful how you set/clear its values.</param>
-        private static IList<Mapping> Algorithm3(QueryGraph queryGraph,
+        private static IList<Mapping> Algorithm3(UndirectedGraph<string, Edge<string>> inputGraph, QueryGraph queryGraph,
             AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> expansionTree,
             QueryGraph parentQueryGraph, IList<Mapping> parentGraphMappings)
         {
@@ -34,13 +35,13 @@ namespace MODA.Impl
                 // Reember, f(h) = g
 
                 // if (f(u), f(v)) ϵ G and meets the conditions, add to list
-                if (map.InducedSubGraphEdges.Count == queryGraph.EdgeCount)
+                if (map.InducedSubGraphEdgesCount == queryGraph.EdgeCount)
                 {
-                    newEdgeImage = map.GetImage(parentQueryGraph.Edges2);
+                    newEdgeImage = map.GetImage(inputGraph, parentQueryGraph.Edges2);
                 }
-                else if (map.InducedSubGraphEdges.Count > queryGraph.EdgeCount)
+                else if (map.InducedSubGraphEdgesCount > queryGraph.EdgeCount)
                 {
-                    newEdgeImage = map.GetImage(newEdge);
+                    newEdgeImage = map.GetImage(inputGraph, newEdge);
                 }
                 else
                 {
@@ -48,7 +49,8 @@ namespace MODA.Impl
                 }
                 if (newEdgeImage != null)
                 {
-                    if (map.InducedSubGraphEdges.Contains(newEdgeImage))
+                    //if (map.InducedSubGraphEdges.Contains(newEdgeImage))
+                    if (inputGraph.ContainsEdge(newEdgeImage.Source, newEdgeImage.Target))
                     {
                         list.Add(map);
                     }
@@ -78,7 +80,7 @@ namespace MODA.Impl
                 {
                     toReturn.Add(new Mapping(list[i].Function)
                     {
-                        InducedSubGraphEdges = list[i].InducedSubGraphEdges
+                        InducedSubGraphEdgesCount = list[i].InducedSubGraphEdgesCount
                     });
                     list.RemoveAt(i);
                 }

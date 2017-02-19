@@ -17,7 +17,7 @@
 - As an example, to run with the test data, simply run with the command:
 	MODA.Console . Scere20141001CR_idx.txt 4 0 y n
 	or
-	MODA.Console . Scere20141001CR_idx.txt 4 0 y n n ./Files.query_5v_7e.txt
+	MODA.Console . Scere20141001CR_idx.txt 4 0 y n n ./Files/query_5v_7e.txt
 
 - Subgraph sizes (the last parameter in the command) below 3 and above 5 are not (yet) supported
 - You will get the chance to provide sample file of the query graph (subgraph) you're interested in, if you have one
