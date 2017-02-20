@@ -373,10 +373,11 @@ namespace MODA.Impl
             var qGraphL6_3 = new Edge<int>[]
             {
                 new Edge<int>(1,2),
+                new Edge<int>(1,4), //New Add
                 new Edge<int>(1,5),
                 new Edge<int>(2,3),
                 new Edge<int>(2,4),
-                new Edge<int>(2,5), //New Add
+                new Edge<int>(2,5),
                 new Edge<int>(3,4),
                 new Edge<int>(3,5),
                 new Edge<int>(4,5)
