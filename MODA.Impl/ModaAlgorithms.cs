@@ -119,7 +119,8 @@ namespace MODA.Impl
 
                 inducedSubGraphEdges.Clear();
                 inducedSubGraphEdges = null;
-                return new List<Mapping>(1) { map };
+                //return new List<Mapping>(1) { map };
+                return new Mapping[] { map };
                 #endregion
 
             }
