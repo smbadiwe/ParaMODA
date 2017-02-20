@@ -1,14 +1,18 @@
 ﻿namespace MODA.Console
 {
+    using System;
+    using System.Collections.Generic;
+
     class Program
     {
         static void Main(string[] args)
         {
             //For args values, see ReadMe.txt
 #if DEBUG
-            args = "../Debug QueryGraph.txt 4 0 y n".Split(' ');
+            //args = "../Debug QueryGraph.txt 3 0 y n".Split(' ');
             //args = "../Debug Scere20141001CR_idx.txt 3 0 y n".Split(' '); //../Debug/qg_3v_3e.txt
-            //args = "../Debug Ecoli20141001CR_idx.txt 4 0 y n".Split(' ');
+            args = "../Debug Ecoli20141001CR_idx.txt 3 0 y n".Split(' ');
+            
 #else
             //args = "C:\\SOMA\\Deeds\\UWFinaProjectWorks\\MODA\\MODA.Console\\bin\\Debug\\ QueryGraph.txt 3 0 y n".Split(' ');
             //args = "../Debug Scere20141001CR_idx.txt 4 0 y y".Split(' ');
@@ -31,7 +35,7 @@
             //graph3.AddEdge("0", "3");
 #if DEBUG
 
-            System.Console.ReadKey();
+            Console.ReadKey();
 #endif
         }
     }

@@ -39,18 +39,18 @@ namespace MODA.Impl.Graphics
 
         #endregion
         
-        public static void Visualize<TEdge>(this IEdgeListGraph<string, TEdge> graph,
+        public static void Visualize<TEdge>(this IEdgeListGraph<int, TEdge> graph,
             string dotProgramLocation, string outputFullFileName)
-            where TEdge : IEdge<string>
+            where TEdge : IEdge<int>
         {
             Visualize(graph, dotProgramLocation, outputFullFileName, NoOpEdgeFormatter);
         }
 
-        public static void Visualize<TEdge>(this IEdgeListGraph<string, TEdge> graph,
-            string dotProgramLocation, string outputFullFileName, FormatEdgeAction<string, TEdge> edgeFormatter)
-            where TEdge : IEdge<string>
+        public static void Visualize<TEdge>(this IEdgeListGraph<int, TEdge> graph,
+            string dotProgramLocation, string outputFullFileName, FormatEdgeAction<int, TEdge> edgeFormatter)
+            where TEdge : IEdge<int>
         {
-            var viz = new GraphvizAlgorithm<string, TEdge>(graph);
+            var viz = new GraphvizAlgorithm<int, TEdge>(graph);
 
             viz.FormatVertex += VizFormastring;
 
@@ -59,21 +59,21 @@ namespace MODA.Impl.Graphics
             viz.Generate(new FileDotEngine(dotProgramLocation), outputFullFileName);
         }
 
-        public static string ToDotNotation<TEdge>(this IVertexAndEdgeListGraph<string, TEdge> graph)
-            where TEdge : IEdge<string>
+        public static string ToDotNotation<TEdge>(this IVertexAndEdgeListGraph<int, TEdge> graph)
+            where TEdge : IEdge<int>
         {
-            var viz = new GraphvizAlgorithm<string, TEdge>(graph);
+            var viz = new GraphvizAlgorithm<int, TEdge>(graph);
             viz.FormatVertex += VizFormastring;
             return viz.Generate(new DotPrinter(), "");
         }
 
-        private static void VizFormastring(object sender, FormatVertexEventArgs<string> e)
+        private static void VizFormastring(object sender, FormatVertexEventArgs<int> e)
         {
-            e.VertexFormatter.Label = e.Vertex;
+            e.VertexFormatter.Label = e.Vertex.ToString();
         } 
 
-        private static void NoOpEdgeFormatter<TEdge>(object sender, FormatEdgeEventArgs<string, TEdge> e)
-            where TEdge : IEdge<string>
+        private static void NoOpEdgeFormatter<TEdge>(object sender, FormatEdgeEventArgs<int, TEdge> e)
+            where TEdge : IEdge<int>
         {
             // noop
             //e.EdgeFormatter.Label.Value = e.Edge.Label;

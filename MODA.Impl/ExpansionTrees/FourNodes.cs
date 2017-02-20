@@ -15,18 +15,18 @@ namespace MODA.Impl
             var rootNode = new ExpansionTreeNode();
 
             #region Level 1 - Two (2) Trees
-            var qGraphL1_1 = new Edge<string>[]
+            var qGraphL1_1 = new Edge<int>[]
             {
-                new Edge<string>("A","B"),
-                new Edge<string>("B","C"),
-                new Edge<string>("C","D")
+                new Edge<int>(1,2),
+                new Edge<int>(2,3),
+                new Edge<int>(3,4)
             }
             .ToQueryGraph("qGraphL1_1");
-            var qGraphL1_2 = new Edge<string>[]
+            var qGraphL1_2 = new Edge<int>[]
             {
-                new Edge<string>("A","B"),
-                new Edge<string>("B","C"),
-                new Edge<string>("B","D")
+                new Edge<int>(1,2),
+                new Edge<int>(2,3),
+                new Edge<int>(2,4)
             }
             .ToQueryGraph("qGraphL1_2");
 
@@ -46,20 +46,20 @@ namespace MODA.Impl
             #endregion
 
             #region Level 2 - Two (2) graphs
-            var qGraphL2_1 = new Edge<string>[]
+            var qGraphL2_1 = new Edge<int>[]
             {
-                new Edge<string>("A","B"),
-                new Edge<string>("B","C"),
-                new Edge<string>("B","D"), //New Add; could have been 0-2
-                new Edge<string>("C","D")
+                new Edge<int>(1,2),
+                new Edge<int>(2,3),
+                new Edge<int>(2,4), //New Add; could have been 0-2
+                new Edge<int>(3,4)
             }
             .ToQueryGraph("qGraphL2_1");
-            var qGraphL2_2 = new Edge<string>[]
+            var qGraphL2_2 = new Edge<int>[]
             {
-                new Edge<string>("A","B"),
-                new Edge<string>("A","D"), //New Add
-                new Edge<string>("B","C"),
-                new Edge<string>("C","D")
+                new Edge<int>(1,2),
+                new Edge<int>(1,4), //New Add
+                new Edge<int>(2,3),
+                new Edge<int>(3,4)
             }
             .ToQueryGraph("qGraphL2_2");
 
@@ -80,13 +80,13 @@ namespace MODA.Impl
             #endregion
 
             #region Level 3 - One (1) graph
-            var qGraphL3_1 = new Edge<string>[]
+            var qGraphL3_1 = new Edge<int>[]
             {
-                new Edge<string>("A","B"),
-                new Edge<string>("A","C"), //New Add
-                new Edge<string>("B","C"),
-                new Edge<string>("B","D"),
-                new Edge<string>("C","D")
+                new Edge<int>(1,2),
+                new Edge<int>(1,3), //New Add
+                new Edge<int>(2,3),
+                new Edge<int>(2,4),
+                new Edge<int>(3,4)
             }
             .ToQueryGraph("qGraphL3_1");
             var nodeL3_1 = new ExpansionTreeNode
@@ -100,14 +100,14 @@ namespace MODA.Impl
             #endregion
 
             #region Level 4 - One (1) Graph, which is the complete graph
-            var qGraphL4_1 = new Edge<string>[]
+            var qGraphL4_1 = new Edge<int>[]
             {
-                new Edge<string>("A","B"),
-                new Edge<string>("A","C"), //New Add
-                new Edge<string>("A","D"),
-                new Edge<string>("B","C"),
-                new Edge<string>("B","D"),
-                new Edge<string>("C","D")
+                new Edge<int>(1,2),
+                new Edge<int>(1,3), //New Add
+                new Edge<int>(1,4),
+                new Edge<int>(2,3),
+                new Edge<int>(2,4),
+                new Edge<int>(3,4)
             }
             .ToQueryGraph("qGraphL4_1");
 

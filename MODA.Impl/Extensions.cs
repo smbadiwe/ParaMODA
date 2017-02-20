@@ -12,10 +12,10 @@ namespace MODA.Impl
 {
     public static class Extensions
     {
-        public static IList<string> GetNeighbors(this UndirectedGraph<string, Edge<string>> graph, string vertex, bool isG)
+        public static IList<int> GetNeighbors(this UndirectedGraph<int, Edge<int>> graph, int vertex, bool isG)
         {
             return graph.GetNeighbors(vertex);
-            //HashSet<string> neighbors;
+            //HashSet<int> neighbors;
             //if (isG)
             //{
             //    if (!ModaAlgorithms.G_NodeNeighbours.TryGetValue(vertex, out neighbors))
@@ -38,7 +38,7 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="edges"></param>
         /// <returns></returns>
-        public static QueryGraph ToQueryGraph(this IEnumerable<Edge<string>> edges, string graphLabel = "")
+        public static QueryGraph ToQueryGraph(this IEnumerable<Edge<int>> edges, string graphLabel = "")
         {
             var g = new QueryGraph
             {

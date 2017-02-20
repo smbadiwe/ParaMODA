@@ -50,11 +50,11 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="filename">The uploaded filename</param>
         /// <returns>A string containing feedback of the processing</returns>
-        public static UndirectedGraph<string, Edge<string>> LoadGraph(string filename, bool isQueryGraph = false)
+        public static UndirectedGraph<int, Edge<int>> LoadGraph(string filename, bool isQueryGraph = false)
         {
             var lines = File.ReadAllLines(filename);
 
-            UndirectedGraph<string, Edge<string>> newGraphInstance;
+            UndirectedGraph<int, Edge<int>> newGraphInstance;
             if (isQueryGraph)
             {
                 newGraphInstance = new QueryGraph
@@ -64,7 +64,7 @@ namespace MODA.Impl
             }
             else
             {
-                newGraphInstance = new UndirectedGraph<string, Edge<string>>();
+                newGraphInstance = new UndirectedGraph<int, Edge<int>>();
             }
             //Parallelizing this actually made it take longer to process my datasets
             string[] tmp;
@@ -73,9 +73,9 @@ namespace MODA.Impl
                 if (line.StartsWith("#")) continue;
                 tmp = line.Split(new string[] { " ", "\t" }, StringSplitOptions.RemoveEmptyEntries);
                 if (tmp.Length < 2) continue;
-
-                //newGraphInstance.AddVerticesAndEdge(new Edge<string>(tmp[0], tmp[1]));
-                newGraphInstance.AddVerticesAndEdge(tmp[0], tmp[1]);
+                
+                //newGraphInstance.AddVerticesAndEdge(new Edge<int>(tmp[0], tmp[1]));
+                newGraphInstance.AddVerticesAndEdge(int.Parse(tmp[0]), int.Parse(tmp[1]));
             }
             return newGraphInstance;
         }

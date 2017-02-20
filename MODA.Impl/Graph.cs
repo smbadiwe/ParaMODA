@@ -15,7 +15,7 @@ namespace MODA.Impl
         private bool[] adjMatrix;
         private int currentVertexCount;
         public int MaxSize { get; private set; }
-        public string[] Vertices { get; private set; }
+        public int[] Vertices { get; private set; }
         public int MaxEdgeCount { get; private set; }
         public int VertexCount { get { return currentVertexCount; } }
         public int EdgeCount { get { return adjMatrix.Count(x => x == true); } }
@@ -24,10 +24,10 @@ namespace MODA.Impl
             MaxSize = size;
             MaxEdgeCount = size * (size - 1) / 2;
             adjMatrix = new bool[MaxEdgeCount];
-            Vertices = new string[size];
+            Vertices = new int[size];
         }
 
-        public bool TryGetEdge(string source, string target, out Edge<string> edge)
+        public bool TryGetEdge(int source, int target, out Edge<int> edge)
         {
             int adjMatrixIndex = 0;
             for (int i = 0; i < MaxSize - 1; i++)
@@ -39,7 +39,7 @@ namespace MODA.Impl
                     {
                         if (adjMatrix[adjMatrixIndex] == true)
                         {
-                            edge = new Edge<string>(source, target);
+                            edge = new Edge<int>(source, target);
                             return true;
                         }
                         else
@@ -55,17 +55,17 @@ namespace MODA.Impl
             return false;
         }
 
-        public IList<Edge<string>> GetEdges()
+        public IList<Edge<int>> GetEdges()
         {
             int adjMatrixIndex = 0;
-            var toReturn = new List<Edge<string>>(currentVertexCount - 1);
+            var toReturn = new List<Edge<int>>(currentVertexCount - 1);
             for (int i = 0; i < MaxSize - 1; i++)
             {
                 for (int j = i + 1; j < MaxSize; j++)
                 {
                     if (adjMatrix[adjMatrixIndex] == true)
                     {
-                        toReturn.Add(new Edge<string>(Vertices[i], Vertices[j]));
+                        toReturn.Add(new Edge<int>(Vertices[i], Vertices[j]));
                     }
 
                     adjMatrixIndex++;
@@ -74,7 +74,7 @@ namespace MODA.Impl
             return toReturn;
         }
 
-        public bool AddNode(string node)
+        public bool AddNode(int node)
         {
             if (currentVertexCount < MaxSize)
             {
@@ -88,12 +88,12 @@ namespace MODA.Impl
             return false;
         }
 
-        public bool ContainsVertex(string node)
+        public bool ContainsVertex(int node)
         {
             return Vertices.Contains(node);
         }
 
-        public void AddVerticesAndEdgeRange(IEnumerable<Edge<string>> edges)
+        public void AddVerticesAndEdgeRange(IEnumerable<Edge<int>> edges)
         {
             foreach (var edge in edges)
             {
@@ -101,13 +101,13 @@ namespace MODA.Impl
             }
         }
 
-        public IList<string> GetNeighbors(string node)
+        public IList<int> GetNeighbors(int node)
         {
             var indexOfNode = Array.IndexOf(Vertices, node);
             if (indexOfNode > -1)
             {
                 int adjMatrixIndex = 0;
-                var toReturn = new List<string>(currentVertexCount - 1);
+                var toReturn = new List<int>(currentVertexCount - 1);
                 for (int i = 0; i < MaxSize - 1; i++)
                 {
                     for (int j = i + 1; j < MaxSize; j++)
@@ -131,10 +131,10 @@ namespace MODA.Impl
                 }
                 return toReturn;
             }
-            return new string[0];
+            return new int[0];
         }
 
-        public int AdjacentDegree(string node)
+        public int AdjacentDegree(int node)
         {
             int indexOfNode = Array.IndexOf(Vertices, node);
             if (indexOfNode > -1)
@@ -160,12 +160,12 @@ namespace MODA.Impl
             return 0;
         }
 
-        public bool AddVerticesAndEdge(Edge<string> edge)
+        public bool AddVerticesAndEdge(Edge<int> edge)
         {
             return AddEdge(edge.Source, edge.Target);
         }
 
-        public bool AddEdge(string source, string target)
+        public bool AddEdge(int source, int target)
         {
             AddNode(source);
             AddNode(target);
@@ -187,9 +187,9 @@ namespace MODA.Impl
             return false;
         }
 
-        public bool ContainsEdge(string source, string target)
+        public bool ContainsEdge(int source, int target)
         {
-            Edge<string> edge;
+            Edge<int> edge;
             return TryGetEdge(source, target, out edge);
         }
 
@@ -201,7 +201,7 @@ namespace MODA.Impl
             return newG;
         }
 
-        public bool RemoveVertex(string node)
+        public bool RemoveVertex(int node)
         {
             //Removing an edge is tantamount to setting the corresponding element in the adjeacency matrix to false
             int indexOfNode = Array.IndexOf(Vertices, node);
@@ -245,7 +245,7 @@ namespace MODA.Impl
         {
             if (index >= Vertices.Length) return;
 
-            string[] newVerticesSet = new string[Vertices.Length - 1];
+            int[] newVerticesSet = new int[Vertices.Length - 1];
             int i = 0;
             int j = 0;
             while (i < Vertices.Length)
@@ -267,11 +267,11 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="count">The expected number of items to return. This value is usually less than the <see cref="VertexCount"/></param>
         /// <returns></returns>
-        public IList<string> GetDegreeSequence(int count)
+        public IList<int> GetDegreeSequence(int count)
         {
-            if (Vertices.Length == 0) return new string[0];
+            if (Vertices.Length == 0) return new int[0];
 
-            var tempList = new Dictionary<string, int>(count);
+            var tempList = new Dictionary<int, int>(count);
             int iter = 1;
             foreach (var node in Vertices)
             {
@@ -280,7 +280,7 @@ namespace MODA.Impl
                 if (iter == count) break;
             }
 
-            var listToReturn = new List<string>(count);
+            var listToReturn = new List<int>(count);
             foreach (var item in tempList.OrderByDescending(x => x.Value))
             {
                 listToReturn.Add(item.Key);

@@ -24,21 +24,21 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size / 3</param>
-        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraph, int numberOfSamples = -1)
+        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<int, Edge<int>> inputGraph, int numberOfSamples = -1)
         {
             //var timer = System.Diagnostics.Stopwatch.StartNew();
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
 
-            H_NodeNeighbours = new Dictionary<string, HashSet<string>>();
-            G_NodeNeighbours = new Dictionary<string, HashSet<string>>();
+            H_NodeNeighbours = new Dictionary<int, HashSet<int>>();
+            G_NodeNeighbours = new Dictionary<int, HashSet<int>>();
             var comparer = new MappingNodesComparer();
-            var theMappings = new Dictionary<string[], List<Mapping>>(comparer);
+            var theMappings = new Dictionary<IList<int>, List<Mapping>>(comparer);
             var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
 
             Console.WriteLine("Calling Algo 2-Modified: Number of Iterations: {0}.\n", numberOfSamples);
 
             var h = queryGraph.Vertices.ElementAt(0);
-            var f = new Dictionary<string, string>(1);
+            var f = new Dictionary<int, int>(1);
             var subgraphSize = queryGraph.VertexCount;
             int mappingCount = 0;
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
@@ -60,11 +60,10 @@ namespace MODA.Impl
                         {
                             Mapping mapping = mappings[k];
                             //Recall: f(h) = g
-                            var key = mapping.Function.Values.ToArray();
                             List<Mapping> mapSet;
-                            if (!theMappings.TryGetValue(key, out mapSet))
+                            if (!theMappings.TryGetValue(mapping.Function.Values, out mapSet))
                             {
-                                theMappings[key] = new List<Mapping>(1) { mapping };
+                                theMappings[mapping.Function.Values] = new List<Mapping>(1) { mapping };
                                 mappingCount++;
                             }
                             else

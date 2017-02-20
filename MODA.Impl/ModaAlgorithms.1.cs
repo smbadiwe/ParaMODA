@@ -7,10 +7,10 @@ namespace MODA.Impl
 {
     public partial class ModaAlgorithms
     {
-        private static ExpansionTreeBuilder<string> _builder;
+        private static ExpansionTreeBuilder<int> _builder;
         public static void BuildTree(int subgraphSize)
         {
-            _builder = new ExpansionTreeBuilder<string>(subgraphSize);
+            _builder = new ExpansionTreeBuilder<int>(subgraphSize);
             _builder.Build();
         }
 
@@ -23,7 +23,7 @@ namespace MODA.Impl
         /// <param name="thresholdValue">Frequency value, above which we can comsider the subgraph a "frequent subgraph"</param>
         /// <returns>Fg, frequent subgraph list. NB: The dictionary .Value is an <see cref="object"/> which will be either a list of <see cref="Mapping"/> or a <see cref="long"/>
         /// depending on the value of <see cref="GetOnlyMappingCounts"/>.</returns>
-        public static Dictionary<QueryGraph, string> Algorithm1_C(UndirectedGraph<string, Edge<string>> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
+        public static Dictionary<QueryGraph, string> Algorithm1_C(UndirectedGraph<int, Edge<int>> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
         {
             // The enumeration module (Algo 3) needs the mappings generated from the previous run(s)
             Dictionary<QueryGraph, string> allMappings;
@@ -140,7 +140,7 @@ namespace MODA.Impl
         /// <param name="thresholdValue">Frequency value, above which we can comsider the subgraph a "frequent subgraph"</param>
         /// <returns>Fg, frequent subgraph list. NB: The dictionary .Value is an <see cref="object"/> which will be either a list of <see cref="Mapping"/> or a <see cref="long"/>
         /// depending on the value of <see cref="GetOnlyMappingCounts"/>.</returns>
-        public static Dictionary<QueryGraph, IList<Mapping>> Algorithm1(UndirectedGraph<string, Edge<string>> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
+        public static Dictionary<QueryGraph, IList<Mapping>> Algorithm1(UndirectedGraph<int, Edge<int>> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
         {
             // The enumeration module (Algo 3) needs the mappings generated from the previous run(s)
             Dictionary<QueryGraph, IList<Mapping>> allMappings;

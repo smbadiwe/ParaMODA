@@ -14,7 +14,7 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraphClone">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraphClone"/> size / 3</param>
-        internal static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<string, Edge<string>> inputGraphClone, int numberOfSamples = -1)
+        internal static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<int, Edge<int>> inputGraphClone, int numberOfSamples = -1)
         {
             //var timer = System.Diagnostics.Stopwatch.StartNew();
             if (numberOfSamples <= 0) numberOfSamples = inputGraphClone.VertexCount / 3; // VertexCountDividend;
@@ -22,9 +22,9 @@ namespace MODA.Impl
             // Do we need this clone? Can't we just remove the node directly from the graph? 
             // We do need it.
 
-            H_NodeNeighbours = new Dictionary<string, HashSet<string>>();
+            H_NodeNeighbours = new Dictionary<int, HashSet<int>>();
             var comparer = new MappingNodesComparer();
-            var theMappings = new Dictionary<string[], List<Mapping>>(comparer);
+            var theMappings = new Dictionary<IList<int>, List<Mapping>>(comparer);
             var inputGraphDegSeq = inputGraphClone.GetDegreeSequence(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
             var subgraphSize = queryGraphVertices.Length;
@@ -33,7 +33,7 @@ namespace MODA.Impl
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
                 var g = inputGraphDegSeq[i];
-                G_NodeNeighbours = new Dictionary<string, HashSet<string>>();
+                G_NodeNeighbours = new Dictionary<int, HashSet<int>>();
                 for (int j = 0; j < subgraphSize; j++)
                 {
                     var h = queryGraphVertices[j];
@@ -42,7 +42,7 @@ namespace MODA.Impl
                         #region Can Support
                         //var sw = System.Diagnostics.Stopwatch.StartNew();
                         //Remember: f(h) = g, so h is Domain and g is Range
-                        var f = new Dictionary<string, string>(1);
+                        var f = new Dictionary<int, int>(1);
                         f[h] = g;
                         var mappings = IsomorphicExtension(f, queryGraph, inputGraphClone);
 
@@ -57,11 +57,10 @@ namespace MODA.Impl
                             {
                                 Mapping mapping = mappings[k];
                                 //Recall: f(h) = g
-                                var key = mapping.Function.Values.ToArray();
                                 List<Mapping> mapSet;
-                                if (!theMappings.TryGetValue(key, out mapSet))
+                                if (!theMappings.TryGetValue(mapping.Function.Values, out mapSet))
                                 {
-                                    theMappings[key] = new List<Mapping>(1) { mapping };
+                                    theMappings[mapping.Function.Values] = new List<Mapping>(1) { mapping };
                                     mappingCount++;
                                 }
                                 else

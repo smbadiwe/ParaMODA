@@ -4,8 +4,6 @@ using System.IO;
 using System;
 using System.Text;
 using StdConsole = System.Console;
-using MODA.Impl.Graphics;
-using System.Runtime.InteropServices;
 
 namespace MODA.Console
 {

@@ -17,7 +17,7 @@ namespace MODA.Impl
         /// <param name="expansionTree">T_k</param>
         /// <param name="parentQueryGraph"></param>
         /// <param name="parentGraphMappings">NB: This param is still used even outside this method is call. So, be careful how you set/clear its values.</param>
-        private static IList<Mapping> Algorithm3(UndirectedGraph<string, Edge<string>> inputGraph, QueryGraph queryGraph,
+        private static IList<Mapping> Algorithm3(UndirectedGraph<int, Edge<int>> inputGraph, QueryGraph queryGraph,
             AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> expansionTree,
             QueryGraph parentQueryGraph, IList<Mapping> parentGraphMappings)
         {
@@ -26,7 +26,9 @@ namespace MODA.Impl
             //var timer = System.Diagnostics.Stopwatch.StartNew();
             var subgraphSize = queryGraph.VertexCount;
             var newEdge = GetEdgeDifference(queryGraph, parentQueryGraph);
-            Edge<string> newEdgeImage;
+            if (newEdge == null) return new Mapping[0];
+
+            Edge<int> newEdgeImage;
             var list = new List<Mapping>();
             for (int i = 0; i < parentGraphMappings.Count; i++)
             {
@@ -122,11 +124,15 @@ namespace MODA.Impl
         /// <param name="currentQueryGraph">The current subgraph being queried</param>
         /// <param name="parentQueryGraph">The parent to <paramref name="currentQueryGraph"/>. This parent is also a subset, meaning it has one edge less.</param>
         /// <returns></returns>
-        private static Edge<string> GetEdgeDifference(QueryGraph currentQueryGraph, QueryGraph parentQueryGraph)
+        private static Edge<int> GetEdgeDifference(QueryGraph currentQueryGraph, QueryGraph parentQueryGraph)
         {
             // Recall: currentQueryGraph is a super-graph of parentQueryGraph
-            if (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount != 1) throw new ArgumentException("Invalid arguments for the method: GetEdgeDifference");
-
+            if (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount != 1)
+            {
+                Console.WriteLine("Invalid arguments for the method: GetEdgeDifference. [currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount] = {0}.\ncurrentQueryGraph.Label = '{1}'. parentQueryGraph.Label = '{2}'."
+                    , (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount), currentQueryGraph.Label, parentQueryGraph.Label);
+                return null;
+            }
             var edges = parentQueryGraph.Edges2;
             foreach (var edge in currentQueryGraph.Edges2)
             {
@@ -135,7 +141,7 @@ namespace MODA.Impl
                     return edge;
                 }
             }
-            throw new InvalidOperationException();
+            return null; // throw new InvalidOperationException();
         }
 
 

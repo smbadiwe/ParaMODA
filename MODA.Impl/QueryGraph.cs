@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MODA.Impl
 {
-    public sealed class QueryGraph : UndirectedGraph<string, Edge<string>>
+    public sealed class QueryGraph : UndirectedGraph<int, Edge<int>>
     {
         public QueryGraph() : base()
         {
