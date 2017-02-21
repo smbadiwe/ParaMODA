@@ -85,7 +85,7 @@ namespace MODA.Impl
                             {
                                 inducedSubGraphEdges.Clear();
                                 inducedSubGraphEdges = null;
-                                return new Dictionary<IList<int>, Mapping>(0);
+                                return null;
                             }
                         }
                         if (edge_h == false) // => edge_g was never evaluated because the first part of the AND statement was false
@@ -109,7 +109,7 @@ namespace MODA.Impl
                 {
                     inducedSubGraphEdges.Clear();
                     inducedSubGraphEdges = null;
-                    return new Dictionary<IList<int>, Mapping>(0);
+                    return null;
                 }
 
                 var map = new Mapping(partialMapDict)
@@ -119,7 +119,6 @@ namespace MODA.Impl
 
                 inducedSubGraphEdges.Clear();
                 inducedSubGraphEdges = null;
-                //return new List<Mapping>(1) { map };
                 return new Dictionary<IList<int>, Mapping>(1) { { map.Function.Values, map } };
                 #endregion
 
@@ -130,7 +129,7 @@ namespace MODA.Impl
 
             // get m, most constrained neighbor
             int m = GetMostConstrainedNeighbour(partialMap.Keys, queryGraph);
-            if (m < 0) return new Dictionary<IList<int>, Mapping>();
+            if (m < 0) return null;
 
             var listOfIsomorphisms = new Dictionary<IList<int>, Mapping>(comparer);
 
@@ -153,7 +152,7 @@ namespace MODA.Impl
                     }
                     newPartialMap[m] = n;
                     var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph, comparer);
-                    if (subList.Count > 0)
+                    if (subList != null && subList.Count > 0)
                     {
                         foreach (var item in subList)
                         {
