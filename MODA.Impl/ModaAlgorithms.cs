@@ -63,8 +63,8 @@ namespace MODA.Impl
         /// <param name="queryGraph">G</param>
         /// <param name="inputGraph">H</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
-        private static IList<Mapping> IsomorphicExtension(Dictionary<int, int> partialMap, QueryGraph queryGraph
-            , UndirectedGraph<int, Edge<int>> inputGraph)
+        private static Dictionary<IList<int>, Mapping> IsomorphicExtension(Dictionary<int, int> partialMap, QueryGraph queryGraph
+            , UndirectedGraph<int, Edge<int>> inputGraph, MappingNodesComparer comparer)
         {
             if (partialMap.Count == queryGraph.VertexCount)
             {
@@ -85,7 +85,7 @@ namespace MODA.Impl
                             {
                                 inducedSubGraphEdges.Clear();
                                 inducedSubGraphEdges = null;
-                                return new Mapping[0];
+                                return new Dictionary<IList<int>, Mapping>(0);
                             }
                         }
                         if (edge_h == false) // => edge_g was never evaluated because the first part of the AND statement was false
@@ -109,7 +109,7 @@ namespace MODA.Impl
                 {
                     inducedSubGraphEdges.Clear();
                     inducedSubGraphEdges = null;
-                    return new Mapping[0];
+                    return new Dictionary<IList<int>, Mapping>(0);
                 }
 
                 var map = new Mapping(partialMapDict)
@@ -120,7 +120,7 @@ namespace MODA.Impl
                 inducedSubGraphEdges.Clear();
                 inducedSubGraphEdges = null;
                 //return new List<Mapping>(1) { map };
-                return new Mapping[] { map };
+                return new Dictionary<IList<int>, Mapping>(1) { { map.Function.Values, map } };
                 #endregion
 
             }
@@ -130,9 +130,9 @@ namespace MODA.Impl
 
             // get m, most constrained neighbor
             int m = GetMostConstrainedNeighbour(partialMap.Keys, queryGraph);
-            if (m < 0) return new Mapping[0];
+            if (m < 0) return new Dictionary<IList<int>, Mapping>();
 
-            var listOfIsomorphisms = new List<Mapping>();
+            var listOfIsomorphisms = new Dictionary<IList<int>, Mapping>(comparer);
 
             var neighbourRange = ChooseNeighboursOfRange(partialMap.Values, inputGraph);
 
@@ -152,10 +152,13 @@ namespace MODA.Impl
                         newPartialMap.Add(item.Key, item.Value);
                     }
                     newPartialMap[m] = n;
-                    var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);
+                    var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph, comparer);
                     if (subList.Count > 0)
                     {
-                        listOfIsomorphisms.AddRange(subList);
+                        foreach (var item in subList)
+                        {
+                            listOfIsomorphisms[item.Key] = item.Value;
+                        }
                     }
                 }
             }

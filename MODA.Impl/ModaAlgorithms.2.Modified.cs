@@ -26,8 +26,7 @@ namespace MODA.Impl
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size / 3</param>
         private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<int, Edge<int>> inputGraph, int numberOfSamples = -1)
         {
-            //var timer = System.Diagnostics.Stopwatch.StartNew();
-            if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3; // VertexCountDividend;
+            if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3;
 
             H_NodeNeighbours = new Dictionary<int, HashSet<int>>();
             G_NodeNeighbours = new Dictionary<int, HashSet<int>>();
@@ -45,30 +44,18 @@ namespace MODA.Impl
                 if (CanSupport(queryGraph, h, inputGraph, g))
                 {
                     #region Can Support
-                    //var sw = System.Diagnostics.Stopwatch.StartNew();
                     //Remember: f(h) = g, so h is Domain and g is Range
                     f[h] = g;
-                    var mappings = IsomorphicExtension(f, queryGraph, inputGraph);
+                    var mappings = IsomorphicExtension(f, queryGraph, inputGraph, comparer);
                     if (mappings.Count > 0)
                     {
-                        //sw.Stop();
-                        //Console.WriteLine(".");
-                        //sw.Restart();
-                        for (int k = mappings.Count - 1; k >= 0; k--)
+                        foreach (var item in mappings)
                         {
-                            Mapping mapping = mappings[k];
                             //Recall: f(h) = g
-                            if (!theMappings.ContainsKey(mapping.Function.Values))
-                            {
-                                theMappings[mapping.Function.Values] = mapping;
-                            }
-                            mappings.RemoveAt(k);
+                            theMappings[item.Key] = item.Value;
                         }
-                        mappings = null;
+                        mappings.Clear();
                     }
-                    //sw.Stop();
-                    //logGist.AppendFormat("Map: {0}.\tTime to set:\t{1:N}s.\th = {2}. g = {3}\n", mappings.Count, sw.Elapsed.ToString(), h, g);
-                    //sw = null;
                     #endregion
                 }
             }

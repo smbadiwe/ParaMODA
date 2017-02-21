@@ -16,8 +16,7 @@ namespace MODA.Impl
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraphClone"/> size / 3</param>
         internal static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<int, Edge<int>> inputGraphClone, int numberOfSamples = -1)
         {
-            //var timer = System.Diagnostics.Stopwatch.StartNew();
-            if (numberOfSamples <= 0) numberOfSamples = inputGraphClone.VertexCount / 3; // VertexCountDividend;
+            if (numberOfSamples <= 0) numberOfSamples = inputGraphClone.VertexCount / 3;
 
             // Do we need this clone? Can't we just remove the node directly from the graph? 
             // We do need it.
@@ -40,30 +39,19 @@ namespace MODA.Impl
                     if (CanSupport(queryGraph, h, inputGraphClone, g))
                     {
                         #region Can Support
-                        //var sw = System.Diagnostics.Stopwatch.StartNew();
                         //Remember: f(h) = g, so h is Domain and g is Range
                         var f = new Dictionary<int, int>(1);
                         f[h] = g;
-                        var mappings = IsomorphicExtension(f, queryGraph, inputGraphClone);
-
-                        //sw.Stop();
-                        //Console.WriteLine("Time to do IsomorphicExtension: {0}\n", sw.Elapsed.ToString());
-                        //Console.Write(".");
+                        var mappings = IsomorphicExtension(f, queryGraph, inputGraphClone, comparer);
+                        
                         if (mappings.Count > 0)
                         {
-                            //sw.Restart();
-
-                            for (int k = mappings.Count - 1; k >= 0; k--)
+                            foreach (var item in mappings)
                             {
-                                Mapping mapping = mappings[k];
                                 //Recall: f(h) = g
-                                if (!theMappings.ContainsKey(mapping.Function.Values))
-                                {
-                                    theMappings[mapping.Function.Values] = mapping;
-                                }
-                                mappings.RemoveAt(k);
+                                theMappings[item.Key] = item.Value;
                             }
-                            mappings = null;
+                            mappings.Clear();
                         }
                         #endregion
                     }

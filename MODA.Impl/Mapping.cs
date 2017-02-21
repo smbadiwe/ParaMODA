@@ -83,7 +83,25 @@ namespace MODA.Impl
             }
             return null;
         }
-        
+
+        public override bool Equals(object obj)
+        {
+            var other = (Mapping)obj;
+
+            int i = 0;
+            foreach (var func in this.Function)
+            {
+                if (other.Function.Keys[i] == func.Key && other.Function.Values[i] == func.Value)
+                {
+                    i++;
+                    continue;
+                }
+                return false;
+            }
+
+            return true;
+        }
+
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -100,6 +118,6 @@ namespace MODA.Impl
             sb.Append("]\n");
             return sb.ToString();
         }
-        
+
     }
 }

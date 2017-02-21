@@ -22,8 +22,7 @@ namespace MODA.Impl
             QueryGraph parentQueryGraph, IList<Mapping> parentGraphMappings)
         {
             if (parentGraphMappings.Count == 0) return new Mapping[0];
-
-            //var timer = System.Diagnostics.Stopwatch.StartNew();
+            
             var subgraphSize = queryGraph.VertexCount;
             var newEdge = GetEdgeDifference(queryGraph, parentQueryGraph);
             if (newEdge == null) return new Mapping[0];
@@ -51,7 +50,6 @@ namespace MODA.Impl
                 }
                 if (newEdgeImage != null)
                 {
-                    //if (map.InducedSubGraphEdges.Contains(newEdgeImage))
                     if (inputGraph.ContainsEdge(newEdgeImage.Source, newEdgeImage.Target))
                     {
                         list.Add(map);
@@ -70,7 +68,6 @@ namespace MODA.Impl
                     {
                         dict.Remove(list[i].Id);
                     }
-                    //parentGraphMappings.RemoveBySwap(list[i]);
                 }
                 foreach (var item in dict)
                 {
