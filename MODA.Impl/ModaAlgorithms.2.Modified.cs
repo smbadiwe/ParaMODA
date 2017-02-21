@@ -24,13 +24,12 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size / 3</param>
-        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<int, Edge<int>> inputGraph, int numberOfSamples = -1)
+        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<int, Edge<int>> inputGraph, int numberOfSamples)
         {
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3;
 
             H_NodeNeighbours = new Dictionary<int, HashSet<int>>();
             G_NodeNeighbours = new Dictionary<int, HashSet<int>>();
-            var comparer = new MappingNodesComparer();
             var theMappings = new Dictionary<IList<int>, Mapping>(comparer);
             var inputGraphDegSeq = inputGraph.GetNodesSortedByDegree(numberOfSamples);
 
@@ -46,7 +45,7 @@ namespace MODA.Impl
                     #region Can Support
                     //Remember: f(h) = g, so h is Domain and g is Range
                     f[h] = g;
-                    var mappings = IsomorphicExtension(f, queryGraph, inputGraph, comparer);
+                    var mappings = IsomorphicExtension(f, queryGraph, inputGraph);
                     if (mappings.Count > 0)
                     {
                         foreach (var item in mappings)

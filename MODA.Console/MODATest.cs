@@ -13,8 +13,6 @@ namespace MODA.Console
         {
             try
             {
-                //MinimizeFootprint(); //MinimizeMemory();
-
                 #region Process input parameters
                 if (args == null || args.Length < 6)
                 {
@@ -99,19 +97,7 @@ namespace MODA.Console
                 {
                     StdConsole.WriteLine("Query Graph (H): Nodes - {0}; Edges: {1}\n", queryGraph.VertexCount, queryGraph.EdgeCount);
                 }
-
-                //StdConsole.WriteLine("Do you want to generate an image of the input (and query) graph(s)? Y/N\nIf Y, you'll need to provide the path to dot.exe program on your machine");
-                //resp = StdConsole.ReadLine();
-                //if (resp == "y" || resp == "Y")
-                //{
-                //    StdConsole.WriteLine("Enter the path of the dot.exe program on your machine:");
-                //    resp = StdConsole.ReadLine(); //the dot program's filename, including the path
-                //    Visualizer.Visualize(inputGraph, resp, inputGraphFile + ".dot");
-                //    if (queryGraph != null) // => queryGraphFile has a value
-                //    {
-                //        Visualizer.Visualize(queryGraph, resp, queryGraphFile + ".dot");
-                //    }
-                //}
+                
                 StdConsole.ForegroundColor = ConsoleColor.Green;
 
                 if (queryGraph == null)

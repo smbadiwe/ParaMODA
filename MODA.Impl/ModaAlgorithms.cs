@@ -7,6 +7,17 @@ namespace MODA.Impl
 {
     public partial class ModaAlgorithms
     {
+        private static MappingNodesComparer comparer;
+        /// <summary>
+        /// If true, then the querygraph must match exactly to the input subgraph. In other words, only induced subgraphs will be returned
+        /// </summary>
+        private static bool getInducedMappingsOnly;
+        static ModaAlgorithms()
+        {
+            comparer = new MappingNodesComparer();
+            getInducedMappingsOnly = false;
+        }
+
         /// <summary>
         /// If true, it means we only care about how many mappings are found for each subgraph, not info about the mappings themselves.
         /// </summary>
@@ -64,7 +75,7 @@ namespace MODA.Impl
         /// <param name="inputGraph">H</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
         private static Dictionary<IList<int>, Mapping> IsomorphicExtension(Dictionary<int, int> partialMap, QueryGraph queryGraph
-            , UndirectedGraph<int, Edge<int>> inputGraph, MappingNodesComparer comparer)
+            , UndirectedGraph<int, Edge<int>> inputGraph)
         {
             if (partialMap.Count == queryGraph.VertexCount)
             {
@@ -83,6 +94,7 @@ namespace MODA.Impl
                             edge_h = true;
                             if (!inputGraph.TryGetEdge(partialMapDict.Values[i], partialMapDict.Values[j], out edge_g))
                             {
+                                // No correspondent in the input graph
                                 inducedSubGraphEdges.Clear();
                                 inducedSubGraphEdges = null;
                                 return null;
@@ -106,6 +118,14 @@ namespace MODA.Impl
                 }
                 edge_g = null;
                 if (queryGraph.EdgeCount > inducedSubGraphEdges.Count) // this shouuld never happen; but just in case
+                {
+                    inducedSubGraphEdges.Clear();
+                    inducedSubGraphEdges = null;
+                    return null;
+                }
+
+                // If we're to get induced mappings only, then the both query graph and the image must have the same number of edges
+                if (getInducedMappingsOnly && (queryGraph.EdgeCount != inducedSubGraphEdges.Count))
                 {
                     inducedSubGraphEdges.Clear();
                     inducedSubGraphEdges = null;
@@ -151,7 +171,7 @@ namespace MODA.Impl
                         newPartialMap.Add(item.Key, item.Value);
                     }
                     newPartialMap[m] = n;
-                    var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph, comparer);
+                    var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);
                     if (subList != null && subList.Count > 0)
                     {
                         foreach (var item in subList)

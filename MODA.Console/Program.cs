@@ -9,7 +9,7 @@
         {
             //For args values, see ReadMe.txt
 #if DEBUG
-            args = "../Debug QueryGraph.txt 4 0 y n".Split(' ');
+            args = "../Debug QueryGraph.txt 3 0 y n n ../Files/1/3.txt".Split(' ');
             //args = "../Debug Scere20141001CR_idx.txt 4 0 y n".Split(' '); //../Debug/qg_3v_3e.txt
             //args = "../Debug Ecoli20141001CR_idx.txt 3 0 y n".Split(' ');
             

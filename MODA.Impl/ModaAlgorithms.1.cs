@@ -110,12 +110,12 @@ namespace MODA.Impl
             }
             else
             {
+                getInducedMappingsOnly = true;
                 List<Mapping> mappings;
                 if (UseModifiedGrochow)
                 {
                     // Modified Mapping module - MODA and Grockow & Kellis
                     mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations);
-                    // mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph, numIterations);
                 }
                 else
                 {
@@ -208,6 +208,7 @@ namespace MODA.Impl
             }
             else
             {
+                getInducedMappingsOnly = true;
                 List<Mapping> mappings;
                 if (UseModifiedGrochow)
                 {

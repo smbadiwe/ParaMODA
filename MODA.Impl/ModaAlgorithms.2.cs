@@ -14,7 +14,7 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraphClone">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraphClone"/> size / 3</param>
-        internal static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<int, Edge<int>> inputGraphClone, int numberOfSamples = -1)
+        internal static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<int, Edge<int>> inputGraphClone, int numberOfSamples)
         {
             if (numberOfSamples <= 0) numberOfSamples = inputGraphClone.VertexCount / 3;
 
@@ -22,7 +22,6 @@ namespace MODA.Impl
             // We do need it.
 
             H_NodeNeighbours = new Dictionary<int, HashSet<int>>();
-            var comparer = new MappingNodesComparer();
             var theMappings = new Dictionary<IList<int>, Mapping>(comparer);
             var inputGraphDegSeq = inputGraphClone.GetNodesSortedByDegree(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
@@ -42,7 +41,7 @@ namespace MODA.Impl
                         //Remember: f(h) = g, so h is Domain and g is Range
                         var f = new Dictionary<int, int>(1);
                         f[h] = g;
-                        var mappings = IsomorphicExtension(f, queryGraph, inputGraphClone, comparer);
+                        var mappings = IsomorphicExtension(f, queryGraph, inputGraphClone);
                         
                         if (mappings.Count > 0)
                         {
