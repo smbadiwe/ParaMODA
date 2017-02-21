@@ -32,15 +32,13 @@ namespace MODA.Impl
             H_NodeNeighbours = new Dictionary<int, HashSet<int>>();
             G_NodeNeighbours = new Dictionary<int, HashSet<int>>();
             var comparer = new MappingNodesComparer();
-            var theMappings = new Dictionary<IList<int>, List<Mapping>>(comparer);
-            var inputGraphDegSeq = inputGraph.GetDegreeSequence(numberOfSamples);
+            var theMappings = new Dictionary<IList<int>, Mapping>(comparer);
+            var inputGraphDegSeq = inputGraph.GetNodesSortedByDegree(numberOfSamples);
 
             Console.WriteLine("Calling Algo 2-Modified: Number of Iterations: {0}.\n", numberOfSamples);
 
             var h = queryGraph.Vertices.ElementAt(0);
             var f = new Dictionary<int, int>(1);
-            var subgraphSize = queryGraph.VertexCount;
-            int mappingCount = 0;
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
                 var g = inputGraphDegSeq[i];
@@ -60,19 +58,9 @@ namespace MODA.Impl
                         {
                             Mapping mapping = mappings[k];
                             //Recall: f(h) = g
-                            List<Mapping> mapSet;
-                            if (!theMappings.TryGetValue(mapping.Function.Values, out mapSet))
+                            if (!theMappings.ContainsKey(mapping.Function.Values))
                             {
-                                theMappings[mapping.Function.Values] = new List<Mapping>(1) { mapping };
-                                mappingCount++;
-                            }
-                            else
-                            {
-                                if (false == mapSet.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
-                                {
-                                    mapSet.Add(mapping);
-                                    mappingCount++;
-                                }
+                                theMappings[mapping.Function.Values] = mapping;
                             }
                             mappings.RemoveAt(k);
                         }
@@ -85,13 +73,7 @@ namespace MODA.Impl
                 }
             }
 
-            var toReturn = new List<Mapping>(mappingCount);
-            foreach (var set in theMappings)
-            {
-                toReturn.AddRange(set.Value);
-                set.Value.Clear();
-            }
-
+            var toReturn = new List<Mapping>(theMappings.Values);
             theMappings.Clear();
             theMappings = null;
             inputGraphDegSeq.Clear();

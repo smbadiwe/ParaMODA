@@ -24,11 +24,11 @@ namespace MODA.Impl
 
             H_NodeNeighbours = new Dictionary<int, HashSet<int>>();
             var comparer = new MappingNodesComparer();
-            var theMappings = new Dictionary<IList<int>, List<Mapping>>(comparer);
-            var inputGraphDegSeq = inputGraphClone.GetDegreeSequence(numberOfSamples);
+            var theMappings = new Dictionary<IList<int>, Mapping>(comparer);
+            var inputGraphDegSeq = inputGraphClone.GetNodesSortedByDegree(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
             var subgraphSize = queryGraphVertices.Length;
-            int mappingCount = 0;
+
             Console.WriteLine("Calling Algo 2:\n");
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
@@ -57,19 +57,9 @@ namespace MODA.Impl
                             {
                                 Mapping mapping = mappings[k];
                                 //Recall: f(h) = g
-                                List<Mapping> mapSet;
-                                if (!theMappings.TryGetValue(mapping.Function.Values, out mapSet))
+                                if (!theMappings.ContainsKey(mapping.Function.Values))
                                 {
-                                    theMappings[mapping.Function.Values] = new List<Mapping>(1) { mapping };
-                                    mappingCount++;
-                                }
-                                else
-                                {
-                                    if (false == mapSet.Exists(x => x.IsIsomorphicWith(mapping, queryGraph)))
-                                    {
-                                        mapSet.Add(mapping);
-                                        mappingCount++;
-                                    }
+                                    theMappings[mapping.Function.Values] = mapping;
                                 }
                                 mappings.RemoveAt(k);
                             }
@@ -84,13 +74,7 @@ namespace MODA.Impl
                 G_NodeNeighbours.Clear();
             }
 
-            var toReturn = new List<Mapping>(mappingCount);
-            foreach (var set in theMappings)
-            {
-                toReturn.AddRange(set.Value);
-                set.Value.Clear();
-            }
-
+            var toReturn = new List<Mapping>(theMappings.Values);
             queryGraphVertices = null;
             inputGraphClone = null;
 

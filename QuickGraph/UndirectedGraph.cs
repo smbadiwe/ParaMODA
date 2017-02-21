@@ -33,7 +33,7 @@ namespace QuickGraph
             this.allowParallelEdges = allowParallelEdges;
             this.edgeEqualityComparer = EdgeExtensions.GetUndirectedVertexEquality<TVertex, TEdge>();
             this.edges2 = new Dictionary<TVertex, List<TVertex>>();
-            this.adjacentEdges = new VertexEdgeDictionary<TVertex, TEdge>(EqualityComparer<TVertex>.Default);
+            //this.adjacentEdges = new VertexEdgeDictionary<TVertex, TEdge>(EqualityComparer<TVertex>.Default);
         }
 
         //public UndirectedGraph(bool allowParallelEdges, EdgeEqualityComparer<TVertex, TEdge> edgeEqualityComparer)
@@ -94,20 +94,16 @@ namespace QuickGraph
 
         /// <summary>
         /// NB: The degree sequence of an undirected graph is the non-increasing sequence of its vertex degrees;
+        /// We return the vertices 
         /// </summary>
         /// <param name="count">The expected number of items to return. This value is usually less than the <see cref="VertexCount"/></param>
         /// <returns></returns>
-        public IList<TVertex> GetDegreeSequence(int count)
+        public IList<TVertex> GetNodesSortedByDegree(int count)
         {
-            if (this.IsVerticesEmpty) return new TVertex[0];
-
             var tempList = new Dictionary<TVertex, int>(count);
-            int iter = 0;
-            foreach (var node in Vertices)
+            foreach (var node in Vertices.Take(count))
             {
                 tempList.Add(node, this.AdjacentDegree(node));
-                iter++;
-                if (iter == count) break;
             }
 
             var listToReturn = new List<TVertex>(count);
@@ -120,10 +116,24 @@ namespace QuickGraph
             return listToReturn;
         }
 
+        /// <summary>
+        /// NB: The degree sequence of an undirected graph is the non-increasing sequence of its vertex degrees;
+        /// </summary>
+        /// <returns></returns>
+        public int[] GetDegreeSequence()
+        {
+            var listToReturn = new List<int>(VertexCount);
+            foreach (var node in Vertices)
+            {
+                listToReturn.Add(this.AdjacentDegree(node));
+            }
+            
+            return listToReturn.OrderByDescending(x => x).ToArray();
+        }
+
         public UndirectedGraph<TVertex, TEdge> Clone()
         {
             var inputGraphClone = new UndirectedGraph<TVertex, TEdge>();
-            //inputGraphClone.AddVerticesAndEdgeRange(this.Edges);
             foreach (var edge in this.Edges2)
             {
                 inputGraphClone.AddVerticesAndEdge(edge.Source, edge.Target);
@@ -139,8 +149,8 @@ namespace QuickGraph
             {
                 sb.AppendFormat("[{0}],", edge);
             }
-            //sb.AppendLine();
-            return sb.ToString().TrimEnd();
+
+            return sb.ToString();
         }
         #endregion
 
@@ -369,6 +379,7 @@ namespace QuickGraph
             return this.edges2.ContainsKey(vertex);
         }
         #endregion
+
         private Dictionary<TVertex, List<TVertex>> edges2;
         public bool AddVerticesAndEdge(TVertex source, TVertex target)
         {
