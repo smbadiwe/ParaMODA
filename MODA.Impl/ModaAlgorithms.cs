@@ -95,7 +95,7 @@ namespace MODA.Impl
                             if (!inputGraph.TryGetEdge(partialMapDict.Values[i], partialMapDict.Values[j], out edge_g))
                             {
                                 // No correspondent in the input graph
-                                inducedSubGraphEdges.Clear();
+                                //inducedSubGraphEdges.Clear();
                                 inducedSubGraphEdges = null;
                                 return null;
                             }
@@ -119,7 +119,7 @@ namespace MODA.Impl
                 edge_g = null;
                 if (queryGraph.EdgeCount > inducedSubGraphEdges.Count) // this shouuld never happen; but just in case
                 {
-                    inducedSubGraphEdges.Clear();
+                    //inducedSubGraphEdges.Clear();
                     inducedSubGraphEdges = null;
                     return null;
                 }
@@ -127,17 +127,17 @@ namespace MODA.Impl
                 // If we're to get induced mappings only, then the both query graph and the image must have the same number of edges
                 if (getInducedMappingsOnly && (queryGraph.EdgeCount != inducedSubGraphEdges.Count))
                 {
-                    inducedSubGraphEdges.Clear();
+                    //inducedSubGraphEdges.Clear();
                     inducedSubGraphEdges = null;
                     return null;
                 }
 
                 var map = new Mapping(partialMapDict)
                 {
-                    InducedSubGraphEdgesCount = inducedSubGraphEdges.Count
+                    SubGraphEdgeCount = inducedSubGraphEdges.Count
                 };
 
-                inducedSubGraphEdges.Clear();
+                //inducedSubGraphEdges.Clear();
                 inducedSubGraphEdges = null;
                 return new Dictionary<IList<int>, Mapping>(1) { { map.Function.Values, map } };
                 #endregion
@@ -247,27 +247,7 @@ namespace MODA.Impl
             neighboursOfN = null;
             return false;
         }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="used_range"> Meaning that we're only interested in the Values. Remember: f(h) = g</param>
-        ///// <param name="inputGraph">G</param>
-        ///// <returns></returns>
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //private static HashSet<int> ChooseNeighboursOfRange(IEnumerable<int> used_range, UndirectedGraph<int, Edge<int>> inputGraph)
-        //{
-        //    var toReturn = new List<int>();
-        //    foreach (var range in used_range)
-        //    {
-        //        var local = inputGraph.GetNeighbors(range, true);
-        //        toReturn.AddRange(local);
-        //        local = null;
-        //    }
-
-        //    return new HashSet<int>(toReturn); //.ToArray();
-        //}
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -292,7 +272,8 @@ namespace MODA.Impl
                         }
                     }
                     toReturn.AddRange(batch);
-                    batch.Clear(); // = null;
+                    //batch.Clear(); // = null;
+                    batch = null;
                     local = null;
                 }
                 else
@@ -336,34 +317,7 @@ namespace MODA.Impl
             }
             return -1;
         }
-
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="domain">Domain, D, of fumction f. Meaning that we're only interested in the Keys. Remember: f(h) = g</param>
-        ///// <param name="queryGraph">H</param>
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //private static string GetMostConstrainedNeighbour(IEnumerable<int> domain, UndirectedGraph<int, Edge<int>> queryGraph)
-        //{
-        //    /*
-        //     * As is standard in backtracking searches, the algorithm uses the most constrained neighbor
-        //     * to eliminate maps that cannot be isomorphisms: that is, the neighbor of the already-mapped 
-        //     * nodes which is likely to have the fewest possible nodes it can be mapped to. First we select 
-        //     * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
-        //     * the highest degree and largest neighbor degree sequence.
-        //     * */
-        //    var tempList = new Dictionary<int, int>();
-        //    foreach (var node in queryGraph.Vertices.Except(domain))
-        //    {
-        //        tempList.Add(node, queryGraph.AdjacentDegree(node));
-        //    }
-        //    foreach (var item in tempList.OrderByDescending(x => x.Value))
-        //    {
-        //        return item.Key; // Only the first is needed
-        //    }
-        //    return "";
-        //}
-
+        
         /// <summary>
         /// We say that <paramref name="node_G"/> (g) of <paramref name="inputGraph"/> (G) can support <paramref name="node_H"/> (h) of <paramref name="queryGraph"/> (H)
         /// if we cannot rule out a subgraph isomorphism from H into G which maps h to g based on the degrees of h and g, and the degree of their neighbours

@@ -13,7 +13,7 @@ namespace MODA.Impl
         }
 
         /// <summary>
-        /// 
+        /// Usage is temporary - to help organize stuffs in Algorithm 3
         /// </summary>
         public int Id { get; set; }
 
@@ -23,9 +23,10 @@ namespace MODA.Impl
         public SortedList<int, int> Function { get; private set; }
 
         /// <summary>
-        /// Count of all the edges in the input subgraph G that fit the query graph (---Function.Keys)
+        /// Count of all the edges in the input subgraph G that fit the query graph (---Function.Keys).
+        /// This count is for the induced subgraph
         /// </summary>
-        public int InducedSubGraphEdgesCount { get; set; }
+        public int SubGraphEdgeCount { get; set; }
 
         /// <summary>
         /// Only for when (InducedSubGraphEdgesCount == currentQueryGraphEdgeCount)
@@ -37,7 +38,7 @@ namespace MODA.Impl
             int subgraphSize = Function.Count;
             var g_nodes = Function.Values; // Remember, f(h) = g, so .Values is for g's
             Edge<int> edge_g = null;
-            var inducedSubGraphEdges = new List<Edge<int>>(InducedSubGraphEdgesCount);
+            var inducedSubGraphEdges = new List<Edge<int>>(SubGraphEdgeCount);
             for (int i = 0; i < subgraphSize - 1; i++)
             {
                 for (int j = (i + 1); j < subgraphSize; j++)

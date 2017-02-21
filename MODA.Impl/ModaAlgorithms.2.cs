@@ -50,7 +50,8 @@ namespace MODA.Impl
                                 //Recall: f(h) = g
                                 theMappings[item.Key] = item.Value;
                             }
-                            mappings.Clear();
+                            //mappings.Clear();
+                            mappings = null;
                         }
                         #endregion
                     }
@@ -58,20 +59,21 @@ namespace MODA.Impl
 
                 //Remove g
                 inputGraphClone.RemoveVertex(g);
-                G_NodeNeighbours.Clear();
+                //G_NodeNeighbours.Clear();
+                G_NodeNeighbours = null;
             }
 
             var toReturn = new List<Mapping>(theMappings.Values);
             queryGraphVertices = null;
             inputGraphClone = null;
 
-            theMappings.Clear();
+            //theMappings.Clear();
             theMappings = null;
-            inputGraphDegSeq.Clear();
+            //inputGraphDegSeq.Clear();
             inputGraphDegSeq = null;
-            H_NodeNeighbours.Clear();
+            //H_NodeNeighbours.Clear();
             H_NodeNeighbours = null;
-            G_NodeNeighbours.Clear();
+            //G_NodeNeighbours.Clear();
             G_NodeNeighbours = null;
             Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.", toReturn.Count);
             return toReturn;

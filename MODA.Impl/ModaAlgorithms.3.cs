@@ -36,11 +36,11 @@ namespace MODA.Impl
                 // Reember, f(h) = g
 
                 // if (f(u), f(v)) ϵ G and meets the conditions, add to list
-                if (map.InducedSubGraphEdgesCount == queryGraph.EdgeCount)
+                if (map.SubGraphEdgeCount == queryGraph.EdgeCount)
                 {
                     newEdgeImage = map.GetImage(inputGraph, parentQueryGraph.Edges2);
                 }
-                else if (map.InducedSubGraphEdgesCount > queryGraph.EdgeCount)
+                else if (map.SubGraphEdgeCount > queryGraph.EdgeCount)
                 {
                     newEdgeImage = map.GetImage(inputGraph, newEdge);
                 }
@@ -79,7 +79,7 @@ namespace MODA.Impl
                 {
                     toReturn.Add(new Mapping(list[i].Function)
                     {
-                        InducedSubGraphEdgesCount = list[i].InducedSubGraphEdgesCount
+                        SubGraphEdgeCount = list[i].SubGraphEdgeCount
                     });
                     list.RemoveAt(i);
                 }

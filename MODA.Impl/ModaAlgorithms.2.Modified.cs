@@ -33,7 +33,7 @@ namespace MODA.Impl
             var theMappings = new Dictionary<IList<int>, Mapping>(comparer);
             var inputGraphDegSeq = inputGraph.GetNodesSortedByDegree(numberOfSamples);
 
-            Console.WriteLine("Calling Algo 2-Modified: Number of Iterations: {0}.\n", numberOfSamples);
+            Console.WriteLine("Calling Algo 2-Modified:\n");
 
             var h = queryGraph.Vertices.ElementAt(0);
             var f = new Dictionary<int, int>(1);
@@ -60,13 +60,13 @@ namespace MODA.Impl
             }
 
             var toReturn = new List<Mapping>(theMappings.Values);
-            theMappings.Clear();
+            //theMappings.Clear();
             theMappings = null;
-            inputGraphDegSeq.Clear();
+            //inputGraphDegSeq.Clear();
             inputGraphDegSeq = null;
-            H_NodeNeighbours.Clear();
+            //H_NodeNeighbours.Clear();
             H_NodeNeighbours = null;
-            G_NodeNeighbours.Clear();
+            //G_NodeNeighbours.Clear();
             G_NodeNeighbours = null;
             
             Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
