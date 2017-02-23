@@ -92,16 +92,18 @@ namespace MODA.Impl
                     parentGraphMappings.Add(item.Value);
                 }
                 dict.Clear();
+                if (!string.IsNullOrWhiteSpace(fileName) && oldCount > parentGraphMappings.Count)
+                {
+                    System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(parentGraphMappings)));
+                }
                 var toReturn = new List<Mapping>(list.Count);
                 for (int i = list.Count - 1; i >= 0; i--)
                 {
                     toReturn.Add(new Mapping(list[i].Function, list[i].SubGraphEdgeCount, list[i].Id));
-                    list.RemoveAt(i);
+                    //list.RemoveAt(i);
                 }
-                if (!string.IsNullOrWhiteSpace(fileName) && oldCount > dict.Count)
-                {
-                    System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(parentGraphMappings)));
-                }
+                list.Clear();
+                list = null;
                 Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
                 return toReturn;
             }

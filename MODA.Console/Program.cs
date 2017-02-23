@@ -35,7 +35,7 @@
             //graph3.AddEdge("1", "2");
             //graph3.AddEdge("2", "3");
             //graph3.AddEdge("0", "3");
-#if !DEBUG
+#if DEBUG
 
             Console.ReadKey();
 #endif
