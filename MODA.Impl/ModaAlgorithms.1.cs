@@ -23,7 +23,7 @@ namespace MODA.Impl
         /// <param name="thresholdValue">Frequency value, above which we can comsider the subgraph a "frequent subgraph"</param>
         /// <returns>Fg, frequent subgraph list. NB: The dictionary .Value is an <see cref="object"/> which will be either a list of <see cref="Mapping"/> or a <see cref="long"/>
         /// depending on the value of <see cref="GetOnlyMappingCounts"/>.</returns>
-        public static Dictionary<QueryGraph, string> Algorithm1_C(UndirectedGraph<int, Edge<int>> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
+        public static Dictionary<QueryGraph, string> Algorithm1_C(UndirectedGraph<int> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
         {
             // The enumeration module (Algo 3) needs the mappings generated from the previous run(s)
             Dictionary<QueryGraph, string> allMappings;
@@ -63,24 +63,7 @@ namespace MODA.Impl
                         string _filename;
                         if (allMappings.TryGetValue(parentQueryGraph, out _filename))
                         {
-                            IList<Mapping> parentGraphMappings;
-                            if (int.Parse(_filename.Split('#')[0]) > 0)
-                            {
-                                parentGraphMappings = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Mapping>>(Extensions.DecompressString(System.IO.File.ReadAllText(_filename)));
-                            }
-                            else
-                            {
-                                parentGraphMappings = new Mapping[0];
-                            }
-                            int oldCount = parentGraphMappings.Count;
-                            mappings = Algorithm3(inputGraph, qGraph, _builder.ExpansionTree, parentQueryGraph, parentGraphMappings);
-                            if (oldCount > parentGraphMappings.Count)
-                            {
-                                _filename = $"{parentGraphMappings.Count}#{parentQueryGraph.Label}.ser";
-                                System.IO.File.WriteAllText(_filename, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(parentGraphMappings)));
-                                allMappings[parentQueryGraph] = _filename;
-                            }
-                            if (parentGraphMappings.Count > 0) parentGraphMappings.Clear();
+                            mappings = Algorithm3(null, inputGraph, qGraph, _builder.ExpansionTree, parentQueryGraph, _filename);
                         }
                         else
                         {
@@ -97,7 +80,7 @@ namespace MODA.Impl
                     System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(mappings)));
                     if (mappings.Count > 0) mappings.Clear();
                     allMappings.Add(qGraph, fileName);
-                    
+
                     // Check for complete-ness; if complete, break
                     if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))
                     {
@@ -140,7 +123,7 @@ namespace MODA.Impl
         /// <param name="thresholdValue">Frequency value, above which we can comsider the subgraph a "frequent subgraph"</param>
         /// <returns>Fg, frequent subgraph list. NB: The dictionary .Value is an <see cref="object"/> which will be either a list of <see cref="Mapping"/> or a <see cref="long"/>
         /// depending on the value of <see cref="GetOnlyMappingCounts"/>.</returns>
-        public static Dictionary<QueryGraph, IList<Mapping>> Algorithm1(UndirectedGraph<int, Edge<int>> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
+        public static Dictionary<QueryGraph, IList<Mapping>> Algorithm1(UndirectedGraph<int> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
         {
             // The enumeration module (Algo 3) needs the mappings generated from the previous run(s)
             Dictionary<QueryGraph, IList<Mapping>> allMappings;
@@ -177,15 +160,7 @@ namespace MODA.Impl
 
                         // This is part of Algo 3; but performance tweaks makes it more useful to get it here
                         var parentQueryGraph = GetParent(qGraph, _builder.ExpansionTree);
-                        IList<Mapping> parentGraphMappings;
-                        if (allMappings.TryGetValue(parentQueryGraph, out parentGraphMappings))
-                        {
-                            mappings = Algorithm3(inputGraph, qGraph, _builder.ExpansionTree, parentQueryGraph, parentGraphMappings);
-                        }
-                        else
-                        {
-                            mappings = null;
-                        }
+                        mappings = Algorithm3(allMappings, inputGraph, qGraph, _builder.ExpansionTree, parentQueryGraph, null);
                     }
                     if (mappings != null && mappings.Count > thresholdValue)
                     {

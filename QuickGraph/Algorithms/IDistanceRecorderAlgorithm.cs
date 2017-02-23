@@ -11,4 +11,14 @@
         event VertexAction<TVertex> InitializeVertex;
         event VertexAction<TVertex> DiscoverVertex;
     }
+
+    /// <summary>
+    /// An algorithm that exposes events to compute a distance map between vertices
+    /// </summary>
+    /// <typeparam name="TVertex">type of the vertices</typeparam>
+    public interface IDistanceRecorderAlgorithm<TVertex>
+    {
+        event VertexAction<TVertex> InitializeVertex;
+        event VertexAction<TVertex> DiscoverVertex;
+    }
 }

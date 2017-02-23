@@ -8,14 +8,12 @@ namespace QuickGraph.Collections
     /// A cloneable list of edges
     /// </summary>
     /// <typeparam name="TVertex"></typeparam>
-    /// <typeparam name="TEdge"></typeparam>
-    [ContractClass(typeof(IEdgeListContract<,>))]
-    public interface IEdgeList<TVertex, TEdge>
-        : IList<TEdge>
+    [ContractClass(typeof(IEdgeListContract<>))]
+    public interface IEdgeList<TVertex>
+        : IList<Edge<TVertex>>
         #if !SILVERLIGHT
         , ICloneable
         #endif
-        where TEdge : IEdge<TVertex>
     {
         /// <summary>
         /// Trims excess allocated space
@@ -28,6 +26,6 @@ namespace QuickGraph.Collections
 #if !SILVERLIGHT
         new 
 #endif
-        IEdgeList<TVertex, TEdge> Clone();
+        IEdgeList<TVertex> Clone();
     }
 }

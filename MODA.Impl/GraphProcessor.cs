@@ -15,7 +15,7 @@ namespace MODA.Impl
         /// <param name="filename">The uploaded filename</param>
         /// <param name="newGraphInstance"></param>
         /// <returns>A string containing feedback of the processing</returns>
-        private static string LoadGraph<T>(string filename, UndirectedGraph<T, Edge<T>> newGraphInstance)
+        private static string LoadGraph<T>(string filename, UndirectedGraph<T> newGraphInstance)
         {
             var lines = File.ReadAllLines(filename);
             Stopwatch sw = Stopwatch.StartNew();
@@ -50,11 +50,11 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="filename">The uploaded filename</param>
         /// <returns>A string containing feedback of the processing</returns>
-        public static UndirectedGraph<int, Edge<int>> LoadGraph(string filename, bool isQueryGraph = false)
+        public static UndirectedGraph<int> LoadGraph(string filename, bool isQueryGraph = false)
         {
             var lines = File.ReadAllLines(filename);
 
-            UndirectedGraph<int, Edge<int>> newGraphInstance;
+            UndirectedGraph<int> newGraphInstance;
             if (isQueryGraph)
             {
                 newGraphInstance = new QueryGraph
@@ -64,7 +64,7 @@ namespace MODA.Impl
             }
             else
             {
-                newGraphInstance = new UndirectedGraph<int, Edge<int>>();
+                newGraphInstance = new UndirectedGraph<int>();
             }
             //Parallelizing this actually made it take longer to process my datasets
             string[] tmp;

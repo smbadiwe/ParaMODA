@@ -3,48 +3,47 @@ using System.Diagnostics.Contracts;
 namespace QuickGraph.Collections
 {
     //[ContractClassFor(typeof(IVertexEdgeDictionary<,>))]
-    abstract class IVertexEdgeDictionaryContract<TVertex, TEdge> 
-        : IVertexEdgeDictionary<TVertex, TEdge>
-        where TEdge : IEdge<TVertex>
+    abstract class IVertexEdgeDictionaryContract<TVertex> 
+        : IVertexEdgeDictionary<TVertex>
     {
-        IVertexEdgeDictionary<TVertex, TEdge> IVertexEdgeDictionary<TVertex, TEdge>.Clone()
+        IVertexEdgeDictionary<TVertex> IVertexEdgeDictionary<TVertex>.Clone()
         {
-            Contract.Ensures(Contract.Result<IVertexEdgeDictionary<TVertex, TEdge>>() != null);
+            Contract.Ensures(Contract.Result<IVertexEdgeDictionary<TVertex>>() != null);
             throw new NotImplementedException();
         }
 
         #region others
-        void System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex, TEdge>>.Add(TVertex key, IEdgeList<TVertex, TEdge> value)
+        void System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex>>.Add(TVertex key, IEdgeList<TVertex> value)
         {
             throw new NotImplementedException();
         }
 
-        bool System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex, TEdge>>.ContainsKey(TVertex key)
+        bool System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex>>.ContainsKey(TVertex key)
         {
             throw new NotImplementedException();
         }
 
-        System.Collections.Generic.ICollection<TVertex> System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex, TEdge>>.Keys
+        System.Collections.Generic.ICollection<TVertex> System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex>>.Keys
         {
             get { throw new NotImplementedException(); }
         }
 
-        bool System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex, TEdge>>.Remove(TVertex key)
+        bool System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex>>.Remove(TVertex key)
         {
             throw new NotImplementedException();
         }
 
-        bool System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex, TEdge>>.TryGetValue(TVertex key, out IEdgeList<TVertex, TEdge> value)
+        bool System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex>>.TryGetValue(TVertex key, out IEdgeList<TVertex> value)
         {
             throw new NotImplementedException();
         }
 
-        System.Collections.Generic.ICollection<IEdgeList<TVertex, TEdge>> System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex, TEdge>>.Values
+        System.Collections.Generic.ICollection<IEdgeList<TVertex>> System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex>>.Values
         {
             get { throw new NotImplementedException(); }
         }
 
-        IEdgeList<TVertex, TEdge> System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex, TEdge>>.this[TVertex key]
+        IEdgeList<TVertex> System.Collections.Generic.IDictionary<TVertex, IEdgeList<TVertex>>.this[TVertex key]
         {
             get
             {
@@ -56,42 +55,42 @@ namespace QuickGraph.Collections
             }
         }
 
-        void System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>>>.Add(System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>> item)
+        void System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>>>.Add(System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>> item)
         {
             throw new NotImplementedException();
         }
 
-        void System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>>>.Clear()
+        void System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>>>.Clear()
         {
             throw new NotImplementedException();
         }
 
-        bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>>>.Contains(System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>> item)
+        bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>>>.Contains(System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>> item)
         {
             throw new NotImplementedException();
         }
 
-        void System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>>>.CopyTo(System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>>[] array, int arrayIndex)
+        void System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>>>.CopyTo(System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>>[] array, int arrayIndex)
         {
             throw new NotImplementedException();
         }
 
-        int System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>>>.Count
+        int System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>>>.Count
         {
             get { throw new NotImplementedException(); }
         }
 
-        bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>>>.IsReadOnly
+        bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>>>.IsReadOnly
         {
             get { throw new NotImplementedException(); }
         }
 
-        bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>>>.Remove(System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>> item)
+        bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>>>.Remove(System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>> item)
         {
             throw new NotImplementedException();
         }
 
-        System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>>> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex, TEdge>>>.GetEnumerator()
+        System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>>> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TVertex, IEdgeList<TVertex>>>.GetEnumerator()
         {
             throw new NotImplementedException();
         }

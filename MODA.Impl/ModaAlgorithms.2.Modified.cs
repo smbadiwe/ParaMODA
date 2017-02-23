@@ -24,7 +24,7 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size / 3</param>
-        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<int, Edge<int>> inputGraph, int numberOfSamples)
+        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<int> inputGraph, int numberOfSamples)
         {
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3;
 
@@ -53,7 +53,8 @@ namespace MODA.Impl
                             //Recall: f(h) = g
                             theMappings[item.Key] = item.Value;
                         }
-                        mappings.Clear();
+                        //mappings.Clear();
+                        mappings = null;
                     }
                     #endregion
                 }

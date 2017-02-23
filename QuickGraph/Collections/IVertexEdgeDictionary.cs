@@ -13,13 +13,12 @@ namespace QuickGraph.Collections
     /// <typeparam name="TVertex"></typeparam>
     /// <typeparam name="TEdge"></typeparam>
     //[ContractClass(typeof(IVertexEdgeDictionaryContract<,>))]
-    public interface IVertexEdgeDictionary<TVertex, TEdge>
-        : IDictionary<TVertex, IEdgeList<TVertex, TEdge>>
+    public interface IVertexEdgeDictionary<TVertex>
+        : IDictionary<TVertex, IEdgeList<TVertex>>
 #if !SILVERLIGHT
         , ICloneable
         , ISerializable
 #endif
-     where TEdge : IEdge<TVertex>
     {
         /// <summary>
         /// Gets a clone of the dictionary. The vertices and edges are not cloned.
@@ -28,6 +27,6 @@ namespace QuickGraph.Collections
 #if !SILVERLIGHT
         new 
 #endif
-        IVertexEdgeDictionary<TVertex, TEdge> Clone();
+        IVertexEdgeDictionary<TVertex> Clone();
     }
 }

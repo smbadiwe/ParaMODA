@@ -76,7 +76,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AdjacencyGraph.cs" />
     <Compile Include="Algorithms\AlgorithmBase.cs" />
     <Compile Include="Algorithms\ComputationState.cs" />
     <Compile Include="Algorithms\Contracts\IAlgorithmContract.cs" />
@@ -95,12 +94,16 @@
     <Compile Include="Algorithms\Observers\EdgeRecorderObserver.cs" />
     <Compile Include="Algorithms\Observers\IObserver.cs" />
     <Compile Include="Algorithms\RootedAlgorithmBase.cs" />
+    <Compile Include="Algorithms\Search\BreadthFirstSearchAlgorithm2.cs" />
     <Compile Include="Algorithms\Search\BreadthFirstSearchAlgorithm.cs" />
+    <Compile Include="Algorithms\Search\DepthFirstSearchAlgorithm2.cs" />
     <Compile Include="Algorithms\Search\DepthFirstSearchAlgorithm.cs" />
     <Compile Include="Algorithms\Services\IAlgorithmComponent.cs" />
     <Compile Include="Algorithms\Services\IAlgorithmServices.cs" />
     <Compile Include="Algorithms\Services\ICancelManager.cs" />
     <Compile Include="Algorithms\Services\IService.cs" />
+    <Compile Include="Alt\AdjacencyGraph.cs" />
+    <Compile Include="Alt\Edge.cs" />
     <Compile Include="Collections\EdgeEdgeDictionary.cs" />
     <Compile Include="Collections\EdgeList.cs" />
     <Compile Include="Collections\IEdgeList.cs" />
@@ -129,7 +132,6 @@
     <Compile Include="Contracts\IUndirectedEdgeContract.cs" />
     <Compile Include="Contracts\IUndirectedGraphContract.cs" />
     <Compile Include="Contracts\IVertexSetContract.cs" />
-    <Compile Include="Edge.cs" />
     <Compile Include="EdgeEdgeEventArgs.cs" />
     <Compile Include="EdgeEventArgs.cs" />
     <Compile Include="EdgeExtensions.cs" />
@@ -158,7 +160,7 @@
     <Compile Include="IVertexListGraph.cs" />
     <Compile Include="IVertexSet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UndirectedGraph.cs" />
+    <Compile Include="Alt\UndirectedGraph.cs" />
     <Compile Include="VertexEventArgs.cs" />
     <Compile Include="VertexPredicate.cs" />
   </ItemGroup>

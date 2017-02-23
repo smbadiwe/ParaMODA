@@ -9,7 +9,7 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="expansionTree"></param>
         /// <returns>The root node</returns>
-        public static ExpansionTreeNode BuildFiveNodesTree(this AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> expansionTree)
+        public static ExpansionTreeNode BuildFiveNodesTree(this AdjacencyGraph<ExpansionTreeNode> expansionTree)
         {
             //Level 0 - Root Node
             var rootNode = new ExpansionTreeNode();

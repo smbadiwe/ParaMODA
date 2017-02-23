@@ -4,37 +4,36 @@ using System.Diagnostics.Contracts;
 
 namespace QuickGraph.Collections
 {
-    [ContractClassFor(typeof(IEdgeList<,>))]
-    abstract class IEdgeListContract<TVertex,TEdge> 
-        : IEdgeList<TVertex, TEdge>
-        where TEdge : IEdge<TVertex>
+    [ContractClassFor(typeof(IEdgeList<>))]
+    abstract class IEdgeListContract<TVertex> 
+        : IEdgeList<TVertex>
     {
-        IEdgeList<TVertex, TEdge> IEdgeList<TVertex, TEdge>.Clone()
+        IEdgeList<TVertex> IEdgeList<TVertex>.Clone()
         {
-            Contract.Ensures(Contract.Result<IEdgeList<TVertex, TEdge>>() != null);
+            Contract.Ensures(Contract.Result<IEdgeList<TVertex>>() != null);
             throw new NotImplementedException();
         }
 
-        void IEdgeList<TVertex, TEdge>.TrimExcess()
+        void IEdgeList<TVertex>.TrimExcess()
         { }
 
         #region others
-        int IList<TEdge>.IndexOf(TEdge item)
+        int IList<Edge<TVertex>>.IndexOf(Edge<TVertex> item)
         {
             throw new NotImplementedException();
         }
 
-        void IList<TEdge>.Insert(int index, TEdge item)
+        void IList<Edge<TVertex>>.Insert(int index, Edge<TVertex> item)
         {
             throw new NotImplementedException();
         }
 
-        void IList<TEdge>.RemoveAt(int index)
+        void IList<Edge<TVertex>>.RemoveAt(int index)
         {
             throw new NotImplementedException();
         }
 
-        TEdge IList<TEdge>.this[int index]
+        Edge<TVertex> IList<Edge<TVertex>>.this[int index]
         {
             get
             {
@@ -46,42 +45,42 @@ namespace QuickGraph.Collections
             }
         }
 
-        void ICollection<TEdge>.Add(TEdge item)
+        void ICollection<Edge<TVertex>>.Add(Edge<TVertex> item)
         {
             throw new NotImplementedException();
         }
 
-        void ICollection<TEdge>.Clear()
+        void ICollection<Edge<TVertex>>.Clear()
         {
             throw new NotImplementedException();
         }
 
-        bool ICollection<TEdge>.Contains(TEdge item)
+        bool ICollection<Edge<TVertex>>.Contains(Edge<TVertex> item)
         {
             throw new NotImplementedException();
         }
 
-        void ICollection<TEdge>.CopyTo(TEdge[] array, int arrayIndex)
+        void ICollection<Edge<TVertex>>.CopyTo(Edge<TVertex>[] array, int arrayIndex)
         {
             throw new NotImplementedException();
         }
 
-        int ICollection<TEdge>.Count
+        int ICollection<Edge<TVertex>>.Count
         {
             get { throw new NotImplementedException(); }
         }
 
-        bool ICollection<TEdge>.IsReadOnly
+        bool ICollection<Edge<TVertex>>.IsReadOnly
         {
             get { throw new NotImplementedException(); }
         }
 
-        bool ICollection<TEdge>.Remove(TEdge item)
+        bool ICollection<Edge<TVertex>>.Remove(Edge<TVertex> item)
         {
             throw new NotImplementedException();
         }
 
-        IEnumerator<TEdge> IEnumerable<TEdge>.GetEnumerator()
+        IEnumerator<Edge<TVertex>> IEnumerable<Edge<TVertex>>.GetEnumerator()
         {
             throw new NotImplementedException();
         }

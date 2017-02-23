@@ -14,24 +14,22 @@ namespace QuickGraph.Algorithms.Search
     ///     idref="gross98graphtheory"
     ///     chapter="4.2"
     ///     />
-    public sealed class BreadthFirstSearchAlgorithm<TVertex, TEdge> 
-        : RootedAlgorithmBase<TVertex, IVertexListGraph<TVertex, TEdge>>
-        , IVertexPredecessorRecorderAlgorithm<TVertex,TEdge>
-        , IDistanceRecorderAlgorithm<TVertex,TEdge>
-        , IVertexColorizerAlgorithm<TVertex,TEdge>
-        , ITreeBuilderAlgorithm<TVertex, TEdge>
-        where TEdge : IEdge<TVertex>
+    public sealed class BreadthFirstSearchAlgorithm<TVertex> 
+        : RootedAlgorithmBase<TVertex, AdjacencyGraph<TVertex>>
+        , IDistanceRecorderAlgorithm<TVertex>
+        , IVertexColorizerAlgorithm<TVertex>
+        , ITreeBuilderAlgorithm<TVertex>
     {
         private IDictionary<TVertex, GraphColor> vertexColors;
         private IQueue<TVertex> vertexQueue;
-        private readonly Func<IEnumerable<TEdge>, IEnumerable<TEdge>> outEdgeEnumerator;
+        private readonly Func<IEnumerable<Edge<TVertex>>, IEnumerable<Edge<TVertex>>> outEdgeEnumerator;
 
-        public BreadthFirstSearchAlgorithm(IVertexListGraph<TVertex,TEdge> g)
+        public BreadthFirstSearchAlgorithm(AdjacencyGraph<TVertex> g)
             : this(g, new QuickGraph.Collections.Queue<TVertex>(), new Dictionary<TVertex, GraphColor>())
         {}
 
         public BreadthFirstSearchAlgorithm(
-            IVertexListGraph<TVertex, TEdge> visitedGraph,
+            AdjacencyGraph<TVertex> visitedGraph,
             IQueue<TVertex> vertexQueue,
             IDictionary<TVertex, GraphColor> vertexColors
             )
@@ -40,7 +38,7 @@ namespace QuickGraph.Algorithms.Search
 
         public BreadthFirstSearchAlgorithm(
             IAlgorithmComponent host,
-            IVertexListGraph<TVertex, TEdge> visitedGraph,
+            AdjacencyGraph<TVertex> visitedGraph,
             IQueue<TVertex> vertexQueue,
             IDictionary<TVertex, GraphColor> vertexColors
             )
@@ -49,10 +47,10 @@ namespace QuickGraph.Algorithms.Search
 
         public BreadthFirstSearchAlgorithm(
             IAlgorithmComponent host,
-            IVertexListGraph<TVertex, TEdge> visitedGraph,
+            AdjacencyGraph<TVertex> visitedGraph,
             IQueue<TVertex> vertexQueue,
             IDictionary<TVertex, GraphColor> vertexColors,
-            Func<IEnumerable<TEdge>, IEnumerable<TEdge>> outEdgeEnumerator
+            Func<IEnumerable<Edge<TVertex>>, IEnumerable<Edge<TVertex>>> outEdgeEnumerator
             )
             : base(host, visitedGraph)
         {
@@ -65,7 +63,7 @@ namespace QuickGraph.Algorithms.Search
             this.outEdgeEnumerator = outEdgeEnumerator;
         }
 
-        public Func<IEnumerable<TEdge>, IEnumerable<TEdge>> OutEdgeEnumerator
+        public Func<IEnumerable<Edge<TVertex>>, IEnumerable<Edge<TVertex>>> OutEdgeEnumerator
         {
             get { return this.outEdgeEnumerator; }
         }
@@ -115,40 +113,40 @@ namespace QuickGraph.Algorithms.Search
                 eh(v);
         }
 
-        public event EdgeAction<TVertex, TEdge> ExamineEdge;
-        private void OnExamineEdge(TEdge e)
+        public event EdgeAction<TVertex> ExamineEdge;
+        private void OnExamineEdge(Edge<TVertex> e)
         {
             var eh = this.ExamineEdge;
             if (eh != null)
                 eh(e);
         }
 
-        public event EdgeAction<TVertex, TEdge> TreeEdge;
-        private void OnTreeEdge(TEdge e)
+        public event EdgeAction<TVertex> TreeEdge;
+        private void OnTreeEdge(Edge<TVertex> e)
         {
             var eh = this.TreeEdge;
             if (eh != null)
                 eh(e);
         }
 
-        public event EdgeAction<TVertex, TEdge> NonTreeEdge;
-        private void OnNonTreeEdge(TEdge e)
+        public event EdgeAction<TVertex> NonTreeEdge;
+        private void OnNonTreeEdge(Edge<TVertex> e)
         {
             var eh = this.NonTreeEdge;
             if (eh != null)
                 eh(e);
         }
 
-        public event EdgeAction<TVertex, TEdge> GrayTarget;
-        private void OnGrayTarget(TEdge e)
+        public event EdgeAction<TVertex> GrayTarget;
+        private void OnGrayTarget(Edge<TVertex> e)
         {
             var eh = this.GrayTarget;
             if (eh != null)
                 eh(e);
         }
 
-        public event EdgeAction<TVertex, TEdge> BlackTarget;
-        private void OnBlackTarget(TEdge e)
+        public event EdgeAction<TVertex> BlackTarget;
+        private void OnBlackTarget(Edge<TVertex> e)
         {
             var eh = this.BlackTarget;
             if (eh != null)
@@ -251,78 +249,5 @@ namespace QuickGraph.Algorithms.Search
             }
         }
     }
-
-    public static class AlgoExt
-    {
-
-        /// <summary>
-        /// Gets the list of roots
-        /// </summary>
-        /// <typeparam name="TVertex">type of the vertices</typeparam>
-        /// <typeparam name="TEdge">type of the edges</typeparam>
-        /// <param name="visitedGraph"></param>
-        /// <returns></returns>
-        public static IEnumerable<TVertex> Roots<TVertex, TEdge>(
-#if !NET20
-this
-#endif
-            IVertexListGraph<TVertex, TEdge> visitedGraph)
-            where TEdge : IEdge<TVertex>
-        {
-            Contract.Requires(visitedGraph != null);
-            return RootsIterator<TVertex, TEdge>(visitedGraph);
-        }
-
-        [DebuggerHidden]
-        private static IEnumerable<TVertex> RootsIterator<TVertex, TEdge>(
-            IVertexListGraph<TVertex, TEdge> visitedGraph)
-            where TEdge : IEdge<TVertex>
-        {
-            var notRoots = new Dictionary<TVertex, bool>(visitedGraph.VertexCount);
-            var dfs = new DepthFirstSearchAlgorithm<TVertex, TEdge>(visitedGraph);
-            dfs.ExamineEdge += e => notRoots[e.Target] = false;
-            dfs.Compute();
-
-            foreach (var vertex in visitedGraph.Vertices)
-            {
-                bool value;
-                if (!notRoots.TryGetValue(vertex, out value))
-                    yield return vertex;
-            }
-        }
-
-        /// <summary>
-        /// Gets the list of roots
-        /// </summary>
-        /// <typeparam name="TVertex">type of the vertices</typeparam>
-        /// <param name="visitedGraph"></param>
-        /// <returns></returns>
-        public static IEnumerable<TVertex> Roots<TVertex>(
-#if !NET20
-this
-#endif
-            AdjacencyGraph<TVertex> visitedGraph)
-        {
-            Contract.Requires(visitedGraph != null);
-            return RootsIterator<TVertex>(visitedGraph);
-        }
-
-        [DebuggerHidden]
-        private static IEnumerable<TVertex> RootsIterator<TVertex>(
-            AdjacencyGraph<TVertex> visitedGraph)
-        {
-            var notRoots = new Dictionary<TVertex, bool>(visitedGraph.VertexCount);
-            var dfs = new DepthFirstSearchAlgorithm<TVertex>(visitedGraph);
-            dfs.ExamineEdge += e => notRoots[e.Target] = false;
-            dfs.Compute();
-
-            foreach (var vertex in visitedGraph.Vertices)
-            {
-                bool value;
-                if (!notRoots.TryGetValue(vertex, out value))
-                    yield return vertex;
-            }
-        }
-
-    }
+    
 }

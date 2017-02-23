@@ -2,21 +2,17 @@
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
 
-namespace QuickGraph
+namespace QuickGraph //.Alt
 {
     /// <summary>
     /// The default <see cref="IEdge&lt;TVertex&gt;"/> implementation.
     /// </summary>
     /// <typeparam name="TVertex">The type of the vertex.</typeparam>
-#if !SILVERLIGHT
-    [Serializable]
-#endif
     [DebuggerDisplay("{Source}->{Target}")]
-    public class Edge<TVertex>
-        : IEdge<TVertex>
+    public struct Edge<TVertex>
     {
-        private readonly TVertex source;
-        private readonly TVertex target;
+        public readonly TVertex Source;
+        public readonly TVertex Target;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Edge&lt;TVertex&gt;"/> class.
@@ -28,26 +24,8 @@ namespace QuickGraph
             if (source == null) throw new ArgumentNullException("source");
             if (target == null) throw new ArgumentNullException("target");
 
-            this.source = source;
-            this.target = target;
-        }
-
-        /// <summary>
-        /// Gets the source vertex
-        /// </summary>
-        /// <value></value>
-        public TVertex Source
-        {
-            get { return this.source; }
-        }
-
-        /// <summary>
-        /// Gets the target vertex
-        /// </summary>
-        /// <value></value>
-        public TVertex Target
-        {
-            get { return this.target; }
+            Source = source;
+            Target = target;
         }
 
         /// <summary>
@@ -58,21 +36,20 @@ namespace QuickGraph
         /// </returns>
         public override string ToString()
         {
-            return this.source + "->" + this.target;
+            return Source + "->" + Target;
         }
-        
+
         public override bool Equals(object obj)
         {
             var otherStr = obj?.ToString();
             return !string.IsNullOrWhiteSpace(otherStr) &&
-                (string.Equals($"{source}->{target}", otherStr)
-                || string.Equals($"{target}->{source}", otherStr));
+                (string.Equals($"{Source}->{Target}", otherStr)
+                || string.Equals($"{Target}->{Source}", otherStr));
         }
-        
+
         public override int GetHashCode()
         {
-            return source.GetHashCode() + target.GetHashCode();
+            return Source.GetHashCode() + Target.GetHashCode();
         }
     }
-    
 }

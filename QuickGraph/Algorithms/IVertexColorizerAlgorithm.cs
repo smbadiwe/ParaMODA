@@ -5,4 +5,9 @@
     {
         GraphColor GetVertexColor(TVertex v);
     }
+
+    public interface IVertexColorizerAlgorithm<TVertex>
+    {
+        GraphColor GetVertexColor(TVertex v);
+    }
 }

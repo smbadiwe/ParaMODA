@@ -9,7 +9,7 @@ namespace MODA.Impl
         private int _numberOfNodes;
         public int NumberOfQueryGraphs { get; private set; }
         public Queue<ExpansionTreeNode> VerticesSorted { get; private set; }
-        public AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> ExpansionTree { get; private set; }
+        public AdjacencyGraph<ExpansionTreeNode> ExpansionTree { get; private set; }
 
         /// <summary>
         /// 
@@ -19,7 +19,7 @@ namespace MODA.Impl
         {
             _numberOfNodes = numberOfNodes;
             NumberOfQueryGraphs = 1;
-            ExpansionTree = new AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>>();
+            ExpansionTree = new AdjacencyGraph<ExpansionTreeNode>();
 
             ExpansionTree.EdgeAdded += e => e.Target.ParentNode = e.Source;
         }
@@ -47,7 +47,7 @@ namespace MODA.Impl
             //TODO: Construct the tree.
             // It turns out there's yet no formula to determine the number of isomorphic trees that can be formed
             // from n nodes; hence no way(?) of writing a general code
-            var bfs = new BreadthFirstSearchAlgorithm<ExpansionTreeNode, Edge<ExpansionTreeNode>>(ExpansionTree);
+            var bfs = new BreadthFirstSearchAlgorithm<ExpansionTreeNode>(ExpansionTree);
             bfs.SetRootVertex(rootNode);
             bfs.Compute();
             

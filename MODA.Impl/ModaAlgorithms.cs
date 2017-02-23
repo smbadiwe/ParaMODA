@@ -47,9 +47,9 @@ namespace MODA.Impl
         /// <param name="subgraphSize">The query graph H's size</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static UndirectedGraph<int, Edge<int>> GetInputSubgraph(UndirectedGraph<int, Edge<int>> inputGraph, IEnumerable<int> g_nodes, int subgraphSize)
+        private static UndirectedGraph<int> GetInputSubgraph(UndirectedGraph<int> inputGraph, IEnumerable<int> g_nodes, int subgraphSize)
         {
-            UndirectedGraph<int, Edge<int>> newInputSubgraph = new UndirectedGraph<int, Edge<int>>();
+            UndirectedGraph<int> newInputSubgraph = new UndirectedGraph<int>();
             int counter = 0;
             foreach (var node in g_nodes)
             {
@@ -75,24 +75,24 @@ namespace MODA.Impl
         /// <param name="inputGraph">H</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
         private static Dictionary<IList<int>, Mapping> IsomorphicExtension(Dictionary<int, int> partialMap, QueryGraph queryGraph
-            , UndirectedGraph<int, Edge<int>> inputGraph)
+            , UndirectedGraph<int> inputGraph)
         {
             if (partialMap.Count == queryGraph.VertexCount)
             {
                 #region Return base case
-                var partialMapDict = new SortedList<int, int>(partialMap);
+                var function = new SortedList<int, int>(partialMap);
                 int subgraphSize = partialMap.Count;
-                Edge<int> edge_g = null;
+                Edge<int> edge_g = default(Edge<int>);
                 var inducedSubGraphEdges = new List<Edge<int>>();
                 for (int i = 0; i < subgraphSize - 1; i++)
                 {
                     for (int j = (i + 1); j < subgraphSize; j++)
                     {
                         var edge_h = false;
-                        if (queryGraph.ContainsEdge(partialMapDict.Keys[i], partialMapDict.Keys[j]))
+                        if (queryGraph.ContainsEdge(function.Keys[i], function.Keys[j]))
                         {
                             edge_h = true;
-                            if (!inputGraph.TryGetEdge(partialMapDict.Values[i], partialMapDict.Values[j], out edge_g))
+                            if (!inputGraph.TryGetEdge(function.Values[i], function.Values[j], out edge_g))
                             {
                                 // No correspondent in the input graph
                                 //inducedSubGraphEdges.Clear();
@@ -102,21 +102,21 @@ namespace MODA.Impl
                         }
                         if (edge_h == false) // => edge_g was never evaluated because the first part of the AND statement was false
                         {
-                            if (inputGraph.TryGetEdge(partialMapDict.Values[i], partialMapDict.Values[j], out edge_g))
+                            if (inputGraph.TryGetEdge(function.Values[i], function.Values[j], out edge_g))
                             {
                                 inducedSubGraphEdges.Add(edge_g);
                             }
                         }
                         else
                         {
-                            if (edge_g != null)
+                            if (false == EqualityComparer<Edge<int>>.Default.Equals(edge_g, default(Edge<int>)))
                             {
                                 inducedSubGraphEdges.Add(edge_g);
                             }
                         }
                     }
                 }
-                edge_g = null;
+                edge_g = default(Edge<int>);
                 if (queryGraph.EdgeCount > inducedSubGraphEdges.Count) // this shouuld never happen; but just in case
                 {
                     //inducedSubGraphEdges.Clear();
@@ -132,14 +132,11 @@ namespace MODA.Impl
                     return null;
                 }
 
-                var map = new Mapping(partialMapDict)
-                {
-                    SubGraphEdgeCount = inducedSubGraphEdges.Count
-                };
+                var map = new Mapping(function, inducedSubGraphEdges.Count, -1);
 
                 //inducedSubGraphEdges.Clear();
                 inducedSubGraphEdges = null;
-                return new Dictionary<IList<int>, Mapping>(1) { { map.Function.Values, map } };
+                return new Dictionary<IList<int>, Mapping>(1) { { function.Values, map } };
                 #endregion
 
             }
@@ -198,7 +195,7 @@ namespace MODA.Impl
         /// <param name="neighborsOfM">neighbors of h_node in the <paramref name="queryGraph"/> /></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsNeighbourIncompatible(UndirectedGraph<int, Edge<int>> inputGraph,
+        private static bool IsNeighbourIncompatible(UndirectedGraph<int> inputGraph,
             int n, Dictionary<int, int> partialMap, QueryGraph queryGraph, IList<int> neighborsOfM)
         {
             //  RECALL: m is for Domain, the Key => the query graph
@@ -255,7 +252,7 @@ namespace MODA.Impl
         /// <param name="inputGraph">G</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static List<int> ChooseNeighboursOfRange(IEnumerable<int> used_range, UndirectedGraph<int, Edge<int>> inputGraph)
+        private static List<int> ChooseNeighboursOfRange(IEnumerable<int> used_range, UndirectedGraph<int> inputGraph)
         {
             List<int> toReturn = new List<int>();
             foreach (var range in used_range)
@@ -291,7 +288,7 @@ namespace MODA.Impl
         /// <param name="domain">Domain, D, of fumction f. Meaning that we're only interested in the Keys. Remember: f(h) = g</param>
         /// <param name="queryGraph">H</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int GetMostConstrainedNeighbour(IEnumerable<int> domain, UndirectedGraph<int, Edge<int>> queryGraph)
+        private static int GetMostConstrainedNeighbour(IEnumerable<int> domain, UndirectedGraph<int> queryGraph)
         {
             /*
              * As is standard in backtracking searches, the algorithm uses the most constrained neighbor
@@ -328,7 +325,7 @@ namespace MODA.Impl
         /// <param name="node_G">g</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool CanSupport(QueryGraph queryGraph, int node_H, UndirectedGraph<int, Edge<int>> inputGraph, int node_G)
+        private static bool CanSupport(QueryGraph queryGraph, int node_H, UndirectedGraph<int> inputGraph, int node_G)
         {
             // 1. Based on their degrees
             if (inputGraph.AdjacentDegree(node_G) >= queryGraph.AdjacentDegree(node_H))

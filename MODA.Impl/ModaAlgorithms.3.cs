@@ -10,49 +10,67 @@ namespace MODA.Impl
     public partial class ModaAlgorithms
     {
         /// <summary>
-        /// Enumeration module
-        /// </summary>
+        /// Enumeration module. NB: If either of <paramref name="allMappings"/> or <paramref name="fileName"/> is null, the other will not be.
+        /// </summary> 
+        /// <param name="allMappings"></param>
         /// <param name="inputGraph">G</param>
         /// <param name="queryGraph">H</param>
         /// <param name="expansionTree">T_k</param>
         /// <param name="parentQueryGraph"></param>
+        /// <param name="fileName"></param>
         /// <param name="parentGraphMappings">NB: This param is still used even outside this method is call. So, be careful how you set/clear its values.</param>
-        private static IList<Mapping> Algorithm3(UndirectedGraph<int, Edge<int>> inputGraph, QueryGraph queryGraph,
-            AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> expansionTree,
-            QueryGraph parentQueryGraph, IList<Mapping> parentGraphMappings)
+        private static IList<Mapping> Algorithm3(Dictionary<QueryGraph, IList<Mapping>> allMappings, UndirectedGraph<int> inputGraph, QueryGraph queryGraph,
+            AdjacencyGraph<ExpansionTreeNode> expansionTree,
+            QueryGraph parentQueryGraph, string fileName = null)
         {
+            IList<Mapping> parentGraphMappings;
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                if (!allMappings.TryGetValue(parentQueryGraph, out parentGraphMappings))
+                {
+                    return new Mapping[0];
+                }
+            }
+            else
+            {
+                parentGraphMappings = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Mapping>>(Extensions.DecompressString(System.IO.File.ReadAllText(fileName)));
+            }
             if (parentGraphMappings.Count == 0) return new Mapping[0];
-            
+
             var subgraphSize = queryGraph.VertexCount;
             var newEdge = GetEdgeDifference(queryGraph, parentQueryGraph);
-            if (newEdge == null) return new Mapping[0];
+
+            if (true == EqualityComparer<Edge<int>>.Default.Equals(newEdge, default(Edge<int>)))
+                return new Mapping[0];
 
             Edge<int> newEdgeImage;
             var list = new List<Mapping>();
-            for (int i = 0; i < parentGraphMappings.Count; i++)
+            int oldCount = parentGraphMappings.Count;
+            for (int i = 0; i < oldCount; i++)
             {
-                var map = parentGraphMappings[i];
-                map.Id = i;
+                parentGraphMappings[i].Id = i;
+                //var map = parentGraphMappings[i];
                 // Reember, f(h) = g
 
                 // if (f(u), f(v)) ϵ G and meets the conditions, add to list
-                if (map.SubGraphEdgeCount == queryGraph.EdgeCount)
+                if (parentGraphMappings[i].SubGraphEdgeCount == queryGraph.EdgeCount)
                 {
-                    newEdgeImage = map.GetImage(inputGraph, parentQueryGraph.Edges2);
+                    newEdgeImage = parentGraphMappings[i].GetImage(inputGraph, parentQueryGraph.Edges2);
                 }
-                else if (map.SubGraphEdgeCount > queryGraph.EdgeCount)
+                else if (parentGraphMappings[i].SubGraphEdgeCount > queryGraph.EdgeCount)
                 {
-                    newEdgeImage = map.GetImage(inputGraph, newEdge);
+                    newEdgeImage = parentGraphMappings[i].GetImage(inputGraph, newEdge);
                 }
                 else
                 {
-                    newEdgeImage = null;
+                    newEdgeImage = default(Edge<int>);
                 }
-                if (newEdgeImage != null)
+
+                if (false == EqualityComparer<Edge<int>>.Default.Equals(newEdgeImage, default(Edge<int>)))
                 {
                     if (inputGraph.ContainsEdge(newEdgeImage.Source, newEdgeImage.Target))
                     {
-                        list.Add(map);
+                        list.Add(parentGraphMappings[i]);
                     }
                 }
             }
@@ -77,11 +95,12 @@ namespace MODA.Impl
                 var toReturn = new List<Mapping>(list.Count);
                 for (int i = list.Count - 1; i >= 0; i--)
                 {
-                    toReturn.Add(new Mapping(list[i].Function)
-                    {
-                        SubGraphEdgeCount = list[i].SubGraphEdgeCount
-                    });
+                    toReturn.Add(new Mapping(list[i].Function, list[i].SubGraphEdgeCount, list[i].Id));
                     list.RemoveAt(i);
+                }
+                if (!string.IsNullOrWhiteSpace(fileName) && oldCount > dict.Count)
+                {
+                    System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(parentGraphMappings)));
                 }
                 Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
                 return toReturn;
@@ -101,7 +120,7 @@ namespace MODA.Impl
         /// <param name="expansionTree"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static QueryGraph GetParent(QueryGraph queryGraph, AdjacencyGraph<ExpansionTreeNode, Edge<ExpansionTreeNode>> expansionTree)
+        private static QueryGraph GetParent(QueryGraph queryGraph, AdjacencyGraph<ExpansionTreeNode> expansionTree)
         {
             var hasNode = expansionTree.ContainsVertex(new ExpansionTreeNode
             {
@@ -113,8 +132,7 @@ namespace MODA.Impl
             }
             return null;
         }
-
-
+        
         /// <summary>
         /// Returns the edge in <paramref="currentQueryGraph"/> that is not present in <paramref="parentQueryGraph"/>
         /// </summary>
@@ -128,7 +146,7 @@ namespace MODA.Impl
             {
                 Console.WriteLine("Invalid arguments for the method: GetEdgeDifference. [currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount] = {0}.\ncurrentQueryGraph.Label = '{1}'. parentQueryGraph.Label = '{2}'."
                     , (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount), currentQueryGraph.Label, parentQueryGraph.Label);
-                return null;
+                return default(Edge<int>);
             }
             var edges = parentQueryGraph.Edges2;
             foreach (var edge in currentQueryGraph.Edges2)
@@ -138,7 +156,7 @@ namespace MODA.Impl
                     return edge;
                 }
             }
-            return null; // throw new InvalidOperationException();
+            return default(Edge<int>); // throw new InvalidOperationException();
         }
 
 

@@ -6,4 +6,9 @@
         event VertexAction<TVertex> DiscoverVertex;
         event VertexAction<TVertex> FinishVertex;
     }
+    public interface IVertexTimeStamperAlgorithm<TVertex>
+    {
+        event VertexAction<TVertex> DiscoverVertex;
+        event VertexAction<TVertex> FinishVertex;
+    }
 }

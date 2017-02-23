@@ -44,14 +44,14 @@ namespace MODA.Impl
                         }
                         else
                         {
-                            edge = null;
+                            edge = default(Edge<int>);
                             return false;
                         }
                     }
                     adjMatrixIndex++;
                 }
             }
-            edge = null;
+            edge = default(Edge<int>);
             return false;
         }
 

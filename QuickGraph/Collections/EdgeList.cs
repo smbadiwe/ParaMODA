@@ -6,13 +6,12 @@ namespace QuickGraph.Collections
 #if !SILVERLIGHT
     [Serializable]
 #endif
-    public sealed class EdgeList<TVertex, TEdge>
-        : List<TEdge>
-        , IEdgeList<TVertex, TEdge>
+    public sealed class EdgeList<TVertex>
+        : List<Edge<TVertex>>
+        , IEdgeList<TVertex>
 #if !SILVERLIGHT
         , ICloneable
 #endif
-        where TEdge : IEdge<TVertex>
     {
         public EdgeList() 
         { }
@@ -21,16 +20,16 @@ namespace QuickGraph.Collections
             : base(capacity)
         { }
 
-        public EdgeList(EdgeList<TVertex, TEdge> list)
+        public EdgeList(EdgeList<TVertex> list)
             : base(list)
         {}
 
-        public EdgeList<TVertex, TEdge> Clone()
+        public EdgeList<TVertex> Clone()
         {
-            return new EdgeList<TVertex, TEdge>(this);
+            return new EdgeList<TVertex>(this);
         }
 
-        IEdgeList<TVertex, TEdge> IEdgeList<TVertex,TEdge>.Clone()
+        IEdgeList<TVertex> IEdgeList<TVertex>.Clone()
         {
             return this.Clone();
         }

@@ -315,23 +315,23 @@ this
             }
         }
 
-        /// <summary>
-        /// Returns the most efficient comporer for the particular type of TEdge.
-        /// If TEdge implements IUndirectedEdge, then only the (source,target) pair
-        /// has to be compared; if not, (source, target) and (target, source) have to be compared.
-        /// </summary>
-        /// <typeparam name="TVertex">type of the vertices</typeparam>
-        /// <typeparam name="TEdge">type of the edges</typeparam>
-        /// <returns></returns>
-        public static EdgeEqualityComparer<TVertex, TEdge> GetUndirectedVertexEquality<TVertex, TEdge>()
-            where TEdge : IEdge<TVertex>
-        {
-            if (typeof(IUndirectedEdge<TVertex>).IsAssignableFrom(typeof(TEdge)))
-                return new EdgeEqualityComparer<TVertex, TEdge>(SortedVertexEquality<TVertex, TEdge>);
-            else
-                return new EdgeEqualityComparer<TVertex, TEdge>(UndirectedVertexEquality<TVertex, TEdge>);
-        }
-
+        ///// <summary>
+        ///// Returns the most efficient comporer for the particular type of TEdge.
+        ///// If TEdge implements IUndirectedEdge, then only the (source,target) pair
+        ///// has to be compared; if not, (source, target) and (target, source) have to be compared.
+        ///// </summary>
+        ///// <typeparam name="TVertex">type of the vertices</typeparam>
+        ///// <typeparam name="TEdge">type of the edges</typeparam>
+        ///// <returns></returns>
+        //public static EdgeEqualityComparer<TVertex, TEdge> GetUndirectedVertexEquality<TVertex, TEdge>()
+        //    where TEdge : IEdge<TVertex>
+        //{
+        //    if (typeof(IUndirectedEdge<TVertex>).IsAssignableFrom(typeof(TEdge)))
+        //        return new EdgeEqualityComparer<TVertex, TEdge>(SortedVertexEquality<TVertex, TEdge>);
+        //    else
+        //        return new EdgeEqualityComparer<TVertex, TEdge>(UndirectedVertexEquality<TVertex, TEdge>);
+        //}
+        
         /// <summary>
         /// Gets a value indicating if the vertices of edge match (source, target) or
         /// (target, source)

@@ -11,7 +11,7 @@ namespace QuickGraph
         where TEdge : IEdge<TVertex>
     {
         
-        EdgeEqualityComparer<TVertex, TEdge> EdgeEqualityComparer { get; }
+        //EdgeEqualityComparer<TVertex, TEdge> EdgeEqualityComparer { get; }
 
         
         IList<TEdge> AdjacentEdges(TVertex v);

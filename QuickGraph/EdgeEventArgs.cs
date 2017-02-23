@@ -45,4 +45,11 @@ namespace QuickGraph
     /// <param name="e"></param>
     public delegate void EdgeAction<TVertex,TEdge>(TEdge e)
         where TEdge : IEdge<TVertex>;
+
+    /// <summary>
+    /// The handler for events involving edges
+    /// </summary>
+    /// <typeparam name="TVertex">type of the vertices</typeparam>
+    /// <param name="e"></param>
+    public delegate void EdgeAction<TVertex>(Edge<TVertex> e);
 }

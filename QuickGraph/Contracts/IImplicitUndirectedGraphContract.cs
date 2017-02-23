@@ -5,118 +5,118 @@ using System.Linq;
 
 namespace QuickGraph.Contracts
 {
-    //[ContractClassFor(typeof(IImplicitUndirectedGraph<,>))]
-    abstract class IImplicitUndirectedGraphContract<TVertex, TEdge> 
-        : IImplicitUndirectedGraph<TVertex, TEdge>
-        where TEdge : IEdge<TVertex>
-    {
-        #region IImplicitUndirectedGraph<TVertex,TEdge> Members
+    ////[ContractClassFor(typeof(IImplicitUndirectedGraph<,>))]
+    //abstract class IImplicitUndirectedGraphContract<TVertex, TEdge> 
+    //    : IImplicitUndirectedGraph<TVertex, TEdge>
+    //    where TEdge : IEdge<TVertex>
+    //{
+    //    #region IImplicitUndirectedGraph<TVertex,TEdge> Members
         
-        EdgeEqualityComparer<TVertex, TEdge> IImplicitUndirectedGraph<TVertex, TEdge>.EdgeEqualityComparer
-        {
-            get
-            {
-                Contract.Ensures(Contract.Result<EdgeEqualityComparer<TVertex, TEdge>>() != null);
-                return null;
-            }
-        }
-
-        
-        IList<TEdge> IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentEdges(TVertex v)
-        {
-            IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
-            Contract.Requires(v != null);
-            Contract.Requires(ithis.ContainsVertex(v));
-            Contract.Ensures(Contract.Result<IEnumerable<TEdge>>() != null);
-            Contract.Ensures(
-                Enumerable.All(
-                    Contract.Result<IEnumerable<TEdge>>(),
-                    edge => 
-                        edge != null && 
-                        ithis.ContainsEdge(edge.Source, edge.Target) && 
-                        (edge.Source.Equals(v) || edge.Target.Equals(v))
-                    )
-                );
-
-            return default(IList<TEdge>);
-        }
+    //    EdgeEqualityComparer<TVertex, TEdge> IImplicitUndirectedGraph<TVertex, TEdge>.EdgeEqualityComparer
+    //    {
+    //        get
+    //        {
+    //            Contract.Ensures(Contract.Result<EdgeEqualityComparer<TVertex, TEdge>>() != null);
+    //            return null;
+    //        }
+    //    }
 
         
-        int IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentDegree(TVertex v)
-        {
-            IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
-            Contract.Requires(v != null);
-            Contract.Requires(ithis.ContainsVertex(v));
-            Contract.Ensures(Contract.Result<int>() == Enumerable.Count(ithis.AdjacentEdges(v)));
+    //    IList<TEdge> IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentEdges(TVertex v)
+    //    {
+    //        IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
+    //        Contract.Requires(v != null);
+    //        Contract.Requires(ithis.ContainsVertex(v));
+    //        Contract.Ensures(Contract.Result<IEnumerable<TEdge>>() != null);
+    //        Contract.Ensures(
+    //            Enumerable.All(
+    //                Contract.Result<IEnumerable<TEdge>>(),
+    //                edge => 
+    //                    edge != null && 
+    //                    ithis.ContainsEdge(edge.Source, edge.Target) && 
+    //                    (edge.Source.Equals(v) || edge.Target.Equals(v))
+    //                )
+    //            );
 
-            return default(int);
-        }
-
-        
-        bool IImplicitUndirectedGraph<TVertex, TEdge>.IsAdjacentEdgesEmpty(TVertex v)
-        {
-            IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
-            Contract.Requires(v != null);
-            Contract.Requires(ithis.ContainsVertex(v));
-            Contract.Ensures(Contract.Result<bool>() == (ithis.AdjacentDegree(v) == 0));
-
-            return default(bool);
-        }
+    //        return default(IList<TEdge>);
+    //    }
 
         
-        TEdge IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentEdge(TVertex v, int index)
-        {
-            IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
-            Contract.Requires(v != null);
-            Contract.Requires(ithis.ContainsVertex(v));
-            Contract.Ensures(Contract.Result<TEdge>() != null);
-            Contract.Ensures(
-                Contract.Result<TEdge>().Source.Equals(v)
-                || Contract.Result<TEdge>().Target.Equals(v));
+    //    int IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentDegree(TVertex v)
+    //    {
+    //        IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
+    //        Contract.Requires(v != null);
+    //        Contract.Requires(ithis.ContainsVertex(v));
+    //        Contract.Ensures(Contract.Result<int>() == Enumerable.Count(ithis.AdjacentEdges(v)));
 
-            return default(TEdge);
-        }
+    //        return default(int);
+    //    }
 
         
-        bool IImplicitUndirectedGraph<TVertex, TEdge>.TryGetEdge(TVertex source, TVertex target, out TEdge edge)
-        {
-            IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
-            Contract.Requires(source != null);
-            Contract.Requires(target != null);
+    //    bool IImplicitUndirectedGraph<TVertex, TEdge>.IsAdjacentEdgesEmpty(TVertex v)
+    //    {
+    //        IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
+    //        Contract.Requires(v != null);
+    //        Contract.Requires(ithis.ContainsVertex(v));
+    //        Contract.Ensures(Contract.Result<bool>() == (ithis.AdjacentDegree(v) == 0));
 
-            edge = default(TEdge);
-            return default(bool);
-        }
+    //        return default(bool);
+    //    }
 
         
-        bool IImplicitUndirectedGraph<TVertex, TEdge>.ContainsEdge(TVertex source, TVertex target)
-        {
-            IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
-            Contract.Requires(source != null);
-            Contract.Requires(target != null);
-            Contract.Ensures(Contract.Result<bool>() == Enumerable.Any(ithis.AdjacentEdges(source), e => e.Target.Equals(target) || e.Source.Equals(target)));
+    //    TEdge IImplicitUndirectedGraph<TVertex, TEdge>.AdjacentEdge(TVertex v, int index)
+    //    {
+    //        IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
+    //        Contract.Requires(v != null);
+    //        Contract.Requires(ithis.ContainsVertex(v));
+    //        Contract.Ensures(Contract.Result<TEdge>() != null);
+    //        Contract.Ensures(
+    //            Contract.Result<TEdge>().Source.Equals(v)
+    //            || Contract.Result<TEdge>().Target.Equals(v));
 
-            return default(bool);
-        }
-        #endregion
+    //        return default(TEdge);
+    //    }
 
-        #region IImplicitVertexSet<TVertex> Members
-        bool IImplicitVertexSet<TVertex>.ContainsVertex(TVertex vertex)
-        {
-            throw new NotImplementedException();
-        }
-        #endregion
+        
+    //    bool IImplicitUndirectedGraph<TVertex, TEdge>.TryGetEdge(TVertex source, TVertex target, out TEdge edge)
+    //    {
+    //        IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
+    //        Contract.Requires(source != null);
+    //        Contract.Requires(target != null);
 
-        #region IGraph<TVertex,TEdge> Members
+    //        edge = default(TEdge);
+    //        return default(bool);
+    //    }
 
-        public bool IsDirected {
-          get { throw new NotImplementedException(); }
-        }
+        
+    //    bool IImplicitUndirectedGraph<TVertex, TEdge>.ContainsEdge(TVertex source, TVertex target)
+    //    {
+    //        IImplicitUndirectedGraph<TVertex, TEdge> ithis = this;
+    //        Contract.Requires(source != null);
+    //        Contract.Requires(target != null);
+    //        Contract.Ensures(Contract.Result<bool>() == Enumerable.Any(ithis.AdjacentEdges(source), e => e.Target.Equals(target) || e.Source.Equals(target)));
 
-        public bool AllowParallelEdges {
-          get { throw new NotImplementedException(); }
-        }
+    //        return default(bool);
+    //    }
+    //    #endregion
 
-        #endregion
-    }
+    //    #region IImplicitVertexSet<TVertex> Members
+    //    bool IImplicitVertexSet<TVertex>.ContainsVertex(TVertex vertex)
+    //    {
+    //        throw new NotImplementedException();
+    //    }
+    //    #endregion
+
+    //    #region IGraph<TVertex,TEdge> Members
+
+    //    public bool IsDirected {
+    //      get { throw new NotImplementedException(); }
+    //    }
+
+    //    public bool AllowParallelEdges {
+    //      get { throw new NotImplementedException(); }
+    //    }
+
+    //    #endregion
+    //}
 }

@@ -5,4 +5,9 @@
     {
         event EdgeAction<TVertex, TEdge> TreeEdge;
     }
+
+    public interface ITreeBuilderAlgorithm<TVertex>
+    {
+        event EdgeAction<TVertex> TreeEdge;
+    }
 }
