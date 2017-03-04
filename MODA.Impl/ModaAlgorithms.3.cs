@@ -55,7 +55,7 @@ namespace MODA.Impl
                 // if (f(u), f(v)) ϵ G and meets the conditions, add to list
                 if (parentGraphMappings[i].SubGraphEdgeCount == queryGraph.EdgeCount)
                 {
-                    newEdgeImage = parentGraphMappings[i].GetImage(inputGraph, parentQueryGraph.Edges2);
+                    newEdgeImage = parentGraphMappings[i].GetImage(inputGraph, parentQueryGraph.Edges);
                 }
                 else if (parentGraphMappings[i].SubGraphEdgeCount > queryGraph.EdgeCount)
                 {
@@ -150,8 +150,8 @@ namespace MODA.Impl
                     , (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount), currentQueryGraph.Label, parentQueryGraph.Label);
                 return default(Edge<int>);
             }
-            var edges = parentQueryGraph.Edges2;
-            foreach (var edge in currentQueryGraph.Edges2)
+            var edges = parentQueryGraph.Edges;
+            foreach (var edge in currentQueryGraph.Edges)
             {
                 if (!edges.Contains(edge))
                 {

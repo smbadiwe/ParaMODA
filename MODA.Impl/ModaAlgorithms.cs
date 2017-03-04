@@ -132,11 +132,9 @@ namespace MODA.Impl
                     return null;
                 }
 
-                var map = new Mapping(function, inducedSubGraphEdges.Count, -1);
-
                 //inducedSubGraphEdges.Clear();
                 inducedSubGraphEdges = null;
-                return new Dictionary<IList<int>, Mapping>(1) { { function.Values, map } };
+                return new Dictionary<IList<int>, Mapping>(1) { { function.Values, new Mapping(function, inducedSubGraphEdges.Count, -1) } };
                 #endregion
 
             }
@@ -154,9 +152,11 @@ namespace MODA.Impl
 
             var neighborsOfM = queryGraph.GetNeighbors(m, false);
             var newPartialMapCount = partialMap.Count + 1;
-            foreach (var n in neighbourRange) //foreach neighbour n of f(D)
+            //foreach (var n in neighbourRange) //foreach neighbour n of f(D)
+            for (int i = 0; i < neighbourRange.Count; i++)
             {
-                if (false == IsNeighbourIncompatible(inputGraph, n, partialMap, queryGraph, neighborsOfM))
+                //int n = neighbourRange[i];
+                if (false == IsNeighbourIncompatible(inputGraph, neighbourRange[i], partialMap, queryGraph, neighborsOfM))
                 {
                     //It's not; so, let f' = f on D, and f'(m) = n.
 
@@ -167,7 +167,7 @@ namespace MODA.Impl
                     {
                         newPartialMap.Add(item.Key, item.Value);
                     }
-                    newPartialMap[m] = n;
+                    newPartialMap[m] = neighbourRange[i];
                     var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);
                     if (subList != null && subList.Count > 0)
                     {
@@ -244,7 +244,7 @@ namespace MODA.Impl
             neighboursOfN = null;
             return false;
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -314,7 +314,7 @@ namespace MODA.Impl
             }
             return -1;
         }
-        
+
         /// <summary>
         /// We say that <paramref name="node_G"/> (g) of <paramref name="inputGraph"/> (G) can support <paramref name="node_H"/> (h) of <paramref name="queryGraph"/> (H)
         /// if we cannot rule out a subgraph isomorphism from H into G which maps h to g based on the degrees of h and g, and the degree of their neighbours
@@ -327,15 +327,16 @@ namespace MODA.Impl
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool CanSupport(QueryGraph queryGraph, int node_H, UndirectedGraph<int> inputGraph, int node_G)
         {
-            // 1. Based on their degrees
-            if (inputGraph.AdjacentDegree(node_G) >= queryGraph.AdjacentDegree(node_H))
-            {
-                // => we can map the querygraph unto the input graph, based on the nodes given.
-                // That means we are not ruling out isomorphism. So...
-                return true;
-            }
+            //// 1. Based on their degrees
+            //if (inputGraph.AdjacentDegree(node_G) >= queryGraph.AdjacentDegree(node_H))
+            //{
+            //    // => we can map the querygraph unto the input graph, based on the nodes given.
+            //    // That means we are not ruling out isomorphism. So...
+            //    return true;
+            //}
 
-            return false;
+            //return false;
+            return inputGraph.AdjacentDegree(node_G) >= queryGraph.AdjacentDegree(node_H);
         }
 
         #endregion

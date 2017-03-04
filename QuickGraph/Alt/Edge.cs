@@ -5,7 +5,7 @@ using System.Diagnostics.Contracts;
 namespace QuickGraph //.Alt
 {
     /// <summary>
-    /// The default <see cref="IEdge&lt;TVertex&gt;"/> implementation.
+    /// The struct implementation. It doesn't implement <see cref="IEdge&lt;TVertex&gt;"/> 
     /// </summary>
     /// <typeparam name="TVertex">The type of the vertex.</typeparam>
     [DebuggerDisplay("{Source}->{Target}")]

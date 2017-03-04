@@ -1,20 +1,18 @@
-﻿using QuickGraph.Collections;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace QuickGraph
 {
     public delegate bool EdgeEqualityComparer<TVertex>(Edge<TVertex> edge, TVertex source, TVertex target);
-    
+
     [DebuggerDisplay("VertexCount = {VertexCount}, EdgeCount = {EdgeCount}")]
     public class UndirectedGraph<TVertex>
     {
         private readonly bool allowParallelEdges = true;
         private int edgeCount = 0;
         private int edgeCapacity = 4;
+        private Dictionary<TVertex, List<TVertex>> edges;
 
         public UndirectedGraph()
             : this(true)
@@ -23,19 +21,44 @@ namespace QuickGraph
         public UndirectedGraph(bool allowParallelEdges)
         {
             this.allowParallelEdges = allowParallelEdges;
-            this.edges2 = new Dictionary<TVertex, List<TVertex>>();
-        }
-        
-        public int EdgeCapacity
-        {
-            get { return this.edgeCapacity; }
-            set
-            {
-                this.edgeCapacity = value;
-            }
+            this.edges = new Dictionary<TVertex, List<TVertex>>();
         }
 
-        #region Newly Added
+        public int VertexCount
+        {
+            get { return this.edges.Count; }
+        }
+
+        public IEnumerable<TVertex> Vertices
+        {
+            get { return this.edges.Keys; }
+        }
+        
+        public int EdgeCount
+        {
+            get { return this.edgeCount; }
+        }
+
+        public IEnumerable<Edge<TVertex>> Edges
+        {
+            get
+            {
+                var edgeColors = new Dictionary<Edge<TVertex>, GraphColor>(this.EdgeCount);
+                foreach (var vertsSet in this.edges)
+                {
+                    foreach (var vert in vertsSet.Value)
+                    {
+                        Edge<TVertex> edge = new Edge<TVertex>(vertsSet.Key, vert);
+                        GraphColor c;
+                        if (edgeColors.TryGetValue(edge, out c))
+                            continue;
+
+                        edgeColors.Add(edge, GraphColor.Black);
+                        yield return edge;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// This returns the neighbourhood of the given <paramref name="vertex"/>.
@@ -45,7 +68,7 @@ namespace QuickGraph
         public IList<TVertex> GetNeighbors(TVertex vertex)
         {
             List<TVertex> adjEdges;
-            if (this.edges2.TryGetValue(vertex, out adjEdges))
+            if (this.edges.TryGetValue(vertex, out adjEdges))
             {
                 return adjEdges;
             }
@@ -76,25 +99,10 @@ namespace QuickGraph
             return listToReturn;
         }
 
-        /// <summary>
-        /// NB: The degree sequence of an undirected graph is the non-increasing sequence of its vertex degrees;
-        /// </summary>
-        /// <returns></returns>
-        public int[] GetDegreeSequence()
-        {
-            var listToReturn = new List<int>(VertexCount);
-            foreach (var node in Vertices)
-            {
-                listToReturn.Add(this.AdjacentDegree(node));
-            }
-            
-            return listToReturn.OrderByDescending(x => x).ToArray();
-        }
-
         public UndirectedGraph<TVertex> Clone()
         {
             var inputGraphClone = new UndirectedGraph<TVertex>();
-            foreach (var edge in this.Edges2)
+            foreach (var edge in this.Edges)
             {
                 inputGraphClone.AddVerticesAndEdge(edge.Source, edge.Target);
             }
@@ -103,112 +111,41 @@ namespace QuickGraph
 
         public override string ToString()
         {
-            if (this.IsEdgesEmpty) return "";
+            if (this.EdgeCount == 0) return "";
             var sb = new System.Text.StringBuilder("Graph-Edges_");
-            foreach (var edge in this.Edges2)
+            foreach (var edge in this.Edges)
             {
                 sb.AppendFormat("[{0}],", edge);
             }
 
             return sb.ToString();
         }
-        #endregion
 
-        #region IGraph<Vertex,Edge> Members
-        public bool IsDirected
-        {
-            get { return false; }
-        }
-
-        public bool AllowParallelEdges
-        {
-            get { return this.allowParallelEdges; }
-        }
-        #endregion
-
-        #region IMutableUndirected<Vertex,Edge> Members
         public bool RemoveVertex(TVertex v)
         {
             this.ClearAdjacentEdges(v);
-            return this.edges2.Remove(v);
+            return this.edges.Remove(v);
         }
-        #endregion
-
-        #region IMutableIncidenceGraph<Vertex,Edge> Members
-        //public int RemoveAdjacenEdge<TVertex>If(TVertex v, EdgePredicate<TVertex> predicate)
-        //{
-        //    var ouEdge<TVertex>s = this.adjacentEdges[v];
-        //    var edges = new List<Edge<TVertex>>(ouEdge<TVertex>s.Count);
-        //    foreach (var edge in ouEdge<TVertex>s)
-        //        if (predicate(edge))
-        //            edges.Add(edge);
-
-        //    this.RemoveEdges(edges);
-        //    return edges.Count;
-        //}
-
-        //[ContractInvariantMethod]
-        //void ObjectInvariant()
-        //{
-        //    Contract.Invariant(this.edgeCount >= 0);
-        //}
 
         public void ClearAdjacentEdges(TVertex v)
         {
-            List<TVertex> ends = new List<TVertex>(this.edges2[v]);
+            List<TVertex> ends = new List<TVertex>(this.edges[v]);
             this.edgeCount -= ends.Count;
             foreach (var end in ends)
             {
                 List<TVertex> otherEnds;
-                if (this.edges2.TryGetValue(end, out otherEnds))
+                if (this.edges.TryGetValue(end, out otherEnds))
                 {
                     otherEnds.Remove(v);
                 }
             }
             ends.Clear();
-            //var edges = this.adjacentEdges[v].Clone();
-            //this.edgeCount -= edges.Count;
-
-            //foreach (var edge in edges)
-            //{
-            //    IEdgeList<TVertex> aEdges;
-            //    if (this.adjacentEdges.TryGetValue(edge.Target, out aEdges))
-            //        aEdges.Remove(edge);
-            //    if (this.adjacentEdges.TryGetValue(edge.Source, out aEdges))
-            //        aEdges.Remove(edge);
-            //}
         }
-        #endregion
-
-        #region IMutableGraph<Vertex,Edge> Members - Cleared
-        //public void TrimEdgeExcess()
-        //{
-        //    foreach (var edges in this.adjacentEdges.Values)
-        //        edges.TrimExcess();
-        //}
-
-        //public void Clear()
-        //{
-        //    this.adjacentEdges.Clear();
-        //    this.edgeCount = 0;
-        //    this.OnCleared(EventArgs.Empty);
-        //}
-
-        //public event EventHandler Cleared;
-        //private void OnCleared(EventArgs e)
-        //{
-        //    var eh = this.Cleared;
-        //    if (eh != null)
-        //        eh(this, e);
-        //}
-        #endregion
-
-        #region IUndirectedGraph<Vertex,Edge> Members
-
+        
         public bool TryGetEdge(TVertex source, TVertex target, out Edge<TVertex> edge)
         {
             List<TVertex> ends;
-            if (this.edges2.TryGetValue(source, out ends) && ends.Contains(target))
+            if (this.edges.TryGetValue(source, out ends) && ends.Contains(target))
             {
                 edge = new Edge<TVertex>(source, target);
                 return true;
@@ -221,97 +158,70 @@ namespace QuickGraph
         public bool ContainsEdge(TVertex source, TVertex target)
         {
             List<TVertex> ends;
-            if (this.edges2.TryGetValue(source, out ends) && ends.Contains(target))
+            if (this.edges.TryGetValue(source, out ends) && ends.Contains(target))
             {
                 return true;
             }
             return false;
         }
-        
-        public bool IsVerticesEmpty
-        {
-            get { return this.edges2.Count == 0; }
-        }
 
-        public int VertexCount
-        {
-            get { return this.edges2.Count; }
-        }
-
-        public IEnumerable<TVertex> Vertices
-        {
-            get { return this.edges2.Keys; }
-        }
-
-        public bool ContainsVertex(TVertex vertex)
-        {
-            return this.edges2.ContainsKey(vertex);
-        }
-        #endregion
-
-        private Dictionary<TVertex, List<TVertex>> edges2;
         public bool AddVerticesAndEdge(TVertex source, TVertex target)
         {
             List<TVertex> nodesConnectedToSource, nodesConnectedToTarget;
-            if (edges2.TryGetValue(source, out nodesConnectedToSource))
+            if (edges.TryGetValue(source, out nodesConnectedToSource))
             {
                 //We've seen this source before. So...
                 if (nodesConnectedToSource.Contains(target))
                 {
                     return false; // already exists
                 }
+
+                nodesConnectedToSource.Add(target);
+                //...and add the source to the list of targets too
+                if (edges.TryGetValue(target, out nodesConnectedToTarget))
+                {
+                    if (!nodesConnectedToTarget.Contains(source))
+                    {
+                        nodesConnectedToTarget.Add(source);
+                    }
+                }
                 else
                 {
-                    nodesConnectedToSource.Add(target);
-                    //...and add the source to the list of targets too
-                    if (edges2.TryGetValue(target, out nodesConnectedToTarget))
-                    {
-                        if (!nodesConnectedToTarget.Contains(source))
-                        {
-                            nodesConnectedToTarget.Add(source);
-                        }
-                    }
-                    else
-                    {
-                        edges2[target] = new List<TVertex> { source };
-                    }
+                    edges[target] = new List<TVertex> { source };
                 }
             }
             // since we don't care about direction, chech againby reversing them
-            else if (edges2.TryGetValue(target, out nodesConnectedToTarget))
+            else if (edges.TryGetValue(target, out nodesConnectedToTarget))
             {
                 if (nodesConnectedToTarget.Contains(source))
                 {
                     return false; // already exists
                 }
+
+                nodesConnectedToTarget.Add(source);
+
+                if (edges.TryGetValue(source, out nodesConnectedToSource))
+                {
+                    if (!nodesConnectedToSource.Contains(target))
+                    {
+                        nodesConnectedToSource.Add(target);
+                    }
+                }
                 else
                 {
-                    nodesConnectedToTarget.Add(source);
-
-                    if (edges2.TryGetValue(source, out nodesConnectedToSource))
-                    {
-                        if (!nodesConnectedToSource.Contains(target))
-                        {
-                            nodesConnectedToSource.Add(target);
-                        }
-                    }
-                    else
-                    {
-                        edges2[source] = new List<TVertex> { target };
-                    }
+                    edges[source] = new List<TVertex> { target };
                 }
             }
             else // neither exists. So, add them
             {
-                edges2[source] = new List<TVertex> { target };
-                edges2[target] = new List<TVertex> { source };
+                edges[source] = new List<TVertex> { target };
+                edges[target] = new List<TVertex> { source };
             }
 
             this.edgeCount++;
             return true;
         }
-
-        #region IMutableEdgeListGraph<Vertex,Edge> Members
+        
         public bool AddVerticesAndEdge(Edge<TVertex> edge)
         {
             return AddVerticesAndEdge(edge.Source, edge.Target);
@@ -325,63 +235,15 @@ namespace QuickGraph
                     count++;
             return count;
         }
-        
-        #endregion
-
-        #region IEdgeListGraph<Vertex,Edge> Members
-        public bool IsEdgesEmpty
-        {
-            get { return this.EdgeCount == 0; }
-        }
-
-        public int EdgeCount
-        {
-            get { return this.edgeCount; }
-        }
-
-        public IEnumerable<Edge<TVertex>> Edges2
-        {
-            get
-            {
-                var edgeColors = new Dictionary<Edge<TVertex>, GraphColor>(this.EdgeCount);
-                foreach (var vertsSet in this.edges2)
-                {
-                    foreach (var vert in vertsSet.Value)
-                    {
-                        Edge<TVertex> edge = new Edge<TVertex>(vertsSet.Key, vert);
-                        GraphColor c;
-                        if (edgeColors.TryGetValue(edge, out c))
-                            continue;
-
-                        edgeColors.Add(edge, GraphColor.Black);
-                        yield return edge;
-                    }
-                }
-            }
-        }
-        
-        #endregion
-
-        #region IUndirectedGraph<Vertex,Edge> Members
+ 
         public int AdjacentDegree(TVertex v)
         {
             List<TVertex> edges;
-            if (this.edges2.TryGetValue(v, out edges))
+            if (this.edges.TryGetValue(v, out edges))
             {
                 return edges.Count;
             }
             return 0;
         }
-
-        public bool IsadjacentEdgesEmpty(TVertex v)
-        {
-            List<TVertex> edges;
-            if (this.edges2.TryGetValue(v, out edges))
-            {
-                return edges.Count == 0;
-            }
-            return true;
-        }
-        #endregion
     }
 }
