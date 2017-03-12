@@ -48,8 +48,8 @@ namespace MODA.Impl
             int oldCount = parentGraphMappings.Count;
             for (int i = 0; i < oldCount; i++)
             {
-                parentGraphMappings[i].Id = i;
                 //var map = parentGraphMappings[i];
+                parentGraphMappings[i].Id = i;
                 // Reember, f(h) = g
 
                 // if (f(u), f(v)) ϵ G and meets the conditions, add to list
@@ -99,7 +99,7 @@ namespace MODA.Impl
                 var toReturn = new List<Mapping>(list.Count);
                 for (int i = list.Count - 1; i >= 0; i--)
                 {
-                    toReturn.Add(new Mapping(list[i].Function, list[i].SubGraphEdgeCount, list[i].Id));
+                    toReturn.Add(new Mapping(list[i]));
                     //list.RemoveAt(i);
                 }
                 list.Clear();
@@ -130,7 +130,7 @@ namespace MODA.Impl
             });
             if (hasNode)
             {
-                return expansionTree.Vertices.First(x => !x.IsRootNode && x.NodeName == queryGraph.Label).ParentNode.QueryGraph;
+                return expansionTree.Vertices.First(x => !x.IsRootNode && x.NodeName == queryGraph.Identifier).ParentNode.QueryGraph;
             }
             return null;
         }
@@ -147,7 +147,7 @@ namespace MODA.Impl
             if (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount != 1)
             {
                 Console.WriteLine("Invalid arguments for the method: GetEdgeDifference. [currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount] = {0}.\ncurrentQueryGraph.Label = '{1}'. parentQueryGraph.Label = '{2}'."
-                    , (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount), currentQueryGraph.Label, parentQueryGraph.Label);
+                    , (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount), currentQueryGraph.Identifier, parentQueryGraph.Identifier);
                 return default(Edge<int>);
             }
             var edges = parentQueryGraph.Edges;

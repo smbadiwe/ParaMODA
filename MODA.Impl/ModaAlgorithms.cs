@@ -88,10 +88,10 @@ namespace MODA.Impl
                 {
                     for (int j = (i + 1); j < subgraphSize; j++)
                     {
-                        var edge_h = false;
+                        var hasEdge_h = false;
                         if (queryGraph.ContainsEdge(function.Keys[i], function.Keys[j]))
                         {
-                            edge_h = true;
+                            hasEdge_h = true;
                             if (!inputGraph.TryGetEdge(function.Values[i], function.Values[j], out edge_g))
                             {
                                 // No correspondent in the input graph
@@ -100,7 +100,7 @@ namespace MODA.Impl
                                 return null;
                             }
                         }
-                        if (edge_h == false) // => edge_g was never evaluated because the first part of the AND statement was false
+                        if (hasEdge_h == false) // => edge_g was never evaluated because the first part of the AND statement was false
                         {
                             if (inputGraph.TryGetEdge(function.Values[i], function.Values[j], out edge_g))
                             {
@@ -134,7 +134,7 @@ namespace MODA.Impl
 
                 //inducedSubGraphEdges.Clear();
                 inducedSubGraphEdges = null;
-                return new Dictionary<IList<int>, Mapping>(1) { { function.Values, new Mapping(function, inducedSubGraphEdges.Count, -1) } };
+                return new Dictionary<IList<int>, Mapping>(1) { { function.Values, new Mapping(function, inducedSubGraphEdges.Count) } };
                 #endregion
 
             }
@@ -212,8 +212,6 @@ namespace MODA.Impl
             {
                 if (!partialMap.TryGetValue(d, out val))
                 {
-                    //neighboursOfN = null;
-                    //return false;
                     doNext = true;
                     break;
                 }
@@ -327,16 +325,8 @@ namespace MODA.Impl
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool CanSupport(QueryGraph queryGraph, int node_H, UndirectedGraph<int> inputGraph, int node_G)
         {
-            //// 1. Based on their degrees
-            //if (inputGraph.AdjacentDegree(node_G) >= queryGraph.AdjacentDegree(node_H))
-            //{
-            //    // => we can map the querygraph unto the input graph, based on the nodes given.
-            //    // That means we are not ruling out isomorphism. So...
-            //    return true;
-            //}
-
             //return false;
-            return inputGraph.AdjacentDegree(node_G) >= queryGraph.AdjacentDegree(node_H);
+            return inputGraph.GetDegree(node_G) >= queryGraph.GetDegree(node_H);
         }
 
         #endregion

@@ -8,7 +8,7 @@ namespace MODA.Impl
         /// <summary>
         /// A name to identify this node, especially useful
         /// </summary>
-        public string NodeName { get { return QueryGraph?.Label; } }
+        public string NodeName { get { return QueryGraph?.Identifier; } }
         public ExpansionTreeNode ParentNode { get; set; }
         public bool IsRootNode { get { return QueryGraph == null; } }
 

@@ -11,7 +11,6 @@ namespace QuickGraph
     {
         private readonly bool allowParallelEdges = true;
         private int edgeCount = 0;
-        private int edgeCapacity = 4;
         private Dictionary<TVertex, List<TVertex>> edges;
 
         public UndirectedGraph()
@@ -86,7 +85,7 @@ namespace QuickGraph
             var tempList = new Dictionary<TVertex, int>(count);
             foreach (var node in Vertices.Take(count))
             {
-                tempList.Add(node, this.AdjacentDegree(node));
+                tempList.Add(node, this.GetDegree(node));
             }
 
             var listToReturn = new List<TVertex>(count);
@@ -158,11 +157,7 @@ namespace QuickGraph
         public bool ContainsEdge(TVertex source, TVertex target)
         {
             List<TVertex> ends;
-            if (this.edges.TryGetValue(source, out ends) && ends.Contains(target))
-            {
-                return true;
-            }
-            return false;
+            return (this.edges.TryGetValue(source, out ends) && ends.Contains(target));
         }
 
         public bool AddVerticesAndEdge(TVertex source, TVertex target)
@@ -236,7 +231,12 @@ namespace QuickGraph
             return count;
         }
  
-        public int AdjacentDegree(TVertex v)
+        /// <summary>
+        /// Gets the degree of the given vertex, <paramref name="v"/>/
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public int GetDegree(TVertex v)
         {
             List<TVertex> edges;
             if (this.edges.TryGetValue(v, out edges))

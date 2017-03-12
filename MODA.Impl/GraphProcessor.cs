@@ -59,7 +59,7 @@ namespace MODA.Impl
             {
                 newGraphInstance = new QueryGraph
                 {
-                    Label = Path.GetFileNameWithoutExtension(filename)
+                    Identifier = Path.GetFileNameWithoutExtension(filename)
                 };
             }
             else

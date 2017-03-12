@@ -18,18 +18,18 @@ namespace MODA.Impl
         /// <summary>
         /// A name to identify / refer to this query graph
         /// </summary>
-        public string Label { get; set; }
+        public string Identifier { get; set; }
 
         public bool IsFrequentSubgraph { get; set; }
 
         public override int GetHashCode()
         {
-            return Label.GetHashCode();
+            return Identifier.GetHashCode();
         }
 
         public override bool Equals(object obj)
         {
-            return Label.Equals(((QueryGraph)obj).Label);
+            return Identifier.Equals(((QueryGraph)obj).Identifier);
         }
     }
 }
