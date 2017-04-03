@@ -7,10 +7,17 @@ namespace MODA.Impl
 {
     public class Mapping
     {
-        public Mapping(SortedList<int, int> function, int subGraphEdgeCount, int id)
+        public Mapping(Mapping mapping)
+        {
+            Function = mapping.Function;
+            Id = mapping.Id;
+            SubGraphEdgeCount = mapping.SubGraphEdgeCount;
+        }
+
+        public Mapping(SortedList<int, int> function, int subGraphEdgeCount)
         {
             Function = function;
-            Id = id;
+            Id = -1;
             SubGraphEdgeCount = subGraphEdgeCount;
         }
 

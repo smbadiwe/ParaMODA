@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 namespace MODA.Impl
 {
     /// <summary>
-    /// Implemented using a modified Adjacency matrix version. DO NOT USE
+    /// Implemented using a modified Adjacency matrix version. DO NOT USE.
+    /// It was designed for testing the possibility of automating the generation of expansion trees.
+    /// It's a "Future Work" item
     /// </summary>
     public class Graph
     {

@@ -42,7 +42,7 @@ namespace MODA.Impl
         {
             var g = new QueryGraph
             {
-                Label = graphLabel
+                Identifier = graphLabel
             };
             g.AddVerticesAndEdgeRange(edges);
             return g;
