@@ -17,16 +17,11 @@ namespace MODA.Impl
             comparer = new MappingNodesComparer();
             getInducedMappingsOnly = false;
         }
-
-        /// <summary>
-        /// If true, it means we only care about how many mappings are found for each subgraph, not info about the mappings themselves.
-        /// </summary>
-        public static bool GetOnlyMappingCounts { get; set; }
+        
         /// <summary>
         /// If true, the program will use my modified Grochow's algorithm (Algo 2)
         /// </summary>
         public static bool UseModifiedGrochow { get; set; }
-        public static bool UsingAlgo3 { get; set; }
 
         #region Useful mainly for the Algorithm 2 versions
 
@@ -131,9 +126,7 @@ namespace MODA.Impl
                     inducedSubGraphEdges = null;
                     return null;
                 }
-
-                //inducedSubGraphEdges.Clear();
-                inducedSubGraphEdges = null;
+                
                 return new Dictionary<IList<int>, Mapping>(1) { { function.Values, new Mapping(function, inducedSubGraphEdges.Count, -1) } };
                 #endregion
 

@@ -21,8 +21,9 @@ namespace MODA.Impl
         /// <param name="parentGraphMappings">NB: This param is still used even outside this method is call. So, be careful how you set/clear its values.</param>
         private static IList<Mapping> Algorithm3(Dictionary<QueryGraph, IList<Mapping>> allMappings, UndirectedGraph<int> inputGraph, QueryGraph queryGraph,
             AdjacencyGraph<ExpansionTreeNode> expansionTree,
-            QueryGraph parentQueryGraph, string fileName = null)
+            QueryGraph parentQueryGraph, out string newFileName, string fileName = null)
         {
+            newFileName = null;
             IList<Mapping> parentGraphMappings;
             if (string.IsNullOrWhiteSpace(fileName))
             {
@@ -33,7 +34,7 @@ namespace MODA.Impl
             }
             else
             {
-                parentGraphMappings = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Mapping>>(Extensions.DecompressString(System.IO.File.ReadAllText(fileName)));
+                parentGraphMappings = parentQueryGraph.ReadMappingsFromFile(fileName);
             }
             if (parentGraphMappings.Count == 0) return new Mapping[0];
 
@@ -41,8 +42,9 @@ namespace MODA.Impl
             var newEdge = GetEdgeDifference(queryGraph, parentQueryGraph);
 
             if (true == EqualityComparer<Edge<int>>.Default.Equals(newEdge, default(Edge<int>)))
+            {
                 return new Mapping[0];
-
+            }
             Edge<int> newEdgeImage;
             var list = new List<Mapping>();
             int oldCount = parentGraphMappings.Count;
@@ -94,13 +96,18 @@ namespace MODA.Impl
                 dict.Clear();
                 if (!string.IsNullOrWhiteSpace(fileName) && oldCount > parentGraphMappings.Count)
                 {
-                    System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(parentGraphMappings)));
+                    // This means that some of the mappings from parent fit the current query graph
+                    newFileName = parentQueryGraph.WriteMappingsToFile(parentGraphMappings);
+                    try
+                    {
+                        System.IO.File.Delete(fileName);
+                    }
+                    catch { } // we can afford to let this fail
                 }
                 var toReturn = new List<Mapping>(list.Count);
                 for (int i = list.Count - 1; i >= 0; i--)
                 {
                     toReturn.Add(new Mapping(list[i].Function, list[i].SubGraphEdgeCount, list[i].Id));
-                    //list.RemoveAt(i);
                 }
                 list.Clear();
                 list = null;

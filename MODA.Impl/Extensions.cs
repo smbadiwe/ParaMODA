@@ -38,7 +38,7 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="edges"></param>
         /// <returns></returns>
-        public static QueryGraph ToQueryGraph(this IEnumerable<Edge<int>> edges, string graphLabel = "")
+        public static QueryGraph ToQueryGraph(this IEnumerable<Edge<int>> edges, string graphLabel)
         {
             var g = new QueryGraph
             {

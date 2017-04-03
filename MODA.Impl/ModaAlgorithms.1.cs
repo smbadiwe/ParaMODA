@@ -15,14 +15,14 @@ namespace MODA.Impl
         }
 
         /// <summary>
-        /// Algo 1: Find subgraph frequency (mappings help in memory)
+        /// Algo 1: Find subgraph frequency (mappings found are saved to disk to be retrieved later during Algo 3).
+        /// The value of the dictionary returned is in the form: $"{mappings.Count}#{qGraph.Label}.ser"
         /// </summary>
         /// <param name="inputGraph"></param>
         /// <param name="qGraph">The query graph to be searched for. If not available, we use expansion trees (MODA). Otherwise, we use Grochow's (Algo 2)</param>
         /// <param name="subgraphSize"></param>
         /// <param name="thresholdValue">Frequency value, above which we can comsider the subgraph a "frequent subgraph"</param>
-        /// <returns>Fg, frequent subgraph list. NB: The dictionary .Value is an <see cref="object"/> which will be either a list of <see cref="Mapping"/> or a <see cref="long"/>
-        /// depending on the value of <see cref="GetOnlyMappingCounts"/>.</returns>
+        /// <returns></returns>
         public static Dictionary<QueryGraph, string> Algorithm1_C(UndirectedGraph<int> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
         {
             // The enumeration module (Algo 3) needs the mappings generated from the previous run(s)
@@ -63,7 +63,13 @@ namespace MODA.Impl
                         string _filename;
                         if (allMappings.TryGetValue(parentQueryGraph, out _filename))
                         {
-                            mappings = Algorithm3(null, inputGraph, qGraph, _builder.ExpansionTree, parentQueryGraph, _filename);
+                            string newFileName; // for parentQueryGraph
+                            mappings = Algorithm3(null, inputGraph, qGraph, _builder.ExpansionTree, parentQueryGraph, out newFileName, _filename);
+                            if (!string.IsNullOrWhiteSpace(newFileName))
+                            {
+                                // We change the _filename value in the dictionary since this means some of the mappings from parent fit the child
+                                allMappings[parentQueryGraph] = newFileName;
+                            }
                         }
                         else
                         {
@@ -74,10 +80,9 @@ namespace MODA.Impl
                     {
                         qGraph.IsFrequentSubgraph = true;
                     }
-                    // Save mappings. Do we need to save to disk? Maybe not!
 
-                    var fileName = $"{mappings.Count}#{qGraph.Label}.ser";
-                    System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(mappings)));
+                    // Save mappings. 
+                    var fileName = qGraph.WriteMappingsToFile(mappings);
                     if (mappings.Count > 0) mappings.Clear();
                     allMappings.Add(qGraph, fileName);
 
@@ -121,9 +126,8 @@ namespace MODA.Impl
         /// <param name="qGraph">The query graph to be searched for. If not available, we use expansion trees (MODA). Otherwise, we use Grochow's (Algo 2)</param>
         /// <param name="subgraphSize"></param>
         /// <param name="thresholdValue">Frequency value, above which we can comsider the subgraph a "frequent subgraph"</param>
-        /// <returns>Fg, frequent subgraph list. NB: The dictionary .Value is an <see cref="object"/> which will be either a list of <see cref="Mapping"/> or a <see cref="long"/>
-        /// depending on the value of <see cref="GetOnlyMappingCounts"/>.</returns>
-        public static Dictionary<QueryGraph, IList<Mapping>> Algorithm1(UndirectedGraph<int> inputGraph, QueryGraph qGraph, int subgraphSize, int thresholdValue)
+        /// <returns></returns>
+        public static Dictionary<QueryGraph, IList<Mapping>> Algorithm1(UndirectedGraph<int> inputGraph, QueryGraph qGraph, int subgraphSize = -1, int thresholdValue = 0)
         {
             // The enumeration module (Algo 3) needs the mappings generated from the previous run(s)
             Dictionary<QueryGraph, IList<Mapping>> allMappings;
@@ -160,7 +164,8 @@ namespace MODA.Impl
 
                         // This is part of Algo 3; but performance tweaks makes it more useful to get it here
                         var parentQueryGraph = GetParent(qGraph, _builder.ExpansionTree);
-                        mappings = Algorithm3(allMappings, inputGraph, qGraph, _builder.ExpansionTree, parentQueryGraph, null);
+                        string file;
+                        mappings = Algorithm3(allMappings, inputGraph, qGraph, _builder.ExpansionTree, parentQueryGraph, out file);
                     }
                     if (mappings != null && mappings.Count > thresholdValue)
                     {
