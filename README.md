@@ -7,3 +7,10 @@ The tool, called ParaMODA, incorporates the existing motif-centric algorithms - 
 More importantly the new algorithm allows for parallelization of huge chunks of the task – which will be helpful, especially for studying motifs of double-digit sizes in large networks.
 
 The tool also (optionally) collect and store discovered instances on the disk for future retrieval and analysis.
+
+The run the program, just fork or clone or download the source code here. Then open in Visual Studio and build the project called **ParaMODA**. It should build successfully without any problems. The successful build will generate an exe file which you can then run on command prompt.
+
+The command:`ParaMODA --help` will show you the available (verb) options.
+
+## Can't Run On Windows Machine?
+For users wanting to run program on non-Windows machine, all the source files for this project will work on .NET Core. It should be easy to create .NET Core projects, import the source files accordingly, build and run. This porting will be provided for in future.
