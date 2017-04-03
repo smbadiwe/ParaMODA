@@ -109,7 +109,7 @@ namespace MODA.Impl
                 {
                     mappings = Algorithm2(qGraph, inputGraph, numIterations);
                 }
-                var fileName = $"{mappings.Count}#{qGraph.Label}.ser";
+                var fileName = $"{mappings.Count}#{qGraph.Identifier}.ser";
                 System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(mappings)));
                 if (mappings.Count > 0) mappings.Clear();
                 allMappings = new Dictionary<QueryGraph, string>(1) { { qGraph, fileName } };

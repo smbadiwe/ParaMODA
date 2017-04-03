@@ -1,6 +1,5 @@
 ﻿using QuickGraph;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -107,7 +106,7 @@ namespace MODA.Impl
                 var toReturn = new List<Mapping>(list.Count);
                 for (int i = list.Count - 1; i >= 0; i--)
                 {
-                    toReturn.Add(new Mapping(list[i].Function, list[i].SubGraphEdgeCount, list[i].Id));
+                    toReturn.Add(new Mapping(list[i]));
                 }
                 list.Clear();
                 list = null;
@@ -137,7 +136,7 @@ namespace MODA.Impl
             });
             if (hasNode)
             {
-                return expansionTree.Vertices.First(x => !x.IsRootNode && x.NodeName == queryGraph.Label).ParentNode.QueryGraph;
+                return expansionTree.Vertices.First(x => !x.IsRootNode && x.NodeName == queryGraph.Identifier).ParentNode.QueryGraph;
             }
             return null;
         }
@@ -154,7 +153,7 @@ namespace MODA.Impl
             if (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount != 1)
             {
                 Console.WriteLine("Invalid arguments for the method: GetEdgeDifference. [currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount] = {0}.\ncurrentQueryGraph.Label = '{1}'. parentQueryGraph.Label = '{2}'."
-                    , (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount), currentQueryGraph.Label, parentQueryGraph.Label);
+                    , (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount), currentQueryGraph.Identifier, parentQueryGraph.Identifier);
                 return default(Edge<int>);
             }
             var edges = parentQueryGraph.Edges;
@@ -165,9 +164,7 @@ namespace MODA.Impl
                     return edge;
                 }
             }
-            return default(Edge<int>); // throw new InvalidOperationException();
+            return default(Edge<int>);
         }
-
-
     }
 }

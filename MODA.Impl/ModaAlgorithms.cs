@@ -127,7 +127,7 @@ namespace MODA.Impl
                     return null;
                 }
                 
-                return new Dictionary<IList<int>, Mapping>(1) { { function.Values, new Mapping(function, inducedSubGraphEdges.Count, -1) } };
+                return new Dictionary<IList<int>, Mapping>(1) { { function.Values, new Mapping(function, inducedSubGraphEdges.Count) } };
                 #endregion
 
             }
@@ -329,7 +329,7 @@ namespace MODA.Impl
             //}
 
             //return false;
-            return inputGraph.AdjacentDegree(node_G) >= queryGraph.AdjacentDegree(node_H);
+            return inputGraph.GetDegree(node_G) >= queryGraph.GetDegree(node_H);
         }
 
         #endregion

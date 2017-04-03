@@ -220,11 +220,11 @@ namespace ParaMODA
                             totalMappings += count;
                             try
                             {
-                                File.WriteAllText(Path.Combine(OUTPUT_DIR, qGraph.Key.Label + ".txt"), fileSb.ToString());
+                                File.WriteAllText(Path.Combine(OUTPUT_DIR, qGraph.Key.Identifier + ".txt"), fileSb.ToString());
                             }
                             catch (Exception ex)
                             {
-                                Console.Error.WriteLine("Failed to write file containing mappings found for querygraph {0} to disk.\n\n{1}", qGraph.Key.Label, ex);
+                                Console.Error.WriteLine("Failed to write file containing mappings found for querygraph {0} to disk.\n\n{1}", qGraph.Key.Identifier, ex);
                             }
                         }
                     }
@@ -287,11 +287,11 @@ namespace ParaMODA
 
                             try
                             {
-                                File.WriteAllText(Path.Combine(OUTPUT_DIR, qGraph.Key.Label + ".txt"), fileSb.ToString());
+                                File.WriteAllText(Path.Combine(OUTPUT_DIR, qGraph.Key.Identifier + ".txt"), fileSb.ToString());
                             }
                             catch (Exception ex)
                             {
-                                Console.Error.WriteLine("Failed to write file containing mappings found for querygraph {0} to disk.\n\n{1}", qGraph.Key.Label, ex);
+                                Console.Error.WriteLine("Failed to write file containing mappings found for querygraph {0} to disk.\n\n{1}", qGraph.Key.Identifier, ex);
                             }
                         }
                     }

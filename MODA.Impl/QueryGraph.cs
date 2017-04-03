@@ -36,7 +36,7 @@ namespace MODA.Impl
         /// <returns>filename where it is written</returns>
         public string WriteMappingsToFile(IList<Mapping> mappings)
         {
-            var fileName = $"{mappings.Count}#{Label}.ser";
+            var fileName = $"{mappings.Count}#{Identifier}.ser";
             System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(mappings)));
             return fileName;
         }
