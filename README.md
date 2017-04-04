@@ -8,7 +8,8 @@ More importantly the new algorithm allows for parallelization of huge chunks of 
 
 The tool also (optionally) collect and store discovered instances on the disk for future retrieval and analysis.
 
-The run the program, just fork or clone or download the source code here. Then open in Visual Studio and build the project called **ParaMODA**. It should build successfully without any problems. The successful build will generate an exe file which you can then run on command prompt.
+## Running the Program (Windows)
+To run the program, just fork or clone or download the source code here. Then open in Visual Studio and build the project called **ParaMODA**. It should build successfully without any problems. The successful build will generate an exe file which you can then run on command prompt.
 
 The command:`ParaMODA --help` will show you the available (verb) options.
 
