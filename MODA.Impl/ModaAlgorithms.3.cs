@@ -38,36 +38,42 @@ namespace MODA.Impl
             if (parentGraphMappings.Count == 0) return new Mapping[0];
 
             var subgraphSize = queryGraph.VertexCount;
-            var newEdge = GetEdgeDifference(queryGraph, parentQueryGraph);
+            var parentQueryGraphEdges = new Dictionary<Edge<int>, byte>(parentQueryGraph.EdgeCount);
+            foreach (var edge in parentQueryGraph.Edges)
+            {
+                parentQueryGraphEdges.Add(edge, 1);
+            }
+            var newEdge = GetEdgeDifference(queryGraph, parentQueryGraph, parentQueryGraphEdges);
 
-            if (true == EqualityComparer<Edge<int>>.Default.Equals(newEdge, default(Edge<int>)))
+            // if it's NOT a valid edge
+            if (newEdge.Source == Utils.DefaultEdgeNodeVal)
             {
                 return new Mapping[0];
             }
             Edge<int> newEdgeImage;
             var list = new List<Mapping>();
-            int oldCount = parentGraphMappings.Count;
+            int oldCount = parentGraphMappings.Count, queryGraphEdgeCount = queryGraph.EdgeCount;
             for (int i = 0; i < oldCount; i++)
             {
                 parentGraphMappings[i].Id = i;
-                //var map = parentGraphMappings[i];
                 // Reember, f(h) = g
 
                 // if (f(u), f(v)) ϵ G and meets the conditions, add to list
-                if (parentGraphMappings[i].SubGraphEdgeCount == queryGraph.EdgeCount)
+                if (parentGraphMappings[i].SubGraphEdgeCount == queryGraphEdgeCount)
                 {
-                    newEdgeImage = parentGraphMappings[i].GetImage(inputGraph, parentQueryGraph.Edges);
+                    newEdgeImage = parentGraphMappings[i].GetImage(inputGraph, parentQueryGraphEdges);
                 }
-                else if (parentGraphMappings[i].SubGraphEdgeCount > queryGraph.EdgeCount)
+                else if (parentGraphMappings[i].SubGraphEdgeCount > queryGraphEdgeCount)
                 {
                     newEdgeImage = parentGraphMappings[i].GetImage(inputGraph, newEdge);
                 }
                 else
                 {
-                    newEdgeImage = default(Edge<int>);
+                    newEdgeImage = new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
                 }
 
-                if (false == EqualityComparer<Edge<int>>.Default.Equals(newEdgeImage, default(Edge<int>)))
+                // if it's a valid edge
+                if (newEdgeImage.Source != Utils.DefaultEdgeNodeVal)
                 {
                     if (inputGraph.ContainsEdge(newEdgeImage.Source, newEdgeImage.Target))
                     {
@@ -75,24 +81,17 @@ namespace MODA.Impl
                     }
                 }
             }
+            var threadName = System.Threading.Thread.CurrentThread.ManagedThreadId;
             if (list.Count > 0)
             {
                 // Remove mappings from the parent qGraph that are found in this qGraph 
                 // This is because we're only interested in induced subgraphs
-                var dict = parentGraphMappings.ToDictionary(x => x.Id);
+                var theRest = parentGraphMappings.Except(list).ToList();
                 parentGraphMappings.Clear();
-                for (int i = 0; i < list.Count; i++)
+                foreach (var item in theRest)
                 {
-                    if (dict.ContainsKey(list[i].Id))
-                    {
-                        dict.Remove(list[i].Id);
-                    }
+                    parentGraphMappings.Add(item);
                 }
-                foreach (var item in dict)
-                {
-                    parentGraphMappings.Add(item.Value);
-                }
-                dict.Clear();
                 if (!string.IsNullOrWhiteSpace(fileName) && oldCount > parentGraphMappings.Count)
                 {
                     // This means that some of the mappings from parent fit the current query graph
@@ -103,19 +102,13 @@ namespace MODA.Impl
                     }
                     catch { } // we can afford to let this fail
                 }
-                var toReturn = new List<Mapping>(list.Count);
-                for (int i = list.Count - 1; i >= 0; i--)
-                {
-                    toReturn.Add(new Mapping(list[i]));
-                }
-                list.Clear();
-                list = null;
-                Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
-                return toReturn;
+
+                Console.WriteLine("Thread {0}:\tAlgorithm 3: All tasks completed. Number of mappings found: {1}.\n", threadName, list.Count);
+                return list;
             }
             else
             {
-                Console.WriteLine("Algorithm 3: All tasks completed. Number of mappings found: 0.\n");
+                Console.WriteLine("Thread {0}:\tAlgorithm 3: All tasks completed. Number of mappings found: 0.\n", threadName);
                 return new Mapping[0];
             }
 
@@ -140,31 +133,31 @@ namespace MODA.Impl
             }
             return null;
         }
-        
+
         /// <summary>
         /// Returns the edge in <paramref="currentQueryGraph"/> that is not present in <paramref="parentQueryGraph"/>
         /// </summary>
         /// <param name="currentQueryGraph">The current subgraph being queried</param>
         /// <param name="parentQueryGraph">The parent to <paramref name="currentQueryGraph"/>. This parent is also a subset, meaning it has one edge less.</param>
+        /// <param name="parentQueryGraphEdges">Edges of <see cref="parentQueryGraph"/>. We send it in to avoid re-computation since we already have it where this method is used</param>
         /// <returns></returns>
-        private static Edge<int> GetEdgeDifference(QueryGraph currentQueryGraph, QueryGraph parentQueryGraph)
+        private static Edge<int> GetEdgeDifference(QueryGraph currentQueryGraph, QueryGraph parentQueryGraph, Dictionary<Edge<int>, byte> parentQueryGraphEdges)
         {
             // Recall: currentQueryGraph is a super-graph of parentQueryGraph
             if (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount != 1)
             {
-                Console.WriteLine("Invalid arguments for the method: GetEdgeDifference. [currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount] = {0}.\ncurrentQueryGraph.Label = '{1}'. parentQueryGraph.Label = '{2}'."
-                    , (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount), currentQueryGraph.Identifier, parentQueryGraph.Identifier);
-                return default(Edge<int>);
+                Console.WriteLine("Thread {0}:\tInvalid arguments for the method: GetEdgeDifference. [currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount] = {1}.\ncurrentQueryGraph.Label = '{2}'. parentQueryGraph.Label = '{3}'."
+                    , System.Threading.Thread.CurrentThread.ManagedThreadId, (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount), currentQueryGraph.Identifier, parentQueryGraph.Identifier);
+                return new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
             }
-            var edges = parentQueryGraph.Edges;
             foreach (var edge in currentQueryGraph.Edges)
             {
-                if (!edges.Contains(edge))
+                if (!parentQueryGraphEdges.ContainsKey(edge))
                 {
                     return edge;
                 }
             }
-            return default(Edge<int>);
+            return new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
         }
     }
 }

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace MODA.Impl
 {
@@ -20,18 +19,15 @@ namespace MODA.Impl
 
             // Do we need this clone? Can't we just remove the node directly from the graph? 
             // We do need it.
-
-            H_NodeNeighbours = new Dictionary<int, HashSet<int>>();
             var theMappings = new Dictionary<IList<int>, Mapping>(comparer);
             var inputGraphDegSeq = inputGraphClone.GetNodesSortedByDegree(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
             var subgraphSize = queryGraphVertices.Length;
-
-            Console.WriteLine("Calling Algo 2:\n");
+            var threadName = System.Threading.Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine("Thread {0}:\tCalling Algo 2:\n", threadName);
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
                 var g = inputGraphDegSeq[i];
-                G_NodeNeighbours = new Dictionary<int, HashSet<int>>();
                 for (int j = 0; j < subgraphSize; j++)
                 {
                     var h = queryGraphVertices[j];
@@ -50,8 +46,6 @@ namespace MODA.Impl
                                 //Recall: f(h) = g
                                 theMappings[item.Key] = item.Value;
                             }
-                            //mappings.Clear();
-                            mappings = null;
                         }
                         #endregion
                     }
@@ -59,23 +53,10 @@ namespace MODA.Impl
 
                 //Remove g
                 inputGraphClone.RemoveVertex(g);
-                //G_NodeNeighbours.Clear();
-                G_NodeNeighbours = null;
             }
 
             var toReturn = new List<Mapping>(theMappings.Values);
-            queryGraphVertices = null;
-            inputGraphClone = null;
-
-            //theMappings.Clear();
-            theMappings = null;
-            //inputGraphDegSeq.Clear();
-            inputGraphDegSeq = null;
-            //H_NodeNeighbours.Clear();
-            H_NodeNeighbours = null;
-            //G_NodeNeighbours.Clear();
-            G_NodeNeighbours = null;
-            Console.WriteLine("Algorithm 2: All tasks completed. Number of mappings found: {0}.", toReturn.Count);
+            Console.WriteLine("Thread {0}:\tAlgorithm 2: All tasks completed. Number of mappings found: {1}.", threadName, toReturn.Count);
             return toReturn;
         }
     }

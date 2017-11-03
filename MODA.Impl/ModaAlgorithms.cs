@@ -24,16 +24,7 @@ namespace MODA.Impl
         public static bool UseModifiedGrochow { get; set; }
 
         #region Useful mainly for the Algorithm 2 versions
-
-        /// <summary>
-        /// Used to cache 
-        /// </summary>
-        public static Dictionary<int, HashSet<int>> G_NodeNeighbours;
-        /// <summary>
-        /// Used to cache 
-        /// </summary>
-        public static Dictionary<int, HashSet<int>> H_NodeNeighbours;
-
+        
         /// <summary>
         /// 
         /// </summary>
@@ -77,17 +68,19 @@ namespace MODA.Impl
                 #region Return base case
                 var function = new SortedList<int, int>(partialMap);
                 int subgraphSize = partialMap.Count;
-                Edge<int> edge_g = default(Edge<int>);
+                Edge<int> edge_g = new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
                 var inducedSubGraphEdges = new List<Edge<int>>();
                 for (int i = 0; i < subgraphSize - 1; i++)
                 {
                     for (int j = (i + 1); j < subgraphSize; j++)
                     {
                         var edge_h = false;
+
+                        int iVal = function.Values[i], jVal = function.Values[j];
                         if (queryGraph.ContainsEdge(function.Keys[i], function.Keys[j]))
                         {
                             edge_h = true;
-                            if (!inputGraph.TryGetEdge(function.Values[i], function.Values[j], out edge_g))
+                            if (!inputGraph.TryGetEdge(iVal, jVal, out edge_g))
                             {
                                 // No correspondent in the input graph
                                 //inducedSubGraphEdges.Clear();
@@ -97,37 +90,35 @@ namespace MODA.Impl
                         }
                         if (edge_h == false) // => edge_g was never evaluated because the first part of the AND statement was false
                         {
-                            if (inputGraph.TryGetEdge(function.Values[i], function.Values[j], out edge_g))
+                            if (inputGraph.TryGetEdge(iVal, jVal, out edge_g))
                             {
                                 inducedSubGraphEdges.Add(edge_g);
                             }
                         }
                         else
                         {
-                            if (false == EqualityComparer<Edge<int>>.Default.Equals(edge_g, default(Edge<int>)))
+                            // if it's a valid edge
+                            if (edge_g.Source != Utils.DefaultEdgeNodeVal)
                             {
                                 inducedSubGraphEdges.Add(edge_g);
                             }
                         }
                     }
                 }
-                edge_g = default(Edge<int>);
-                if (queryGraph.EdgeCount > inducedSubGraphEdges.Count) // this shouuld never happen; but just in case
+                edge_g = new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
+                int inducedSubGraphEdgesCount = inducedSubGraphEdges.Count;
+                if (queryGraph.EdgeCount > inducedSubGraphEdgesCount) // this shouuld never happen; but just in case
                 {
-                    //inducedSubGraphEdges.Clear();
-                    inducedSubGraphEdges = null;
                     return null;
                 }
 
                 // If we're to get induced mappings only, then the both query graph and the image must have the same number of edges
-                if (getInducedMappingsOnly && (queryGraph.EdgeCount != inducedSubGraphEdges.Count))
+                if (getInducedMappingsOnly && (queryGraph.EdgeCount != inducedSubGraphEdgesCount))
                 {
-                    //inducedSubGraphEdges.Clear();
-                    inducedSubGraphEdges = null;
                     return null;
                 }
                 
-                return new Dictionary<IList<int>, Mapping>(1) { { function.Values, new Mapping(function, inducedSubGraphEdges.Count) } };
+                return new Dictionary<IList<int>, Mapping>(1) { { function.Values, new Mapping(function, inducedSubGraphEdgesCount) } };
                 #endregion
 
             }
@@ -145,7 +136,7 @@ namespace MODA.Impl
 
             var neighborsOfM = queryGraph.GetNeighbors(m, false);
             var newPartialMapCount = partialMap.Count + 1;
-            //foreach (var n in neighbourRange) //foreach neighbour n of f(D)
+            //foreach neighbour n of f(D)
             for (int i = 0; i < neighbourRange.Count; i++)
             {
                 //int n = neighbourRange[i];
@@ -198,21 +189,19 @@ namespace MODA.Impl
             }
 
             //If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
-            var neighboursOfN = inputGraph.GetNeighbors(n, true);
+            var neighboursOfN = inputGraph.GetNeighbors(n, true).ToDictionary(x => x, y => byte.MinValue);
+           
             bool doNext = false;
             int val; // f(d)
             foreach (var d in neighborsOfM)
             {
                 if (!partialMap.TryGetValue(d, out val))
                 {
-                    //neighboursOfN = null;
-                    //return false;
                     doNext = true;
                     break;
                 }
-                if (!neighboursOfN.Contains(val))
+                if (!neighboursOfN.ContainsKey(val))
                 {
-                    neighboursOfN = null;
                     return true;
                 }
             }
@@ -224,47 +213,40 @@ namespace MODA.Impl
                 {
                     if (!partialMap.TryGetValue(d, out val))
                     {
-                        neighboursOfN = null;
                         return false;
                     }
-                    if (neighboursOfN.Contains(val))
+                    if (neighboursOfN.ContainsKey(val))
                     {
-                        neighboursOfN = null;
                         return true;
                     }
                 }
             }
-            neighboursOfN = null;
             return false;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="used_range"> Meaning that we're only interested in the Values. Remember: f(h) = g</param>
+        /// <param name="usedRange"> Meaning that we're only interested in the Values. Remember: f(h) = g</param>
         /// <param name="inputGraph">G</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static List<int> ChooseNeighboursOfRange(IEnumerable<int> used_range, UndirectedGraph<int> inputGraph)
+        private static List<int> ChooseNeighboursOfRange(IEnumerable<int> usedRange, UndirectedGraph<int> inputGraph)
         {
             List<int> toReturn = new List<int>();
-            foreach (var range in used_range)
+            var usedRangeDict = usedRange.ToDictionary(x => x, y => byte.MinValue);
+            foreach (var range in usedRangeDict)
             {
-                var local = inputGraph.GetNeighbors(range, true);
+                var local = inputGraph.GetNeighbors(range.Key, true);
                 if (local.Count > 0)
                 {
-                    List<int> batch = new List<int>(local.Count);
                     foreach (var loc in local)
                     {
-                        if (!used_range.Contains(loc))
+                        if (!usedRangeDict.ContainsKey(loc))
                         {
-                            batch.Add(loc);
+                            toReturn.Add(loc);
                         }
                     }
-                    toReturn.AddRange(batch);
-                    //batch.Clear(); // = null;
-                    batch = null;
-                    local = null;
                 }
                 else
                 {
@@ -290,20 +272,20 @@ namespace MODA.Impl
              * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
              * the highest degree and largest neighbor degree sequence.
              * */
-            foreach (var dom in domain)
+            var domainDict = domain.ToDictionary(x => x, y => byte.MinValue);
+            foreach (var dom in domainDict)
             {
-                var local = queryGraph.GetNeighbors(dom, false);
+                var local = queryGraph.GetNeighbors(dom.Key, false);
                 if (local.Count > 0)
                 {
                     foreach (var loc in local)
                     {
-                        if (!domain.Contains(loc))
+                        if (!domainDict.ContainsKey(loc))
                         {
                             return loc;
                         }
                     }
                 }
-                local = null;
             }
             return -1;
         }

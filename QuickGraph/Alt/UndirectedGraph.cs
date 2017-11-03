@@ -37,25 +37,25 @@ namespace QuickGraph
         {
             get { return this.edgeCount; }
         }
-
+        
         public IEnumerable<Edge<TVertex>> Edges
         {
             get
             {
-                var edgeColors = new Dictionary<Edge<TVertex>, GraphColor>(this.EdgeCount);
+                var list = new List<Edge<TVertex>>(this.edgeCount);
+                var edgeColors = new Dictionary<Edge<TVertex>, byte>(this.edgeCount);
                 foreach (var vertsSet in this.edges)
                 {
                     foreach (var vert in vertsSet.Value)
                     {
                         Edge<TVertex> edge = new Edge<TVertex>(vertsSet.Key, vert);
-                        GraphColor c;
-                        if (edgeColors.TryGetValue(edge, out c))
-                            continue;
+                        if (edgeColors.ContainsKey(edge)) continue;
 
-                        edgeColors.Add(edge, GraphColor.Black);
-                        yield return edge;
+                        edgeColors.Add(edge, 1);
+                        list.Add(edge);
                     }
                 }
+                return list;
             }
         }
 

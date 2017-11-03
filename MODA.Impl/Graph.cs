@@ -46,14 +46,14 @@ namespace MODA.Impl
                         }
                         else
                         {
-                            edge = default(Edge<int>);
+                            edge = new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
                             return false;
                         }
                     }
                     adjMatrixIndex++;
                 }
             }
-            edge = default(Edge<int>);
+            edge = new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
             return false;
         }
 

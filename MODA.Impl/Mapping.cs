@@ -7,6 +7,11 @@ namespace MODA.Impl
 {
     public class Mapping
     {
+        public Mapping()
+        {
+            Id = -1;
+        }
+
         public Mapping(Mapping mapping)
         {
             Function = mapping.Function;
@@ -14,6 +19,7 @@ namespace MODA.Impl
             SubGraphEdgeCount = mapping.SubGraphEdgeCount;
         }
 
+        //NB: SortedDictionary proved to be much worse for me
         public Mapping(SortedList<int, int> function, int subGraphEdgeCount)
         {
             Function = function;
@@ -29,7 +35,7 @@ namespace MODA.Impl
         /// <summary>
         /// This represents the [f(h) = g] relation. Meaning key is h and value is g.
         /// </summary>
-        public readonly SortedList<int, int> Function;
+        public SortedList<int, int> Function;
 
         /// <summary>
         /// Count of all the edges in the input subgraph G that fit the query graph (---Function.Keys).
@@ -42,11 +48,11 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="parentQueryGraphEdges"></param>
         /// <returns></returns>
-        public Edge<int> GetImage(UndirectedGraph<int> inputGraph, IEnumerable<Edge<int>> parentQueryGraphEdges)
+        public Edge<int> GetImage(UndirectedGraph<int> inputGraph, Dictionary<Edge<int>, byte> parentQueryGraphEdges)
         {
             int subgraphSize = Function.Count;
             var g_nodes = Function.Values; // Remember, f(h) = g, so .Values is for g's
-            Edge<int> edge_g; // = default(Edge<int>);
+            Edge<int> edge_g; // = new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
             var inducedSubGraphEdges = new List<Edge<int>>(SubGraphEdgeCount);
             for (int i = 0; i < subgraphSize - 1; i++)
             {
@@ -60,7 +66,7 @@ namespace MODA.Impl
             }
 
             var edgeImages = new HashSet<Edge<int>>();
-            foreach (var x in parentQueryGraphEdges)
+            foreach (var x in parentQueryGraphEdges.Keys)
             {
                 edgeImages.Add(new Edge<int>(Function[x.Source], Function[x.Target]));
             }
@@ -68,18 +74,11 @@ namespace MODA.Impl
             {
                 if (!edgeImages.Contains(edgex))
                 {
-                    inducedSubGraphEdges.Clear();
-                    edgeImages.Clear();
-                    inducedSubGraphEdges = null;
-                    edgeImages = null;
                     return edgex;
                 }
             }
-            inducedSubGraphEdges.Clear();
-            edgeImages.Clear();
-            inducedSubGraphEdges = null;
-            edgeImages = null;
-            return default(Edge<int>);
+
+            return new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
         }
 
         /// <summary>
@@ -95,13 +94,15 @@ namespace MODA.Impl
             {
                 return image;
             }
-            return default(Edge<int>);
+            return new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
         }
 
         public override bool Equals(object obj)
         {
             var other = obj as Mapping;
             if (other == null) return false;
+
+            if (Id >= 0 && Id != other.Id) return false;
 
             int i = 0;
             foreach (var func in Function)

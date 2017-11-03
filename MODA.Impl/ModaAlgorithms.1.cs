@@ -38,7 +38,7 @@ namespace MODA.Impl
                     qGraph = GetNextNode()?.QueryGraph;
                     if (qGraph == null) break;
                     IList<Mapping> mappings;
-                    if (qGraph.EdgeCount == (subgraphSize - 1))
+                    if (qGraph.EdgeCount == (subgraphSize - 1)) // i.e. if qGraph is a tree
                     {
                         var inputGraphClone = inputGraph.Clone();
                         if (UseModifiedGrochow)

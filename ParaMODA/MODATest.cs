@@ -4,6 +4,7 @@ using System.IO;
 using System;
 using System.Text;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace ParaMODA
 {
@@ -11,54 +12,55 @@ namespace ParaMODA
     {
         private const string OUTPUT_DIR = "MappingOutputs";
         private static StringBuilder sb = new StringBuilder("Processing Graph...");
+        private static BaseVerb invokedVerbInstance = null;
+        private static void OnVerbCommand(string verb, object subOptions)
+        {
+            // if parsing succeeds the verb name and correct instance
+            // will be passed to onVerbCommand delegate (string,object)
+            switch (verb)
+            {
+                case "runone":
+                    invokedVerbInstance = subOptions as RunOneVerb;
+                    break;
+                case "runmany":
+                    var many = subOptions as RunManyVerb;
+                    if (string.IsNullOrWhiteSpace(many.QueryGraphFolder)
+                        && many.QueryGraphFiles == null)
+                    {
+                        Console.WriteLine("One of the options -f (--folder) or -q (--querygraphs) has to be set.\n\n");
+                        many.GetUsage();
+                        Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
+                    }
+                    else
+                    {
+                        invokedVerbInstance = many;
+                    }
+                    break;
+                case "runall":
+                    invokedVerbInstance = subOptions as RunAllVerb;
+                    break;
+                default:
+                    break;
+            }
+        }
+
         internal static void Run(string[] args)
         {
             var fgColor = Console.ForegroundColor;
             try
             {
-                BaseVerb invokedVerbInstance = null;
-
-                var parser = new CommandLine.Parser(with =>
+                using (var parser = new CommandLine.Parser(with =>
+                        {
+                            with.HelpWriter = Console.Error;
+                            with.ParsingCulture = System.Globalization.CultureInfo.InvariantCulture;
+                            with.IgnoreUnknownArguments = true;
+                        }))
                 {
-                    with.HelpWriter = Console.Error;
-                    with.ParsingCulture = System.Globalization.CultureInfo.InvariantCulture;
-                    with.IgnoreUnknownArguments = true;
-                });
-                if (!parser.ParseArguments(args, new Options(),
-                  (verb, subOptions) =>
-                  {
-                      // if parsing succeeds the verb name and correct instance
-                      // will be passed to onVerbCommand delegate (string,object)
-                      switch (verb)
-                      {
-                          case "runone":
-                              invokedVerbInstance = subOptions as RunOneVerb;
-                              break;
-                          case "runmany":
-                              var many = subOptions as RunManyVerb;
-                              if (string.IsNullOrWhiteSpace(many.QueryGraphFolder)
-                                  && many.QueryGraphFiles == null)
-                              {
-                                  Console.WriteLine("One of the options -f (--folder) or -q (--querygraphs) has to be set.\n\n");
-                                  many.GetUsage();
-                                  Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
-                              }
-                              else
-                              {
-                                  invokedVerbInstance = many;
-                              }
-                              break;
-                          case "runall":
-                              invokedVerbInstance = subOptions as RunAllVerb;
-                              break;
-                          default:
-                              break;
-                      }
-                  }))
-                {
-                    Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
+                    if (!parser.ParseArguments(args, new Options(), OnVerbCommand))
+                    {
+                        Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
+                    }
                 }
-
                 #region Process input parameters
                 if (invokedVerbInstance == null)
                 {
@@ -168,13 +170,15 @@ namespace ParaMODA
         /// <param name="saveTempMappingsToDisk">This will only apply when we're using the runall option (MODA), in which case this will tell us how to store the mappings found at an expansion tree node for reuse in a child node</param>
         private static void Process(BaseVerb options, QuickGraph.UndirectedGraph<int> inputGraph, QueryGraph queryGraph = null, int subGraphSize = -1, bool saveTempMappingsToDisk = false)
         {
+            var threadName = Thread.CurrentThread.ManagedThreadId;
             if (queryGraph != null)
             {
-                Console.WriteLine("Query Graph (H): Nodes - {0}; Edges: {1}\n", queryGraph.VertexCount, queryGraph.EdgeCount);
+                Console.WriteLine("Thread {0}:\tQuery Graph (H): Nodes - {1}; Edges: {2}\n", threadName, queryGraph.VertexCount, queryGraph.EdgeCount);
             }
+            var sw = new ExecutionStopwatch(); // Stopwatch(); // 
             if (saveTempMappingsToDisk == false)
             {
-                var sw = Stopwatch.StartNew();
+                sw.Start();
 
                 var frequentSubgraphs = ModaAlgorithms.Algorithm1(inputGraph, queryGraph, subGraphSize, options.Threshold);
 
@@ -204,13 +208,13 @@ namespace ParaMODA
                 {
                     foreach (var qGraph in frequentSubgraphs)
                     {
-                        var fileSb = new StringBuilder();
                         if (qGraph.Value == null)
                         {
                             sb.AppendFormat("\tSub-graph: {0}\t Is Frequent Subgraph? false\n", qGraph.Key.ToString());
                         }
                         else
                         {
+                            var fileSb = new StringBuilder();
                             int count = qGraph.Value.Count; //int.Parse(qGraph.Value.Split('#')[0]); // 
                             sb.AppendFormat("\tSub-graph: {0}\t Mappings: {1}\t Is Frequent Subgraph? {2}\n", qGraph.Key.ToString(), count, qGraph.Key.IsFrequentSubgraph);
                             foreach (var mapping in qGraph.Value)
@@ -236,7 +240,7 @@ namespace ParaMODA
             }
             else // if (saveTempMappingsToDisk == true)
             {
-                var sw = Stopwatch.StartNew();
+                sw.Start();
 
                 var frequentSubgraphs = ModaAlgorithms.Algorithm1_C(inputGraph, queryGraph, subGraphSize, options.Threshold);
 
@@ -296,6 +300,7 @@ namespace ParaMODA
                         }
                     }
                 }
+
                 sb.AppendFormat("\nTime Taken: {0} ({1}ms)\nNetwork: Nodes - {2}; Edges: {3};\nTotal Mappings found: {4}\nSubgraph Size: {5}\n", sw.Elapsed, sw.ElapsedMilliseconds.ToString("N"), inputGraph.VertexCount, inputGraph.EdgeCount, totalMappings, subGraphSize);
                 sb.AppendLine("-------------------------------------------\n");
                 frequentSubgraphs.Clear();

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MODA.Impl
@@ -27,13 +28,12 @@ namespace MODA.Impl
         private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<int> inputGraph, int numberOfSamples)
         {
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3;
-
-            H_NodeNeighbours = new Dictionary<int, HashSet<int>>();
-            G_NodeNeighbours = new Dictionary<int, HashSet<int>>();
+            
             var theMappings = new Dictionary<IList<int>, Mapping>(comparer);
             var inputGraphDegSeq = inputGraph.GetNodesSortedByDegree(numberOfSamples);
 
-            Console.WriteLine("Calling Algo 2-Modified:\n");
+            var threadName = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine("Thread {0}:\tCalling Algo 2-Modified:\n", threadName);
 
             var h = queryGraph.Vertices.ElementAt(0);
             var f = new Dictionary<int, int>(1);
@@ -53,7 +53,6 @@ namespace MODA.Impl
                             //Recall: f(h) = g
                             theMappings[item.Key] = item.Value;
                         }
-                        //mappings.Clear();
                         mappings = null;
                     }
                     #endregion
@@ -61,16 +60,10 @@ namespace MODA.Impl
             }
 
             var toReturn = new List<Mapping>(theMappings.Values);
-            //theMappings.Clear();
             theMappings = null;
-            //inputGraphDegSeq.Clear();
             inputGraphDegSeq = null;
-            //H_NodeNeighbours.Clear();
-            H_NodeNeighbours = null;
-            //G_NodeNeighbours.Clear();
-            G_NodeNeighbours = null;
             
-            Console.WriteLine("\nAlgorithm 2: All iteration tasks completed. Number of mappings found: {0}.\n", toReturn.Count);
+            Console.WriteLine("\nThread {0}:\tAlgorithm 2: All iteration tasks completed. Number of mappings found: {1}.\n", threadName, toReturn.Count);
             return toReturn;
         }
 
