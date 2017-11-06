@@ -1,18 +1,11 @@
 ﻿using QuickGraph;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace MODA.Impl
 {
     public partial class ModaAlgorithms
     {
-        private static ExpansionTreeBuilder<int> _builder;
-        public static void BuildTree(int subgraphSize)
-        {
-            _builder = new ExpansionTreeBuilder<int>(subgraphSize);
-            _builder.Build();
-        }
 
         /// <summary>
         /// Algo 1: Find subgraph frequency (mappings found are saved to disk to be retrieved later during Algo 3).
@@ -44,12 +37,12 @@ namespace MODA.Impl
                         if (UseModifiedGrochow)
                         {
                             // Modified Mapping module - MODA and Grockow & Kellis
-                            mappings = Algorithm2_Modified(qGraph, inputGraphClone, numIterations);
+                            mappings = Algorithm2_Modified(qGraph, inputGraphClone, numIterations, false);
                             //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph);
                         }
                         else
                         {
-                            mappings = Algorithm2(qGraph, inputGraphClone, numIterations);
+                            mappings = Algorithm2(qGraph, inputGraphClone, numIterations, false);
                         }
                     }
                     else
@@ -98,16 +91,15 @@ namespace MODA.Impl
             }
             else
             {
-                getInducedMappingsOnly = true;
                 List<Mapping> mappings;
                 if (UseModifiedGrochow)
                 {
                     // Modified Mapping module - MODA and Grockow & Kellis
-                    mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations);
+                    mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations, true);
                 }
                 else
                 {
-                    mappings = Algorithm2(qGraph, inputGraph, numIterations);
+                    mappings = Algorithm2(qGraph, inputGraph, numIterations, true);
                 }
                 var fileName = $"{mappings.Count}#{qGraph.Identifier}.ser";
                 System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(mappings)));
@@ -148,12 +140,12 @@ namespace MODA.Impl
                         if (UseModifiedGrochow)
                         {
                             // Modified Mapping module - MODA and Grockow & Kellis
-                            mappings = Algorithm2_Modified(qGraph, inputGraphClone, numIterations);
-                            //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph);
+                            mappings = Algorithm2_Modified(qGraph, inputGraphClone, numIterations, false);
                         }
                         else
                         {
-                            mappings = Algorithm2(qGraph, inputGraphClone, numIterations);
+                            // Mapping module - MODA and Grockow & Kellis.
+                            mappings = Algorithm2(qGraph, inputGraphClone, numIterations, false);
                         }
                     }
                     else
@@ -177,7 +169,7 @@ namespace MODA.Impl
 
                     mappings = null;
                     // Check for complete-ness; if complete, break
-                    if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))
+                    if (qGraph.IsComplete())
                     {
                         qGraph = null;
                         break;
@@ -188,17 +180,16 @@ namespace MODA.Impl
             }
             else
             {
-                getInducedMappingsOnly = true;
                 List<Mapping> mappings;
                 if (UseModifiedGrochow)
                 {
                     // Modified Mapping module - MODA and Grockow & Kellis
-                    mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations);
+                    mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations, true);
                     // mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph, numIterations);
                 }
                 else
                 {
-                    mappings = Algorithm2(qGraph, inputGraph, numIterations);
+                    mappings = Algorithm2(qGraph, inputGraph, numIterations, true);
                 }
 
                 allMappings = new Dictionary<QueryGraph, IList<Mapping>>(1) { { qGraph, mappings } };
@@ -207,19 +198,5 @@ namespace MODA.Impl
             return allMappings;
         }
 
-        /// <summary>
-        /// Helper method for algorithm 1
-        /// </summary>
-        /// <param name="extTreeNodesQueued"></param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static ExpansionTreeNode GetNextNode()
-        {
-            if (_builder.VerticesSorted.Count > 0)
-            {
-                return _builder.VerticesSorted.Dequeue();
-            }
-            return null;
-        }
     }
 }

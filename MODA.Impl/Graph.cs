@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MODA.Impl
 {
@@ -12,6 +10,7 @@ namespace MODA.Impl
     /// It was designed for testing the possibility of automating the generation of expansion trees.
     /// It's a "Future Work" item
     /// </summary>
+    [Obsolete]
     public class Graph
     {
         private bool[] adjMatrix;

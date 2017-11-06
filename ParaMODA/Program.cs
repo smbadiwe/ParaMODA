@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QuickGraph;
+using System;
 
 namespace ParaMODA
 {
@@ -9,9 +10,9 @@ namespace ParaMODA
             var fgColor = Console.ForegroundColor;
 #if DEBUG
             string argsStr = "";
-            argsStr = @"runall -g ..\Release\Inputs\SampleInputGraph.txt -n 3"; // -k uses expansion tree
+            //argsStr = @"runall -g ..\Release\Inputs\SampleInputGraph.txt -n 5 -k"; // uses expansion tree
             //argsStr = @"runall -g ..\Release\Inputs\Ecoli20141001CR_idx.txt -n 3 -k"; // -k uses expansion tree
-            //argsStr = @"runone -g ..\Release\Inputs\SampleInputGraph.txt -h ..\Release\QueryGraphs\4\qg-5a.txt -n 4 -k 1";
+            argsStr = @"runone -g ..\Release\Inputs\SampleInputGraph.txt -h ..\Release\QueryGraphs\4\qg-5a.txt -n 4";
             args = argsStr.Split(' ');
 #endif
             Console.WriteLine("args = {0}", string.Join(" ", args));

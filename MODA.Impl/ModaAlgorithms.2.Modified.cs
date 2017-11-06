@@ -25,11 +25,11 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size / 3</param>
-        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<int> inputGraph, int numberOfSamples)
+        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<int> inputGraph, int numberOfSamples, bool getInducedMappingsOnly)
         {
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3;
             
-            var theMappings = new Dictionary<IList<int>, Mapping>(comparer);
+            var theMappings = new Dictionary<IList<int>, Mapping>(MappingNodesComparer);
             var inputGraphDegSeq = inputGraph.GetNodesSortedByDegree(numberOfSamples);
 
             var threadName = Thread.CurrentThread.ManagedThreadId;
@@ -40,12 +40,12 @@ namespace MODA.Impl
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
                 var g = inputGraphDegSeq[i];
-                if (CanSupport(queryGraph, h, inputGraph, g))
+                if (Utils.CanSupport(queryGraph, h, inputGraph, g))
                 {
                     #region Can Support
                     //Remember: f(h) = g, so h is Domain and g is Range
                     f[h] = g;
-                    var mappings = IsomorphicExtension(f, queryGraph, inputGraph);
+                    var mappings = Utils.IsomorphicExtension(f, queryGraph, inputGraph, getInducedMappingsOnly);
                     if (mappings.Count > 0)
                     {
                         foreach (var item in mappings)

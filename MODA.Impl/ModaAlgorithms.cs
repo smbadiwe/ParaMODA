@@ -1,319 +1,40 @@
-﻿using QuickGraph;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace MODA.Impl
 {
     public partial class ModaAlgorithms
     {
-        private static MappingNodesComparer comparer;
-        /// <summary>
-        /// If true, then the querygraph must match exactly to the input subgraph. In other words, only induced subgraphs will be returned
-        /// </summary>
-        private static bool getInducedMappingsOnly;
+        private static ExpansionTreeBuilder<int> _builder;
+        internal static MappingNodesComparer MappingNodesComparer;
         static ModaAlgorithms()
         {
-            comparer = new MappingNodesComparer();
-            getInducedMappingsOnly = false;
+            MappingNodesComparer = new MappingNodesComparer();
         }
         
         /// <summary>
         /// If true, the program will use my modified Grochow's algorithm (Algo 2)
         /// </summary>
         public static bool UseModifiedGrochow { get; set; }
-
-        #region Useful mainly for the Algorithm 2 versions
         
+        public static void BuildTree(int subgraphSize)
+        {
+            _builder = new ExpansionTreeBuilder<int>(subgraphSize);
+            _builder.Build();
+        }
+
         /// <summary>
-        /// 
+        /// Helper method for algorithm 1
         /// </summary>
-        /// <param name="inputGraph">The original input graph G</param>
-        /// <param name="g_nodes">Usually {Mapping Instance}.Function.Values.ToArray();</param>
-        /// <param name="subgraphSize">The query graph H's size</param>
+        /// <param name="extTreeNodesQueued"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static UndirectedGraph<int> GetInputSubgraph(UndirectedGraph<int> inputGraph, IEnumerable<int> g_nodes, int subgraphSize)
+        private static ExpansionTreeNode GetNextNode()
         {
-            UndirectedGraph<int> newInputSubgraph = new UndirectedGraph<int>();
-            int counter = 0;
-            foreach (var node in g_nodes)
+            if (_builder.VerticesSorted.Count > 0)
             {
-                for (int j = (counter + 1); j < subgraphSize; j++)
-                {
-                    Edge<int> edge_;
-                    if (inputGraph.TryGetEdge(node, g_nodes.ElementAt(j), out edge_))
-                    {
-                        newInputSubgraph.AddVerticesAndEdge(edge_);
-                    }
-                }
-                counter++;
+                return _builder.VerticesSorted.Dequeue();
             }
-
-            return newInputSubgraph;
+            return null;
         }
-
-        /// <summary>
-        /// Algorithm taken from Grochow and Kellis. This is failing at the moment
-        /// </summary>
-        /// <param name="partialMap">f; Map is represented as a dictionary, with the Key as h and the Value as g</param>
-        /// <param name="queryGraph">G</param>
-        /// <param name="inputGraph">H</param>
-        /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
-        private static Dictionary<IList<int>, Mapping> IsomorphicExtension(Dictionary<int, int> partialMap, QueryGraph queryGraph
-            , UndirectedGraph<int> inputGraph)
-        {
-            if (partialMap.Count == queryGraph.VertexCount)
-            {
-                #region Return base case
-                var function = new SortedList<int, int>(partialMap);
-                int subgraphSize = partialMap.Count;
-                Edge<int> edge_g = new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
-                var inducedSubGraphEdges = new List<Edge<int>>();
-                for (int i = 0; i < subgraphSize - 1; i++)
-                {
-                    for (int j = (i + 1); j < subgraphSize; j++)
-                    {
-                        var edge_h = false;
-
-                        int iVal = function.Values[i], jVal = function.Values[j];
-                        if (queryGraph.ContainsEdge(function.Keys[i], function.Keys[j]))
-                        {
-                            edge_h = true;
-                            if (!inputGraph.TryGetEdge(iVal, jVal, out edge_g))
-                            {
-                                // No correspondent in the input graph
-                                //inducedSubGraphEdges.Clear();
-                                inducedSubGraphEdges = null;
-                                return null;
-                            }
-                        }
-                        if (edge_h == false) // => edge_g was never evaluated because the first part of the AND statement was false
-                        {
-                            if (inputGraph.TryGetEdge(iVal, jVal, out edge_g))
-                            {
-                                inducedSubGraphEdges.Add(edge_g);
-                            }
-                        }
-                        else
-                        {
-                            // if it's a valid edge
-                            if (edge_g.Source != Utils.DefaultEdgeNodeVal)
-                            {
-                                inducedSubGraphEdges.Add(edge_g);
-                            }
-                        }
-                    }
-                }
-                edge_g = new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
-                int inducedSubGraphEdgesCount = inducedSubGraphEdges.Count;
-                if (queryGraph.EdgeCount > inducedSubGraphEdgesCount) // this shouuld never happen; but just in case
-                {
-                    return null;
-                }
-
-                // If we're to get induced mappings only, then the both query graph and the image must have the same number of edges
-                if (getInducedMappingsOnly && (queryGraph.EdgeCount != inducedSubGraphEdgesCount))
-                {
-                    return null;
-                }
-                
-                return new Dictionary<IList<int>, Mapping>(1) { { function.Values, new Mapping(function, inducedSubGraphEdgesCount) } };
-                #endregion
-
-            }
-
-            //Remember: f(h) = g, so h is Domain and g is Range.
-            //  In other words, Key is h and Value is g in the dictionary
-
-            // get m, most constrained neighbor
-            int m = GetMostConstrainedNeighbour(partialMap.Keys, queryGraph);
-            if (m < 0) return null;
-
-            var listOfIsomorphisms = new Dictionary<IList<int>, Mapping>(comparer);
-
-            var neighbourRange = ChooseNeighboursOfRange(partialMap.Values, inputGraph);
-
-            var neighborsOfM = queryGraph.GetNeighbors(m, false);
-            var newPartialMapCount = partialMap.Count + 1;
-            //foreach neighbour n of f(D)
-            for (int i = 0; i < neighbourRange.Count; i++)
-            {
-                //int n = neighbourRange[i];
-                if (false == IsNeighbourIncompatible(inputGraph, neighbourRange[i], partialMap, queryGraph, neighborsOfM))
-                {
-                    //It's not; so, let f' = f on D, and f'(m) = n.
-
-                    //Find all isomorphic extensions of f'.
-                    //newPartialMap[m] = neighbourRange[i];
-                    var newPartialMap = new Dictionary<int, int>(newPartialMapCount);
-                    foreach (var item in partialMap)
-                    {
-                        newPartialMap.Add(item.Key, item.Value);
-                    }
-                    newPartialMap[m] = neighbourRange[i];
-                    var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph);
-                    if (subList != null && subList.Count > 0)
-                    {
-                        foreach (var item in subList)
-                        {
-                            listOfIsomorphisms[item.Key] = item.Value;
-                        }
-                    }
-                }
-            }
-            return listOfIsomorphisms;
-        }
-
-        /// <summary>
-        /// If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
-        /// or if there is a NON-neighbor d ∈ D of m such that n is neighbors with f(d) 
-        /// [or if assigning f(m) = n would violate a symmetry-breaking condition in C(h)]
-        /// then neighbour is incompatible. So contiue with the next n (as in, return true)
-        /// </summary>
-        /// <param name="inputGraph">G</param>
-        /// <param name="n">g_node, pass in 'neighbour'; n in Grochow</param>
-        /// <param name="domain">domain_in_H</param>
-        /// <param name="partialMap">function</param>
-        /// <param name="queryGraph"></param>
-        /// <param name="neighborsOfM">neighbors of h_node in the <paramref name="queryGraph"/> /></param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsNeighbourIncompatible(UndirectedGraph<int> inputGraph,
-            int n, Dictionary<int, int> partialMap, QueryGraph queryGraph, IList<int> neighborsOfM)
-        {
-            //  RECALL: m is for Domain, the Key => the query graph
-            if (partialMap.ContainsValue(n))
-            {
-                return true; // cos it's already done
-            }
-
-            //If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
-            var neighboursOfN = inputGraph.GetNeighbors(n, true).ToDictionary(x => x, y => byte.MinValue);
-           
-            bool doNext = false;
-            int val; // f(d)
-            foreach (var d in neighborsOfM)
-            {
-                if (!partialMap.TryGetValue(d, out val))
-                {
-                    doNext = true;
-                    break;
-                }
-                if (!neighboursOfN.ContainsKey(val))
-                {
-                    return true;
-                }
-            }
-
-            // or if there is a NON - neighbor d ∈ D of m such that n IS neighbors with f(d)
-            if (doNext && queryGraph.VertexCount > 4)
-            {
-                foreach (var d in queryGraph.Vertices.Except(neighborsOfM))
-                {
-                    if (!partialMap.TryGetValue(d, out val))
-                    {
-                        return false;
-                    }
-                    if (neighboursOfN.ContainsKey(val))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="usedRange"> Meaning that we're only interested in the Values. Remember: f(h) = g</param>
-        /// <param name="inputGraph">G</param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static List<int> ChooseNeighboursOfRange(IEnumerable<int> usedRange, UndirectedGraph<int> inputGraph)
-        {
-            List<int> toReturn = new List<int>();
-            var usedRangeDict = usedRange.ToDictionary(x => x, y => byte.MinValue);
-            foreach (var range in usedRangeDict)
-            {
-                var local = inputGraph.GetNeighbors(range.Key, true);
-                if (local.Count > 0)
-                {
-                    foreach (var loc in local)
-                    {
-                        if (!usedRangeDict.ContainsKey(loc))
-                        {
-                            toReturn.Add(loc);
-                        }
-                    }
-                }
-                else
-                {
-                    return toReturn;
-                }
-            }
-
-            return toReturn;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="domain">Domain, D, of fumction f. Meaning that we're only interested in the Keys. Remember: f(h) = g</param>
-        /// <param name="queryGraph">H</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int GetMostConstrainedNeighbour(IEnumerable<int> domain, UndirectedGraph<int> queryGraph)
-        {
-            /*
-             * As is standard in backtracking searches, the algorithm uses the most constrained neighbor
-             * to eliminate maps that cannot be isomorphisms: that is, the neighbor of the already-mapped 
-             * nodes which is likely to have the fewest possible nodes it can be mapped to. First we select 
-             * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
-             * the highest degree and largest neighbor degree sequence.
-             * */
-            var domainDict = domain.ToDictionary(x => x, y => byte.MinValue);
-            foreach (var dom in domainDict)
-            {
-                var local = queryGraph.GetNeighbors(dom.Key, false);
-                if (local.Count > 0)
-                {
-                    foreach (var loc in local)
-                    {
-                        if (!domainDict.ContainsKey(loc))
-                        {
-                            return loc;
-                        }
-                    }
-                }
-            }
-            return -1;
-        }
-
-        /// <summary>
-        /// We say that <paramref name="node_G"/> (g) of <paramref name="inputGraph"/> (G) can support <paramref name="node_H"/> (h) of <paramref name="queryGraph"/> (H)
-        /// if we cannot rule out a subgraph isomorphism from H into G which maps h to g based on the degrees of h and g, and the degree of their neighbours
-        /// </summary>
-        /// <param name="queryGraph">H</param>
-        /// <param name="node_H">h</param>
-        /// <param name="inputGraph">G</param>
-        /// <param name="node_G">g</param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool CanSupport(QueryGraph queryGraph, int node_H, UndirectedGraph<int> inputGraph, int node_G)
-        {
-            //// 1. Based on their degrees
-            //if (inputGraph.AdjacentDegree(node_G) >= queryGraph.AdjacentDegree(node_H))
-            //{
-            //    // => we can map the querygraph unto the input graph, based on the nodes given.
-            //    // That means we are not ruling out isomorphism. So...
-            //    return true;
-            //}
-
-            //return false;
-            return inputGraph.GetDegree(node_G) >= queryGraph.GetDegree(node_H);
-        }
-
-        #endregion
     }
 }

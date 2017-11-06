@@ -1,7 +1,6 @@
 ﻿using QuickGraph;
 using System.Collections.Generic;
 using System.Text;
-using System.Linq;
 
 namespace MODA.Impl
 {
@@ -44,6 +43,18 @@ namespace MODA.Impl
         public int SubGraphEdgeCount;
 
         /// <summary>
+        /// Since we do not have the newly-added image here, what we do is use the edges of the parent
+        /// Only for when (InducedSubGraphEdgesCount == currentQueryGraphEdgeCount)
+        /// </summary>
+        /// <param name="queryGraph"></param>
+        /// <param name="inputGraph"></param>
+        /// <returns></returns>
+        public bool IsCorrectlyMapped(QueryGraph queryGraph, UndirectedGraph<int> inputGraph)
+        {
+            return Utils.IsMappingCorrect(Function, queryGraph, inputGraph, true, SubGraphEdgeCount).IsCorrectMapping;
+        }
+
+        /// <summary>
         /// Only for when (InducedSubGraphEdgesCount == currentQueryGraphEdgeCount)
         /// </summary>
         /// <param name="parentQueryGraphEdges"></param>
@@ -52,7 +63,7 @@ namespace MODA.Impl
         {
             int subgraphSize = Function.Count;
             var g_nodes = Function.Values; // Remember, f(h) = g, so .Values is for g's
-            Edge<int> edge_g; // = new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
+            Edge<int> edge_g;
             var inducedSubGraphEdges = new List<Edge<int>>(SubGraphEdgeCount);
             for (int i = 0; i < subgraphSize - 1; i++)
             {
@@ -82,7 +93,8 @@ namespace MODA.Impl
         }
 
         /// <summary>
-        /// Only for when (InducedSubGraph.EdgeCount > currentQueryGraphEdgeCount)
+        /// Gets the corresponding image of the <see cref="newlyAddedEdge"/> in the <see cref="inputGraph"/>.
+        /// Use only for when (InducedSubGraph.EdgeCount > currentQueryGraphEdgeCount)
         /// </summary>
         /// <param name="inputGraph"></param>
         /// <param name="newlyAddedEdge"></param>

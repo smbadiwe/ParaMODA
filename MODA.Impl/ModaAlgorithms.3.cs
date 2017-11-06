@@ -50,7 +50,7 @@ namespace MODA.Impl
             {
                 return new Mapping[0];
             }
-            Edge<int> newEdgeImage;
+
             var list = new List<Mapping>();
             int oldCount = parentGraphMappings.Count, queryGraphEdgeCount = queryGraph.EdgeCount;
             for (int i = 0; i < oldCount; i++)
@@ -61,21 +61,19 @@ namespace MODA.Impl
                 // if (f(u), f(v)) ϵ G and meets the conditions, add to list
                 if (parentGraphMappings[i].SubGraphEdgeCount == queryGraphEdgeCount)
                 {
-                    newEdgeImage = parentGraphMappings[i].GetImage(inputGraph, parentQueryGraphEdges);
+                    var isMapping = parentGraphMappings[i].IsCorrectlyMapped(queryGraph, inputGraph);
+                    if (isMapping)
+                    {
+                        list.Add(parentGraphMappings[i]);
+                    }
                 }
                 else if (parentGraphMappings[i].SubGraphEdgeCount > queryGraphEdgeCount)
                 {
-                    newEdgeImage = parentGraphMappings[i].GetImage(inputGraph, newEdge);
-                }
-                else
-                {
-                    newEdgeImage = new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
-                }
+                    var newEdgeImage = parentGraphMappings[i].GetImage(inputGraph, newEdge);
 
-                // if it's a valid edge
-                if (newEdgeImage.Source != Utils.DefaultEdgeNodeVal)
-                {
-                    if (inputGraph.ContainsEdge(newEdgeImage.Source, newEdgeImage.Target))
+                    // if it's a valid edge...
+                    if (newEdgeImage.Source != Utils.DefaultEdgeNodeVal
+                        && inputGraph.ContainsEdge(newEdgeImage.Source, newEdgeImage.Target))
                     {
                         list.Add(parentGraphMappings[i]);
                     }

@@ -14,13 +14,19 @@ namespace MODA.Impl
         {
 
         }
-        
+
         /// <summary>
         /// A name to identify / refer to this query graph
         /// </summary>
         public string Identifier { get; set; }
 
         public bool IsFrequentSubgraph { get; set; }
+
+        public bool IsComplete()
+        {
+            var subgraphSize = VertexCount;
+            return EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2);
+        }
 
         public IList<Mapping> ReadMappingsFromFile(string filename)
         {
