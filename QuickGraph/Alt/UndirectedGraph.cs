@@ -42,20 +42,31 @@ namespace QuickGraph
         {
             get
             {
-                var list = new List<Edge<TVertex>>(this.edgeCount);
-                var edgeColors = new Dictionary<Edge<TVertex>, byte>(this.edgeCount);
+                //var list = new List<Edge<TVertex>>(this.edgeCount);
+                var edgeColors = new HashSet<Edge<TVertex>>();
                 foreach (var vertsSet in this.edges)
                 {
                     foreach (var vert in vertsSet.Value)
                     {
                         Edge<TVertex> edge = new Edge<TVertex>(vertsSet.Key, vert);
-                        if (edgeColors.ContainsKey(edge)) continue;
-
-                        edgeColors.Add(edge, 1);
-                        list.Add(edge);
+                        //if (edgeColors.Add(edge))
+                            edgeColors.Add(edge);
                     }
                 }
-                return list;
+                return edgeColors;
+                //var edgeColors = new Dictionary<Edge<TVertex>, byte>(this.edgeCount);
+                //foreach (var vertsSet in this.edges)
+                //{
+                //    foreach (var vert in vertsSet.Value)
+                //    {
+                //        Edge<TVertex> edge = new Edge<TVertex>(vertsSet.Key, vert);
+                //        if (edgeColors.ContainsKey(edge)) continue;
+
+                //        edgeColors.Add(edge, 1);
+                //        list.Add(edge);
+                //    }
+                //}
+                //return list;
             }
         }
 

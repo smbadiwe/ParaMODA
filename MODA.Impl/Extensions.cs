@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -15,22 +14,6 @@ namespace MODA.Impl
         public static IList<int> GetNeighbors(this UndirectedGraph<int> graph, int vertex, bool isG)
         {
             return graph.GetNeighbors(vertex);
-            //HashSet<int> neighbors;
-            //if (isG)
-            //{
-            //    if (!ModaAlgorithms.G_NodeNeighbours.TryGetValue(vertex, out neighbors))
-            //    {
-            //        ModaAlgorithms.G_NodeNeighbours[vertex] = neighbors = graph.GetNeighbors(vertex);
-            //    }
-            //}
-            //else
-            //{
-            //    if (!ModaAlgorithms.H_NodeNeighbours.TryGetValue(vertex, out neighbors))
-            //    {
-            //        ModaAlgorithms.H_NodeNeighbours[vertex] = neighbors = graph.GetNeighbors(vertex);
-            //    }
-            //}
-            //return neighbors;
         }
 
         /// <summary>
@@ -54,8 +37,7 @@ namespace MODA.Impl
             list[index] = list[list.Count - 1];
             list.RemoveAt(list.Count - 1);
         }
-
-
+        
         // O(n)
         public static void RemoveBySwap<T>(this List<T> list, T item)
         {
@@ -115,8 +97,7 @@ namespace MODA.Impl
                 return Encoding.UTF8.GetString(buffer);
             }
         }
-
-
+        
         private static void MinimizeMemory()
         {
             GC.Collect(GC.MaxGeneration);

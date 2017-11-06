@@ -49,10 +49,10 @@ namespace MODA.Impl
             var result = new MappingTestResult { SubgraphEdgeCount = inducedSubGraphEdges.Count };
             if (result.SubgraphEdgeCount >= edgeImages.Count) // if mapping is possible
             {
-                // Now, find that edge in inducedSubGraphEdges that is not in edgeImages
-                foreach (var edgex in inducedSubGraphEdges)
+                // Now, find that edge in edgeImages that is not in inducedSubGraphEdges
+                foreach (var edgex in edgeImages) // iterating over this because edgeImages may have less edges than the subgraph
                 {
-                    if (!edgeImages.Contains(edgex))
+                    if (!inducedSubGraphEdges.Contains(edgex))
                     {
                         return result;
                     }
@@ -160,7 +160,7 @@ namespace MODA.Impl
             }
 
             //If there is a neighbor d ∈ D of m such that n is NOT neighbors with f(d),
-            var neighboursOfN = inputGraph.GetNeighbors(n, true).ToDictionary(x => x, y => byte.MinValue);
+            var neighboursOfN = new HashSet<int>(inputGraph.GetNeighbors(n, true));
 
             bool doNext = false;
             int val; // f(d)
@@ -171,7 +171,7 @@ namespace MODA.Impl
                     doNext = true;
                     break;
                 }
-                if (!neighboursOfN.ContainsKey(val))
+                if (!neighboursOfN.Contains(val))
                 {
                     return true;
                 }
@@ -186,7 +186,7 @@ namespace MODA.Impl
                     {
                         return false;
                     }
-                    if (neighboursOfN.ContainsKey(val))
+                    if (neighboursOfN.Contains(val))
                     {
                         return true;
                     }
@@ -205,15 +205,15 @@ namespace MODA.Impl
         internal static List<int> ChooseNeighboursOfRange(IEnumerable<int> usedRange, UndirectedGraph<int> inputGraph)
         {
             List<int> toReturn = new List<int>();
-            var usedRangeDict = usedRange.ToDictionary(x => x, y => byte.MinValue);
-            foreach (var range in usedRangeDict)
+            var usedRangeSet = new HashSet<int>(usedRange);
+            foreach (var range in usedRangeSet)
             {
-                var local = inputGraph.GetNeighbors(range.Key, true);
+                var local = inputGraph.GetNeighbors(range, true);
                 if (local.Count > 0)
                 {
                     foreach (var loc in local)
                     {
-                        if (!usedRangeDict.ContainsKey(loc))
+                        if (!usedRangeSet.Contains(loc))
                         {
                             toReturn.Add(loc);
                         }
@@ -243,15 +243,15 @@ namespace MODA.Impl
              * the nodes with the most already-mapped neighbors, and amongst those we select the nodes with 
              * the highest degree and largest neighbor degree sequence.
              * */
-            var domainDict = domain.ToDictionary(x => x, y => byte.MinValue);
+            var domainDict = new HashSet<int>(domain);
             foreach (var dom in domainDict)
             {
-                var local = queryGraph.GetNeighbors(dom.Key, false);
+                var local = queryGraph.GetNeighbors(dom, false);
                 if (local.Count > 0)
                 {
                     foreach (var loc in local)
                     {
-                        if (!domainDict.ContainsKey(loc))
+                        if (!domainDict.Contains(loc))
                         {
                             return loc;
                         }

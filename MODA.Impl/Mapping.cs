@@ -53,45 +53,7 @@ namespace MODA.Impl
         {
             return Utils.IsMappingCorrect(Function, queryGraph, inputGraph, true, SubGraphEdgeCount).IsCorrectMapping;
         }
-
-        /// <summary>
-        /// Only for when (InducedSubGraphEdgesCount == currentQueryGraphEdgeCount)
-        /// </summary>
-        /// <param name="parentQueryGraphEdges"></param>
-        /// <returns></returns>
-        public Edge<int> GetImage(UndirectedGraph<int> inputGraph, Dictionary<Edge<int>, byte> parentQueryGraphEdges)
-        {
-            int subgraphSize = Function.Count;
-            var g_nodes = Function.Values; // Remember, f(h) = g, so .Values is for g's
-            Edge<int> edge_g;
-            var inducedSubGraphEdges = new List<Edge<int>>(SubGraphEdgeCount);
-            for (int i = 0; i < subgraphSize - 1; i++)
-            {
-                for (int j = (i + 1); j < subgraphSize; j++)
-                {
-                    if (inputGraph.TryGetEdge(g_nodes[i], g_nodes[j], out edge_g))
-                    {
-                        inducedSubGraphEdges.Add(edge_g);
-                    }
-                }
-            }
-
-            var edgeImages = new HashSet<Edge<int>>();
-            foreach (var x in parentQueryGraphEdges.Keys)
-            {
-                edgeImages.Add(new Edge<int>(Function[x.Source], Function[x.Target]));
-            }
-            foreach (var edgex in inducedSubGraphEdges)
-            {
-                if (!edgeImages.Contains(edgex))
-                {
-                    return edgex;
-                }
-            }
-
-            return new Edge<int>(Utils.DefaultEdgeNodeVal, Utils.DefaultEdgeNodeVal);
-        }
-
+        
         /// <summary>
         /// Gets the corresponding image of the <see cref="newlyAddedEdge"/> in the <see cref="inputGraph"/>.
         /// Use only for when (InducedSubGraph.EdgeCount > currentQueryGraphEdgeCount)

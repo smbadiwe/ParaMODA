@@ -38,10 +38,10 @@ namespace MODA.Impl
             if (parentGraphMappings.Count == 0) return new Mapping[0];
 
             var subgraphSize = queryGraph.VertexCount;
-            var parentQueryGraphEdges = new Dictionary<Edge<int>, byte>(parentQueryGraph.EdgeCount);
+            var parentQueryGraphEdges = new HashSet<Edge<int>>();
             foreach (var edge in parentQueryGraph.Edges)
             {
-                parentQueryGraphEdges.Add(edge, 1);
+                parentQueryGraphEdges.Add(edge);
             }
             var newEdge = GetEdgeDifference(queryGraph, parentQueryGraph, parentQueryGraphEdges);
 
@@ -139,7 +139,7 @@ namespace MODA.Impl
         /// <param name="parentQueryGraph">The parent to <paramref name="currentQueryGraph"/>. This parent is also a subset, meaning it has one edge less.</param>
         /// <param name="parentQueryGraphEdges">Edges of <see cref="parentQueryGraph"/>. We send it in to avoid re-computation since we already have it where this method is used</param>
         /// <returns></returns>
-        private static Edge<int> GetEdgeDifference(QueryGraph currentQueryGraph, QueryGraph parentQueryGraph, Dictionary<Edge<int>, byte> parentQueryGraphEdges)
+        private static Edge<int> GetEdgeDifference(QueryGraph currentQueryGraph, QueryGraph parentQueryGraph, HashSet<Edge<int>> parentQueryGraphEdges)
         {
             // Recall: currentQueryGraph is a super-graph of parentQueryGraph
             if (currentQueryGraph.EdgeCount - parentQueryGraph.EdgeCount != 1)
@@ -150,7 +150,7 @@ namespace MODA.Impl
             }
             foreach (var edge in currentQueryGraph.Edges)
             {
-                if (!parentQueryGraphEdges.ContainsKey(edge))
+                if (!parentQueryGraphEdges.Contains(edge))
                 {
                     return edge;
                 }
