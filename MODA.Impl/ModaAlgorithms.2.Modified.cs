@@ -29,7 +29,7 @@ namespace MODA.Impl
         {
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3;
             
-            var theMappings = new Dictionary<IList<int>, Mapping>(MappingNodesComparer);
+            var theMappings = new Dictionary<IList<int>, List<Mapping>>(MappingNodesComparer);
             var inputGraphDegSeq = inputGraph.GetNodesSortedByDegree(numberOfSamples);
 
             var threadName = Thread.CurrentThread.ManagedThreadId;
@@ -51,7 +51,15 @@ namespace MODA.Impl
                         foreach (var item in mappings)
                         {
                             //Recall: f(h) = g
-                            theMappings[item.Key] = item.Value;
+                            List<Mapping> maps;
+                            if (theMappings.TryGetValue(item.Key, out maps))
+                            {
+                                maps.AddRange(item.Value);
+                            }
+                            else
+                            {
+                                theMappings[item.Key] = item.Value;
+                            }
                         }
                         mappings = null;
                     }
@@ -59,12 +67,12 @@ namespace MODA.Impl
                 }
             }
 
-            var toReturn = new List<Mapping>(theMappings.Values);
+            var toReturn = new HashSet<Mapping>(theMappings.Values.SelectMany(s => s));
             theMappings = null;
             inputGraphDegSeq = null;
             
             Console.WriteLine("\nThread {0}:\tAlgorithm 2: All iteration tasks completed. Number of mappings found: {1}.\n", threadName, toReturn.Count);
-            return toReturn;
+            return toReturn.ToList();
         }
 
     }

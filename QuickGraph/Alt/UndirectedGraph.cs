@@ -100,13 +100,30 @@ namespace QuickGraph
             }
 
             var listToReturn = new List<TVertex>(count);
-            foreach (var item in tempList.OrderByDescending(x => x.Value))
+            foreach (var item in tempList.OrderBy(x => x.Value))
             {
                 listToReturn.Add(item.Key);
             }
 
             tempList.Clear();
             return listToReturn;
+        }
+
+        /// <summary>
+        /// NB: The degree sequence of an undirected graph is the non-increasing sequence of its vertex degrees;
+        /// But here, we return the list of degrees in ascending order. The expected use case will not care about
+        /// the order direction
+        /// </summary>
+        /// <returns></returns>
+        public List<int> GetDegreeSequence()
+        {
+            var tempList = new List<int>(VertexCount);
+            foreach (var node in Vertices)
+            {
+                tempList.Add(this.GetDegree(node));
+            }
+            tempList.Sort();
+            return tempList;
         }
 
         public UndirectedGraph<TVertex> Clone()

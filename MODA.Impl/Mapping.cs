@@ -92,6 +92,11 @@ namespace MODA.Impl
             return true;
         }
 
+        public override int GetHashCode()
+        {
+            return GetMappedNodes().GetHashCode();
+        }
+
         /// <summary>
         /// Retruns the nodes in the input graph that the query graph mapped to.
         /// It's returned as a string where the nodes values are concatenated with '-'

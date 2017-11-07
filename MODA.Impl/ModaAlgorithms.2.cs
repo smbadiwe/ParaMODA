@@ -19,12 +19,12 @@ namespace MODA.Impl
 
             // Do we need this clone? Can't we just remove the node directly from the graph? 
             // We do need it.
-            var theMappings = new Dictionary<IList<int>, Mapping>(MappingNodesComparer);
+            var theMappings = new Dictionary<IList<int>, List<Mapping>>(MappingNodesComparer);
             var inputGraphDegSeq = inputGraphClone.GetNodesSortedByDegree(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
             var subgraphSize = queryGraphVertices.Length;
             var threadName = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            Console.WriteLine("Thread {0}:\tCalling Algo 2:\n", threadName);
+            Console.WriteLine("Thread {0}:\tCallingu Algo 2:\n", threadName);
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
             {
                 var g = inputGraphDegSeq[i];
@@ -44,7 +44,15 @@ namespace MODA.Impl
                             foreach (var item in mappings)
                             {
                                 //Recall: f(h) = g
-                                theMappings[item.Key] = item.Value;
+                                List<Mapping> maps;
+                                if (theMappings.TryGetValue(item.Key, out maps))
+                                {
+                                    maps.AddRange(item.Value);
+                                }
+                                else
+                                {
+                                    theMappings[item.Key] = item.Value;
+                                }
                             }
                         }
                         #endregion
@@ -54,10 +62,10 @@ namespace MODA.Impl
                 //Remove g
                 inputGraphClone.RemoveVertex(g);
             }
-
-            var toReturn = new List<Mapping>(theMappings.Values);
+            var toReturn = new HashSet<Mapping>(theMappings.Values.SelectMany(s => s));
+            
             Console.WriteLine("Thread {0}:\tAlgorithm 2: All tasks completed. Number of mappings found: {1}.", threadName, toReturn.Count);
-            return toReturn;
+            return toReturn.ToList();
         }
     }
 }

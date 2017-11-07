@@ -1,5 +1,6 @@
 ﻿using QuickGraph;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MODA.Impl
 {
@@ -22,10 +23,16 @@ namespace MODA.Impl
 
         public bool IsFrequentSubgraph { get; set; }
 
-        public bool IsComplete()
+        public bool IsComplete(int subgraphSize = -1)
         {
-            var subgraphSize = VertexCount;
+            if (subgraphSize <= 1) subgraphSize = VertexCount;
             return EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2);
+        }
+
+        public bool IsTree(int subgraphSize = -1)
+        {
+            if (subgraphSize <= 1) subgraphSize = VertexCount;
+            return EdgeCount == (subgraphSize - 1);
         }
 
         public IList<Mapping> ReadMappingsFromFile(string filename)
@@ -45,6 +52,52 @@ namespace MODA.Impl
             var fileName = $"{mappings.Count}#{Identifier}.ser";
             System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(mappings)));
             return fileName;
+        }
+
+        public void RemoveNonApplicableMappings(IList<Mapping> mappings, UndirectedGraph<int> inputGraph)
+        {
+            if (mappings.Count == 0) return;
+
+            int subgraphSize = VertexCount;
+            var mapGroups = mappings.GroupBy(x => x.Function.Values, ModaAlgorithms.MappingNodesComparer); //.ToDictionary(x => x.Key, x => x.ToArray());
+
+            var toAdd = new List<Mapping>();
+
+            foreach (var group in mapGroups)
+            {
+                var g_nodes = group.Key; // Remember, f(h) = g, so .Values is for g's
+                // Try to get all the edges in the induced subgraph made up of these g_nodes
+                var inducedSubGraphEdges = new List<Edge<int>>();
+                for (int i = 0; i < subgraphSize - 1; i++)
+                {
+                    for (int j = (i + 1); j < subgraphSize; j++)
+                    {
+                        Edge<int> edge_g;
+                        if (inputGraph.TryGetEdge(g_nodes[i], g_nodes[j], out edge_g))
+                        {
+                            inducedSubGraphEdges.Add(edge_g);
+                        }
+                    }
+                }
+
+                foreach (var item in group)
+                {
+                    var result = Utils.IsMappingCorrect(item.Function, this, inducedSubGraphEdges, true);
+                    if (result.IsCorrectMapping)
+                    {
+                        toAdd.Add(item);
+                        break;
+                    }
+                }
+            }
+            mappings.Clear();
+            if (toAdd.Count > 0)
+            {
+                foreach (var item in toAdd)
+                {
+                    mappings.Add(item);
+                }
+            }
         }
 
         public override int GetHashCode()

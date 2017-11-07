@@ -25,6 +25,8 @@ namespace MODA.Impl
 
             if (qGraph == null) // Use MODA's expansion tree
             {
+                #region Use MODA's expansion tree
+                var treatedNodes = new HashSet<QueryGraph>();
                 allMappings = new Dictionary<QueryGraph, string>(_builder.NumberOfQueryGraphs);
                 do
                 {
@@ -44,15 +46,20 @@ namespace MODA.Impl
                         {
                             mappings = Algorithm2(qGraph, inputGraphClone, numIterations, false);
                         }
+
+                        // Because we're saving to file, we're better off doing this now
+                        qGraph.RemoveNonApplicableMappings(mappings, inputGraph);
+                        treatedNodes.Add(qGraph);
                     }
                     else
                     {
                         // Enumeration moodule - MODA
-
-                        //var timer = System.Diagnostics.Stopwatch.StartNew();
-
                         // This is part of Algo 3; but performance tweaks makes it more useful to get it here
                         var parentQueryGraph = GetParent(qGraph, _builder.ExpansionTree);
+                        if (parentQueryGraph.EdgeCount == (subgraphSize - 1))
+                        {
+                            treatedNodes.Add(parentQueryGraph);
+                        }
                         string _filename;
                         if (allMappings.TryGetValue(parentQueryGraph, out _filename))
                         {
@@ -69,6 +76,7 @@ namespace MODA.Impl
                             mappings = new Mapping[0];
                         }
                     }
+
                     if (mappings.Count > thresholdValue)
                     {
                         qGraph.IsFrequentSubgraph = true;
@@ -80,7 +88,7 @@ namespace MODA.Impl
                     allMappings.Add(qGraph, fileName);
 
                     // Check for complete-ness; if complete, break
-                    if (qGraph.EdgeCount == ((subgraphSize * (subgraphSize - 1)) / 2))
+                    if (qGraph.IsComplete(subgraphSize))
                     {
                         qGraph = null;
                         break;
@@ -88,6 +96,7 @@ namespace MODA.Impl
                     qGraph = null;
                 }
                 while (true);
+                #endregion
             }
             else
             {
@@ -101,6 +110,7 @@ namespace MODA.Impl
                 {
                     mappings = Algorithm2(qGraph, inputGraph, numIterations, true);
                 }
+                qGraph.RemoveNonApplicableMappings(mappings, inputGraph);
                 var fileName = $"{mappings.Count}#{qGraph.Identifier}.ser";
                 System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(mappings)));
                 if (mappings.Count > 0) mappings.Clear();
@@ -128,13 +138,15 @@ namespace MODA.Impl
 
             if (qGraph == null) // Use MODA's expansion tree
             {
+                #region Use MODA's expansion tree
+                var treatedNodes = new HashSet<QueryGraph>();
                 allMappings = new Dictionary<QueryGraph, IList<Mapping>>(_builder.NumberOfQueryGraphs);
                 do
                 {
                     qGraph = GetNextNode()?.QueryGraph;
                     if (qGraph == null) break;
                     IList<Mapping> mappings;
-                    if (qGraph.EdgeCount == (subgraphSize - 1))
+                    if (qGraph.IsTree(subgraphSize))
                     {
                         var inputGraphClone = inputGraph.Clone();
                         if (UseModifiedGrochow)
@@ -156,6 +168,10 @@ namespace MODA.Impl
 
                         // This is part of Algo 3; but performance tweaks makes it more useful to get it here
                         var parentQueryGraph = GetParent(qGraph, _builder.ExpansionTree);
+                        if (parentQueryGraph.IsTree(subgraphSize))
+                        {
+                            treatedNodes.Add(parentQueryGraph);
+                        }
                         string file;
                         mappings = Algorithm3(allMappings, inputGraph, qGraph, _builder.ExpansionTree, parentQueryGraph, out file);
                     }
@@ -169,14 +185,23 @@ namespace MODA.Impl
 
                     mappings = null;
                     // Check for complete-ness; if complete, break
-                    if (qGraph.IsComplete())
+                    if (qGraph.IsComplete(subgraphSize))
                     {
                         qGraph = null;
                         break;
                     }
                     qGraph = null;
                 }
-                while (true);
+                while (true); 
+
+                foreach (var mapping in allMappings)
+                {
+                    if (mapping.Key.IsTree(subgraphSize) && !treatedNodes.Contains(mapping.Key))
+                    {
+                        mapping.Key.RemoveNonApplicableMappings(mapping.Value, inputGraph);
+                    }
+                }
+                #endregion
             }
             else
             {
@@ -192,11 +217,12 @@ namespace MODA.Impl
                     mappings = Algorithm2(qGraph, inputGraph, numIterations, true);
                 }
 
+                qGraph.RemoveNonApplicableMappings(mappings, inputGraph);
                 allMappings = new Dictionary<QueryGraph, IList<Mapping>>(1) { { qGraph, mappings } };
             }
 
             return allMappings;
         }
-
+        
     }
 }

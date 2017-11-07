@@ -24,7 +24,6 @@ namespace MODA.Impl
         {
             int subgraphSize = function.Count;
             var g_nodes = function.Values; // Remember, f(h) = g, so .Values is for g's
-            Edge<int> edge_g;
 
             // Try to get all the edges in the induced subgraph made up of these g_nodes
             var inducedSubGraphEdges = new List<Edge<int>>(subGraphEdgeCount);
@@ -32,6 +31,7 @@ namespace MODA.Impl
             {
                 for (int j = (i + 1); j < subgraphSize; j++)
                 {
+                    Edge<int> edge_g;
                     if (inputGraph.TryGetEdge(g_nodes[i], g_nodes[j], out edge_g))
                     {
                         inducedSubGraphEdges.Add(edge_g);
@@ -39,6 +39,11 @@ namespace MODA.Impl
                 }
             }
 
+            return IsMappingCorrect(function, queryGraph, inducedSubGraphEdges, checkInducedMappingOnly);
+        }
+
+        internal static MappingTestResult IsMappingCorrect(SortedList<int, int> function, QueryGraph queryGraph, List<Edge<int>> inducedSubGraphEdges, bool checkInducedMappingOnly)
+        {
             // Gather the corresponding potential images of the parentQueryGraphEdges in the input graph
             var edgeImages = new HashSet<Edge<int>>();
             foreach (var x in queryGraph.Edges)
@@ -47,19 +52,50 @@ namespace MODA.Impl
             }
 
             var result = new MappingTestResult { SubgraphEdgeCount = inducedSubGraphEdges.Count };
-            if (result.SubgraphEdgeCount >= edgeImages.Count) // if mapping is possible
+
+            var compareEdgeCount = result.SubgraphEdgeCount.CompareTo(edgeImages.Count);
+
+            // if mapping is possible (=> if compareEdgeCount >= 0)
+            var baseG = new UndirectedGraph<int>();
+            baseG.AddVerticesAndEdgeRange(inducedSubGraphEdges);
+            var baseGdeg = baseG.GetDegreeSequence();
+            var testG = new UndirectedGraph<int>();
+            testG.AddVerticesAndEdgeRange(edgeImages);
+            var testGdeg = testG.GetDegreeSequence();
+            if (compareEdgeCount == 0)
             {
-                // Now, find that edge in edgeImages that is not in inducedSubGraphEdges
-                foreach (var edgex in edgeImages) // iterating over this because edgeImages may have less edges than the subgraph
+                // Same node count, same edge count
+                //TODO: All we now need to do is check that the node degrees match
+                for (int i = baseGdeg.Count - 1; i >= 0; i--)
                 {
-                    if (!inducedSubGraphEdges.Contains(edgex))
+                    if (baseGdeg[i] != testGdeg[i])
                     {
+                        result.IsCorrectMapping = false;
                         return result;
                     }
                 }
+                result.IsCorrectMapping = true;
+                return result;
+            }
 
-                // All edges mapped: f(h) = g, so...
-                result.IsCorrectMapping = (checkInducedMappingOnly) ? result.SubgraphEdgeCount == edgeImages.Count : true;
+            if (compareEdgeCount > 0) //=> result.SubgraphEdgeCount > edgeImages.Count
+            {
+                if (checkInducedMappingOnly)
+                {
+                    result.IsCorrectMapping = false;
+                    return result;
+                }
+
+                for (int i = baseGdeg.Count - 1; i >= 0; i--)
+                {
+                    if (baseGdeg[i] < testGdeg[i]) // base should have at least the same value as test
+                    {
+                        result.IsCorrectMapping = false;
+                        return result;
+                    }
+                }
+                result.IsCorrectMapping = true;
+                return result;
             }
 
             return result;
@@ -76,7 +112,7 @@ namespace MODA.Impl
         /// <param name="inputGraph">H</param>
         /// <param name="getInducedMappingsOnly">If true, then the querygraph must match exactly to the input subgraph. In other words, only induced subgraphs will be returned</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
-        internal static Dictionary<IList<int>, Mapping> IsomorphicExtension(Dictionary<int, int> partialMap, QueryGraph queryGraph
+        internal static Dictionary<IList<int>, List<Mapping>> IsomorphicExtension(Dictionary<int, int> partialMap, QueryGraph queryGraph
             , UndirectedGraph<int> inputGraph, bool getInducedMappingsOnly)
         {
             if (partialMap.Count == queryGraph.VertexCount)
@@ -87,7 +123,7 @@ namespace MODA.Impl
                 var result = IsMappingCorrect(function, queryGraph, inputGraph, getInducedMappingsOnly);
                 if (result.IsCorrectMapping)
                 {
-                    return new Dictionary<IList<int>, Mapping>(1) { { function.Values, new Mapping(function, result.SubgraphEdgeCount) } };
+                    return new Dictionary<IList<int>, List<Mapping>>(1) { { function.Values, new List<Mapping> { new Mapping(function, result.SubgraphEdgeCount) } } };
                 }
                 return null;
                 #endregion
@@ -101,7 +137,7 @@ namespace MODA.Impl
             int m = GetMostConstrainedNeighbour(partialMap.Keys, queryGraph);
             if (m < 0) return null;
 
-            var listOfIsomorphisms = new Dictionary<IList<int>, Mapping>(ModaAlgorithms.MappingNodesComparer);
+            var listOfIsomorphisms = new Dictionary<IList<int>, List<Mapping>>(ModaAlgorithms.MappingNodesComparer);
 
             var neighbourRange = ChooseNeighboursOfRange(partialMap.Values, inputGraph);
 
@@ -128,7 +164,15 @@ namespace MODA.Impl
                     {
                         foreach (var item in subList)
                         {
-                            listOfIsomorphisms[item.Key] = item.Value;
+                            List<Mapping> maps;
+                            if (listOfIsomorphisms.TryGetValue(item.Key, out maps))
+                            {
+                                maps.AddRange(item.Value);
+                            }
+                            else
+                            {
+                                listOfIsomorphisms[item.Key] = item.Value;
+                            }
                         }
                     }
                 }

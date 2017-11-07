@@ -53,63 +53,116 @@ namespace MODA.Impl
 
             var list = new List<Mapping>();
             int oldCount = parentGraphMappings.Count, queryGraphEdgeCount = queryGraph.EdgeCount;
+            #region MyRegion
+            //int addId = 0, removeId = -10;
+            //var mapGroups = parentGraphMappings.GroupBy(x => x.Function.Values, MappingNodesComparer); //.ToDictionary(x => x.Key, x => x.ToArray());
+
+            //var toRemove = new HashSet<Mapping>();
+
+            //foreach (var group in mapGroups)
+            //{
+            //    if (group.Count() > 2)
+            //    {
+
+            //    }
+            //    foreach (var item in group)
+            //    {
+            //        item.Id = addId++;
+            //        // Remember, f(h) = g
+            //        bool added = false;
+            //        // if (f(u), f(v)) ϵ G and meets the conditions, add to list
+            //        if (item.SubGraphEdgeCount == queryGraphEdgeCount)
+            //        {
+            //            var isMapping = item.IsCorrectlyMapped(queryGraph, inputGraph);
+            //            if (isMapping)
+            //            {
+            //                list.Add(item);
+            //                added = true;
+            //            }
+            //        }
+            //        else if (item.SubGraphEdgeCount > queryGraphEdgeCount)
+            //        {
+            //            var newEdgeImage = item.GetImage(inputGraph, newEdge);
+
+            //            // if it's a valid edge...
+            //            if (newEdgeImage.Source != Utils.DefaultEdgeNodeVal
+            //                && inputGraph.ContainsEdge(newEdgeImage.Source, newEdgeImage.Target))
+            //            {
+            //                list.Add(item);
+            //                added = true;
+            //            }
+            //        }
+            //        if (added)
+            //        {
+            //            foreach (var rem in group)
+            //            {
+            //                for (int i = 0; i < queryGraphEdgeCount; i++)
+            //                {
+            //                    if (item.Function.Values[i] == rem.Function.Values[queryGraphEdgeCount - i - 1])
+            //                        continue;
+
+            //                    toRemove.Add(rem);
+            //                    break;
+            //                }
+            //            }
+            //        }
+            //    }
+            //} 
+            #endregion
             for (int i = 0; i < oldCount; i++)
             {
-                parentGraphMappings[i].Id = i;
-                // Reember, f(h) = g
+                var item = parentGraphMappings[i];
+                item.Id = i;
+                // Remember, f(h) = g
 
                 // if (f(u), f(v)) ϵ G and meets the conditions, add to list
-                if (parentGraphMappings[i].SubGraphEdgeCount == queryGraphEdgeCount)
+                if (item.SubGraphEdgeCount == queryGraphEdgeCount)
                 {
-                    var isMapping = parentGraphMappings[i].IsCorrectlyMapped(queryGraph, inputGraph);
+                    var isMapping = item.IsCorrectlyMapped(queryGraph, inputGraph);
                     if (isMapping)
                     {
-                        list.Add(parentGraphMappings[i]);
+                        list.Add(item);
                     }
                 }
-                else if (parentGraphMappings[i].SubGraphEdgeCount > queryGraphEdgeCount)
+                else if (item.SubGraphEdgeCount > queryGraphEdgeCount)
                 {
-                    var newEdgeImage = parentGraphMappings[i].GetImage(inputGraph, newEdge);
+                    var newEdgeImage = item.GetImage(inputGraph, newEdge);
 
                     // if it's a valid edge...
                     if (newEdgeImage.Source != Utils.DefaultEdgeNodeVal
                         && inputGraph.ContainsEdge(newEdgeImage.Source, newEdgeImage.Target))
                     {
-                        list.Add(parentGraphMappings[i]);
+                        list.Add(item);
                     }
                 }
             }
             var threadName = System.Threading.Thread.CurrentThread.ManagedThreadId;
-            if (list.Count > 0)
+            
+            // Remove mappings from the parent qGraph that are found in this qGraph 
+            // This is because we're only interested in induced subgraphs
+            var theRest = parentGraphMappings.Except(list).ToList();
+            parentQueryGraph.RemoveNonApplicableMappings(theRest, inputGraph);
+            parentGraphMappings.Clear();
+            foreach (var item in theRest)
             {
-                // Remove mappings from the parent qGraph that are found in this qGraph 
-                // This is because we're only interested in induced subgraphs
-                var theRest = parentGraphMappings.Except(list).ToList();
-                parentGraphMappings.Clear();
-                foreach (var item in theRest)
-                {
-                    parentGraphMappings.Add(item);
-                }
-                if (!string.IsNullOrWhiteSpace(fileName) && oldCount > parentGraphMappings.Count)
-                {
-                    // This means that some of the mappings from parent fit the current query graph
-                    newFileName = parentQueryGraph.WriteMappingsToFile(parentGraphMappings);
-                    try
-                    {
-                        System.IO.File.Delete(fileName);
-                    }
-                    catch { } // we can afford to let this fail
-                }
-
-                Console.WriteLine("Thread {0}:\tAlgorithm 3: All tasks completed. Number of mappings found: {1}.\n", threadName, list.Count);
-                return list;
-            }
-            else
-            {
-                Console.WriteLine("Thread {0}:\tAlgorithm 3: All tasks completed. Number of mappings found: 0.\n", threadName);
-                return new Mapping[0];
+                parentGraphMappings.Add(item);
             }
 
+            // Now, remove duplicates
+            queryGraph.RemoveNonApplicableMappings(list, inputGraph);
+            if (!string.IsNullOrWhiteSpace(fileName) && oldCount > parentGraphMappings.Count)
+            {
+                // This means that some of the mappings from parent fit the current query graph
+                newFileName = parentQueryGraph.WriteMappingsToFile(parentGraphMappings);
+                try
+                {
+                    System.IO.File.Delete(fileName);
+                }
+                catch { } // we can afford to let this fail
+            }
+
+            Console.WriteLine("Thread {0}:\tAlgorithm 3: All tasks completed. Number of mappings found: {1}.\n", threadName, list.Count);
+            return list;
         }
 
         /// <summary>
