@@ -1,5 +1,4 @@
 ﻿using QuickGraph;
-using System;
 using System.Collections.Generic;
 
 namespace MODA.Impl
@@ -40,7 +39,6 @@ namespace MODA.Impl
                         {
                             // Modified Mapping module - MODA and Grockow & Kellis
                             mappings = Algorithm2_Modified(qGraph, inputGraphClone, numIterations, false);
-                            //mappings = ModaAlgorithm2Parallelized.Algorithm2_Modified(qGraph, inputGraph);
                         }
                         else
                         {
@@ -163,9 +161,6 @@ namespace MODA.Impl
                     else
                     {
                         // Enumeration moodule - MODA
-
-                        //var timer = System.Diagnostics.Stopwatch.StartNew();
-
                         // This is part of Algo 3; but performance tweaks makes it more useful to get it here
                         var parentQueryGraph = GetParent(qGraph, _builder.ExpansionTree);
                         if (parentQueryGraph.IsTree(subgraphSize))

@@ -53,62 +53,7 @@ namespace MODA.Impl
 
             var list = new List<Mapping>();
             int oldCount = parentGraphMappings.Count, queryGraphEdgeCount = queryGraph.EdgeCount;
-            #region MyRegion
-            //int addId = 0, removeId = -10;
-            //var mapGroups = parentGraphMappings.GroupBy(x => x.Function.Values, MappingNodesComparer); //.ToDictionary(x => x.Key, x => x.ToArray());
-
-            //var toRemove = new HashSet<Mapping>();
-
-            //foreach (var group in mapGroups)
-            //{
-            //    if (group.Count() > 2)
-            //    {
-
-            //    }
-            //    foreach (var item in group)
-            //    {
-            //        item.Id = addId++;
-            //        // Remember, f(h) = g
-            //        bool added = false;
-            //        // if (f(u), f(v)) ϵ G and meets the conditions, add to list
-            //        if (item.SubGraphEdgeCount == queryGraphEdgeCount)
-            //        {
-            //            var isMapping = item.IsCorrectlyMapped(queryGraph, inputGraph);
-            //            if (isMapping)
-            //            {
-            //                list.Add(item);
-            //                added = true;
-            //            }
-            //        }
-            //        else if (item.SubGraphEdgeCount > queryGraphEdgeCount)
-            //        {
-            //            var newEdgeImage = item.GetImage(inputGraph, newEdge);
-
-            //            // if it's a valid edge...
-            //            if (newEdgeImage.Source != Utils.DefaultEdgeNodeVal
-            //                && inputGraph.ContainsEdge(newEdgeImage.Source, newEdgeImage.Target))
-            //            {
-            //                list.Add(item);
-            //                added = true;
-            //            }
-            //        }
-            //        if (added)
-            //        {
-            //            foreach (var rem in group)
-            //            {
-            //                for (int i = 0; i < queryGraphEdgeCount; i++)
-            //                {
-            //                    if (item.Function.Values[i] == rem.Function.Values[queryGraphEdgeCount - i - 1])
-            //                        continue;
-
-            //                    toRemove.Add(rem);
-            //                    break;
-            //                }
-            //            }
-            //        }
-            //    }
-            //} 
-            #endregion
+            
             for (int i = 0; i < oldCount; i++)
             {
                 var item = parentGraphMappings[i];
