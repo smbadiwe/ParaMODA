@@ -41,18 +41,6 @@ namespace MODA.Impl
         /// This count is for the induced subgraph
         /// </summary>
         public int SubGraphEdgeCount;
-
-        /// <summary>
-        /// Since we do not have the newly-added image here, what we do is use the edges of the parent
-        /// Only for when (InducedSubGraphEdgesCount == currentQueryGraphEdgeCount)
-        /// </summary>
-        /// <param name="queryGraph"></param>
-        /// <param name="inputGraph"></param>
-        /// <returns></returns>
-        public bool IsCorrectlyMapped(QueryGraph queryGraph, UndirectedGraph<int> inputGraph)
-        {
-            return Utils.IsMappingCorrect(Function, queryGraph, inputGraph, true, SubGraphEdgeCount).IsCorrectMapping;
-        }
         
         /// <summary>
         /// Gets the corresponding image of the <see cref="newlyAddedEdge"/> in the <see cref="inputGraph"/>.

@@ -52,35 +52,42 @@ namespace MODA.Impl
             }
 
             var list = new List<Mapping>();
-            int oldCount = parentGraphMappings.Count, queryGraphEdgeCount = queryGraph.EdgeCount;
-            
-            for (int i = 0; i < oldCount; i++)
+            int oldCount = parentGraphMappings.Count, id = 0, queryGraphEdgeCount = queryGraph.EdgeCount;
+            var queryGraphEdges = queryGraph.Edges.ToList();
+
+            var groupByGNodes = parentGraphMappings.GroupBy(x => x.Function.Values, MappingNodesComparer); //.ToDictionary(x => x.Key, x => x.ToArray(), MappingNodesComparer);
+            foreach (var set in groupByGNodes)
             {
-                var item = parentGraphMappings[i];
-                item.Id = i;
-                // Remember, f(h) = g
-
-                // if (f(u), f(v)) ϵ G and meets the conditions, add to list
-                if (item.SubGraphEdgeCount == queryGraphEdgeCount)
+                // function.value (= set of G nodes) are all same here. So build the subgraph here and pass it dowm
+                var subgraph = Utils.GetSubgraph(inputGraph, set.Key); 
+                foreach (var item in set)
                 {
-                    var isMapping = item.IsCorrectlyMapped(queryGraph, inputGraph);
-                    if (isMapping)
+                    item.Id = id;
+                    // Remember, f(h) = g
+
+                    // if (f(u), f(v)) ϵ G and meets the conditions, add to list
+                    if (item.SubGraphEdgeCount == queryGraphEdgeCount)
                     {
-                        list.Add(item);
+                        var isMapping = Utils.IsMappingCorrect2(item.Function, subgraph, queryGraphEdges, true);
+                        if (isMapping.IsCorrectMapping)
+                        {
+                            list.Add(item);
+                        }
                     }
-                }
-                else if (item.SubGraphEdgeCount > queryGraphEdgeCount)
-                {
-                    var newEdgeImage = item.GetImage(inputGraph, newEdge);
-
-                    // if it's a valid edge...
-                    if (newEdgeImage.Source != Utils.DefaultEdgeNodeVal
-                        && inputGraph.ContainsEdge(newEdgeImage.Source, newEdgeImage.Target))
+                    else if (item.SubGraphEdgeCount > queryGraphEdgeCount)
                     {
-                        list.Add(item);
+                        var newEdgeImage = item.GetImage(inputGraph, newEdge);
+
+                        // if it's a valid edge...
+                        if (newEdgeImage.Source != Utils.DefaultEdgeNodeVal
+                            && inputGraph.ContainsEdge(newEdgeImage.Source, newEdgeImage.Target))
+                        {
+                            list.Add(item);
+                        }
                     }
                 }
             }
+
             var threadName = System.Threading.Thread.CurrentThread.ManagedThreadId;
             
             // Remove mappings from the parent qGraph that are found in this qGraph 

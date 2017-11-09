@@ -35,6 +35,7 @@ namespace MODA.Impl
             var threadName = Thread.CurrentThread.ManagedThreadId;
             Console.WriteLine("Thread {0}:\tCalling Algo 2-Modified:\n", threadName);
 
+            var queryGraphEdges = queryGraph.Edges.ToList();
             var h = queryGraph.Vertices.ElementAt(0);
             var f = new Dictionary<int, int>(1);
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
@@ -45,7 +46,7 @@ namespace MODA.Impl
                     #region Can Support
                     //Remember: f(h) = g, so h is Domain and g is Range
                     f[h] = g;
-                    var mappings = Utils.IsomorphicExtension(f, queryGraph, inputGraph, getInducedMappingsOnly);
+                    var mappings = Utils.IsomorphicExtension(f, queryGraph, queryGraphEdges, inputGraph, getInducedMappingsOnly);
                     if (mappings.Count > 0)
                     {
                         foreach (var item in mappings)

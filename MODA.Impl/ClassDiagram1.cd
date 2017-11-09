@@ -2,23 +2,15 @@
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
   <Class Name="MODA.Impl.QueryGraph" Collapsed="true">
     <Position X="0.75" Y="2.5" Width="2" />
-    <InheritanceLine Type="QuickGraph.UndirectedGraph&lt;TVertex&gt;" ManuallyRouted="true" FixedFromPoint="true">
-      <Path>
-        <Point X="1.75" Y="1.062" />
-        <Point X="1.75" Y="2.125" />
-        <Point X="1.75" Y="2.125" />
-        <Point X="1.75" Y="2.5" />
-      </Path>
-    </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAAAAAAEAIAAAAAAgAAAAAAAAAAAIIAAAAAAQAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>QueryGraph.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MODA.Impl.Mapping" Collapsed="true">
     <Position X="4.75" Y="4.25" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>AAACAAAAAAAAAAAEgAQAAAIQAAAAABAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AQACAAAAAAAAAAAEgAQAAAIQAAAAAJAAAAAAAAAAAAA=</HashCode>
       <FileName>Mapping.cs</FileName>
     </TypeIdentifier>
   </Class>

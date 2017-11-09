@@ -7,8 +7,8 @@
     <ProjectGuid>{D9455E2F-1009-4A4C-8953-66E7F5CBA577}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MODA.Impl</RootNamespace>
-    <AssemblyName>MODA.Impl</AssemblyName>
+    <RootNamespace>ParaMODA.Impl</RootNamespace>
+    <AssemblyName>ParaMODA.Impl</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

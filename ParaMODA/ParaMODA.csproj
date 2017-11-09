@@ -72,9 +72,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MODA.Impl\MODA.Impl.csproj">
+    <ProjectReference Include="..\MODA.Impl\ParaMODA.Impl.csproj">
       <Project>{d9455e2f-1009-4a4c-8953-66e7f5cba577}</Project>
-      <Name>MODA.Impl</Name>
+      <Name>ParaMODA.Impl</Name>
     </ProjectReference>
     <ProjectReference Include="..\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj">
       <Project>{cc478062-45ee-4e06-92d6-fa844a318d10}</Project>

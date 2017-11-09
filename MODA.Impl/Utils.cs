@@ -13,52 +13,39 @@ namespace MODA.Impl
         /// Determines whether we have a correct mapping of the query graph to the input graph.
         /// </summary>
         /// <param name="function">The function f(h) = g.</param>
-        /// <param name="queryGraph">The query graph.</param>
+        /// <param name="queryGraphEdges">The query graph edges.</param>
         /// <param name="inputGraph">The input graph.</param>
         /// <param name="checkInducedMappingOnly">If true, we ensure all edges in the query graph map to all edges in the subgraph</param>
         /// <param name="subGraphEdgeCount">The sub-graph edge count. This value can be safely ignored. We only use it to pre-size lists</param>
         /// <returns>
         ///   <c>true</c> if [is mapping correct] [the specified function]; otherwise, <c>false</c>.
         /// </returns>
-        internal static MappingTestResult IsMappingCorrect(SortedList<int, int> function, QueryGraph queryGraph, UndirectedGraph<int> inputGraph, bool checkInducedMappingOnly, int subGraphEdgeCount = 0)
+        internal static MappingTestResult IsMappingCorrect(SortedList<int, int> function, List<Edge<int>> queryGraphEdges, UndirectedGraph<int> inputGraph, bool checkInducedMappingOnly, int subGraphEdgeCount = 0)
         {
-            int subgraphSize = function.Count;
-            var g_nodes = function.Values; // Remember, f(h) = g, so .Values is for g's
-
-            // Try to get all the edges in the induced subgraph made up of these g_nodes
-            var inducedSubGraphEdges = new List<Edge<int>>(subGraphEdgeCount);
-            for (int i = 0; i < subgraphSize - 1; i++)
-            {
-                for (int j = (i + 1); j < subgraphSize; j++)
-                {
-                    Edge<int> edge_g;
-                    if (inputGraph.TryGetEdge(g_nodes[i], g_nodes[j], out edge_g))
-                    {
-                        inducedSubGraphEdges.Add(edge_g);
-                    }
-                }
-            }
-
-            return IsMappingCorrect(function, queryGraph, inducedSubGraphEdges, checkInducedMappingOnly);
+            var subgraph = GetSubgraph(inputGraph, function.Values);
+            
+            return IsMappingCorrect2(function, subgraph, queryGraphEdges, checkInducedMappingOnly);
         }
 
-        internal static MappingTestResult IsMappingCorrect(SortedList<int, int> function, QueryGraph queryGraph, List<Edge<int>> inducedSubGraphEdges, bool checkInducedMappingOnly)
+        internal static MappingTestResult IsMappingCorrect2(SortedList<int, int> function, UndirectedGraph<int> subgraph, List<Edge<int>> queryGraphEdges, bool checkInducedMappingOnly)
         {
             // Gather the corresponding potential images of the parentQueryGraphEdges in the input graph
             var edgeImages = new HashSet<Edge<int>>();
-            foreach (var x in queryGraph.Edges)
+            foreach (var x in queryGraphEdges)
             {
                 edgeImages.Add(new Edge<int>(function[x.Source], function[x.Target]));
             }
 
-            var result = new MappingTestResult { SubgraphEdgeCount = inducedSubGraphEdges.Count };
+            var result = new MappingTestResult { SubgraphEdgeCount = subgraph.EdgeCount };
 
             var compareEdgeCount = result.SubgraphEdgeCount.CompareTo(edgeImages.Count);
+            if (compareEdgeCount < 0)
+            {
+                return result;
+            }
 
             // if mapping is possible (=> if compareEdgeCount >= 0)
-            var baseG = new UndirectedGraph<int>();
-            baseG.AddVerticesAndEdgeRange(inducedSubGraphEdges);
-            var baseGdeg = baseG.GetDegreeSequence();
+            var subgraphDegrees = subgraph.GetDegreeSequence();
             var testG = new UndirectedGraph<int>();
             testG.AddVerticesAndEdgeRange(edgeImages);
             var testGdeg = testG.GetDegreeSequence();
@@ -66,9 +53,9 @@ namespace MODA.Impl
             {
                 // Same node count, same edge count
                 //TODO: All we now need to do is check that the node degrees match
-                for (int i = baseGdeg.Count - 1; i >= 0; i--)
+                for (int i = subgraphDegrees.Count - 1; i >= 0; i--)
                 {
-                    if (baseGdeg[i] != testGdeg[i])
+                    if (subgraphDegrees[i] != testGdeg[i])
                     {
                         result.IsCorrectMapping = false;
                         return result;
@@ -86,9 +73,9 @@ namespace MODA.Impl
                     return result;
                 }
 
-                for (int i = baseGdeg.Count - 1; i >= 0; i--)
+                for (int i = subgraphDegrees.Count - 1; i >= 0; i--)
                 {
-                    if (baseGdeg[i] < testGdeg[i]) // base should have at least the same value as test
+                    if (subgraphDegrees[i] < testGdeg[i]) // base should have at least the same value as test
                     {
                         result.IsCorrectMapping = false;
                         return result;
@@ -101,6 +88,28 @@ namespace MODA.Impl
             return result;
         }
 
+        internal static UndirectedGraph<int> GetSubgraph(UndirectedGraph<int> inputGraph, IList<int> g_nodes)
+        {
+            // Remember, f(h) = g, so Function.Values is for g's
+
+            // Try to get all the edges in the induced subgraph made up of these g_nodes
+            var inducedSubGraphEdges = new List<Edge<int>>();
+            int subgraphSize = g_nodes.Count;
+            for (int i = 0; i < subgraphSize - 1; i++)
+            {
+                for (int j = (i + 1); j < subgraphSize; j++)
+                {
+                    Edge<int> edge_g;
+                    if (inputGraph.TryGetEdge(g_nodes[i], g_nodes[j], out edge_g))
+                    {
+                        inducedSubGraphEdges.Add(edge_g);
+                    }
+                }
+            }
+            var subgraph = new UndirectedGraph<int>();
+            subgraph.AddVerticesAndEdgeRange(inducedSubGraphEdges);
+            return subgraph;
+        }
 
         #region Useful mainly for the Algorithm 2 versions
 
@@ -109,18 +118,19 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="partialMap">f; Map is represented as a dictionary, with the Key as h and the Value as g</param>
         /// <param name="queryGraph">G</param>
+        /// <param name="queryGraphEdges">G's edges. Added to speedup computation by avoiding to evaluate it frequently and needlessly</param>
         /// <param name="inputGraph">H</param>
         /// <param name="getInducedMappingsOnly">If true, then the querygraph must match exactly to the input subgraph. In other words, only induced subgraphs will be returned</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
         internal static Dictionary<IList<int>, List<Mapping>> IsomorphicExtension(Dictionary<int, int> partialMap, QueryGraph queryGraph
-            , UndirectedGraph<int> inputGraph, bool getInducedMappingsOnly)
+            , List<Edge<int>> queryGraphEdges, UndirectedGraph<int> inputGraph, bool getInducedMappingsOnly)
         {
             if (partialMap.Count == queryGraph.VertexCount)
             {
                 #region Return base case
                 var function = new SortedList<int, int>(partialMap);
 
-                var result = IsMappingCorrect(function, queryGraph, inputGraph, getInducedMappingsOnly);
+                var result = IsMappingCorrect(function, queryGraphEdges, inputGraph, getInducedMappingsOnly);
                 if (result.IsCorrectMapping)
                 {
                     return new Dictionary<IList<int>, List<Mapping>>(1) { { function.Values, new List<Mapping> { new Mapping(function, result.SubgraphEdgeCount) } } };
@@ -159,7 +169,7 @@ namespace MODA.Impl
                         newPartialMap.Add(item.Key, item.Value);
                     }
                     newPartialMap[m] = neighbourRange[i];
-                    var subList = IsomorphicExtension(newPartialMap, queryGraph, inputGraph, getInducedMappingsOnly);
+                    var subList = IsomorphicExtension(newPartialMap, queryGraph, queryGraphEdges, inputGraph, getInducedMappingsOnly);
                     if (subList != null && subList.Count > 0)
                     {
                         foreach (var item in subList)

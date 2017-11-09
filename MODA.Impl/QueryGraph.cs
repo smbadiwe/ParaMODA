@@ -62,7 +62,7 @@ namespace MODA.Impl
             var mapGroups = mappings.GroupBy(x => x.Function.Values, ModaAlgorithms.MappingNodesComparer); //.ToDictionary(x => x.Key, x => x.ToArray());
 
             var toAdd = new List<Mapping>();
-
+            var queryGraphEdges = Edges.ToList();
             foreach (var group in mapGroups)
             {
                 var g_nodes = group.Key; // Remember, f(h) = g, so .Values is for g's
@@ -80,9 +80,11 @@ namespace MODA.Impl
                     }
                 }
 
+                var subgraph = new UndirectedGraph<int>();
+                subgraph.AddVerticesAndEdgeRange(inducedSubGraphEdges);
                 foreach (var item in group)
                 {
-                    var result = Utils.IsMappingCorrect(item.Function, this, inducedSubGraphEdges, true);
+                    var result = Utils.IsMappingCorrect2(item.Function, subgraph, queryGraphEdges, true);
                     if (result.IsCorrectMapping)
                     {
                         toAdd.Add(item);

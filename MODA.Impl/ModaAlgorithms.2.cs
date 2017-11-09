@@ -22,6 +22,7 @@ namespace MODA.Impl
             var theMappings = new Dictionary<IList<int>, List<Mapping>>(MappingNodesComparer);
             var inputGraphDegSeq = inputGraphClone.GetNodesSortedByDegree(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
+            var queryGraphEdges = queryGraph.Edges.ToList();
             var subgraphSize = queryGraphVertices.Length;
             var threadName = System.Threading.Thread.CurrentThread.ManagedThreadId;
             Console.WriteLine("Thread {0}:\tCallingu Algo 2:\n", threadName);
@@ -37,7 +38,7 @@ namespace MODA.Impl
                         //Remember: f(h) = g, so h is Domain and g is Range
                         var f = new Dictionary<int, int>(1);
                         f[h] = g;
-                        var mappings = Utils.IsomorphicExtension(f, queryGraph, inputGraphClone, getInducedMappingsOnly);
+                        var mappings = Utils.IsomorphicExtension(f, queryGraph, queryGraphEdges, inputGraphClone, getInducedMappingsOnly);
                         
                         if (mappings.Count > 0)
                         {
