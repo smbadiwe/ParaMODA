@@ -18,12 +18,12 @@ namespace MODA.Impl
         /// <param name="parentQueryGraph"></param>
         /// <param name="fileName"></param>
         /// <param name="parentGraphMappings">NB: This param is still used even outside this method is call. So, be careful how you set/clear its values.</param>
-        private static IList<Mapping> Algorithm3(Dictionary<QueryGraph, IList<Mapping>> allMappings, UndirectedGraph<int> inputGraph, QueryGraph queryGraph,
+        private static IList<Mapping> Algorithm3(Dictionary<QueryGraph, ICollection<Mapping>> allMappings, UndirectedGraph<int> inputGraph, QueryGraph queryGraph,
             AdjacencyGraph<ExpansionTreeNode> expansionTree,
             QueryGraph parentQueryGraph, out string newFileName, string fileName = null)
         {
             newFileName = null;
-            IList<Mapping> parentGraphMappings;
+            ICollection<Mapping> parentGraphMappings;
             if (string.IsNullOrWhiteSpace(fileName))
             {
                 if (!allMappings.TryGetValue(parentQueryGraph, out parentGraphMappings))
@@ -53,7 +53,7 @@ namespace MODA.Impl
 
             var list = new List<Mapping>();
             int oldCount = parentGraphMappings.Count, id = 0, queryGraphEdgeCount = queryGraph.EdgeCount;
-            var queryGraphEdges = queryGraph.Edges.ToList();
+            var queryGraphEdges = queryGraph.Edges.ToArray();
 
             var groupByGNodes = parentGraphMappings.GroupBy(x => x.Function.Values, MappingNodesComparer); //.ToDictionary(x => x.Key, x => x.ToArray(), MappingNodesComparer);
             foreach (var set in groupByGNodes)
@@ -87,7 +87,7 @@ namespace MODA.Impl
                     }
                 }
             }
-
+            queryGraphEdges = null;
             var threadName = System.Threading.Thread.CurrentThread.ManagedThreadId;
             
             // Remove mappings from the parent qGraph that are found in this qGraph 
@@ -99,7 +99,7 @@ namespace MODA.Impl
             {
                 parentGraphMappings.Add(item);
             }
-
+            theRest = null;
             // Now, remove duplicates
             queryGraph.RemoveNonApplicableMappings(list, inputGraph);
             if (!string.IsNullOrWhiteSpace(fileName) && oldCount > parentGraphMappings.Count)

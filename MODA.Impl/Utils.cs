@@ -20,14 +20,14 @@ namespace MODA.Impl
         /// <returns>
         ///   <c>true</c> if [is mapping correct] [the specified function]; otherwise, <c>false</c>.
         /// </returns>
-        internal static MappingTestResult IsMappingCorrect(SortedList<int, int> function, List<Edge<int>> queryGraphEdges, UndirectedGraph<int> inputGraph, bool checkInducedMappingOnly, int subGraphEdgeCount = 0)
+        internal static MappingTestResult IsMappingCorrect(SortedList<int, int> function, Edge<int>[] queryGraphEdges, UndirectedGraph<int> inputGraph, bool checkInducedMappingOnly, int subGraphEdgeCount = 0)
         {
             var subgraph = GetSubgraph(inputGraph, function.Values);
-            
+
             return IsMappingCorrect2(function, subgraph, queryGraphEdges, checkInducedMappingOnly);
         }
 
-        internal static MappingTestResult IsMappingCorrect2(SortedList<int, int> function, UndirectedGraph<int> subgraph, List<Edge<int>> queryGraphEdges, bool checkInducedMappingOnly)
+        internal static MappingTestResult IsMappingCorrect2(SortedList<int, int> function, UndirectedGraph<int> subgraph, Edge<int>[] queryGraphEdges, bool checkInducedMappingOnly)
         {
             // Gather the corresponding potential images of the parentQueryGraphEdges in the input graph
             var edgeImages = new HashSet<Edge<int>>();
@@ -41,6 +41,8 @@ namespace MODA.Impl
             var compareEdgeCount = result.SubgraphEdgeCount.CompareTo(edgeImages.Count);
             if (compareEdgeCount < 0)
             {
+                edgeImages.Clear();
+                edgeImages = null;
                 return result;
             }
 
@@ -57,10 +59,16 @@ namespace MODA.Impl
                 {
                     if (subgraphDegrees[i] != testGdeg[i])
                     {
+                        edgeImages.Clear();
+                        edgeImages = null;
                         result.IsCorrectMapping = false;
                         return result;
                     }
                 }
+                subgraphDegrees.Clear();
+                subgraphDegrees = null;
+                edgeImages.Clear();
+                edgeImages = null;
                 result.IsCorrectMapping = true;
                 return result;
             }
@@ -69,6 +77,10 @@ namespace MODA.Impl
             {
                 if (checkInducedMappingOnly)
                 {
+                    subgraphDegrees.Clear();
+                    subgraphDegrees = null;
+                    edgeImages.Clear();
+                    edgeImages = null;
                     result.IsCorrectMapping = false;
                     return result;
                 }
@@ -77,10 +89,16 @@ namespace MODA.Impl
                 {
                     if (subgraphDegrees[i] < testGdeg[i]) // base should have at least the same value as test
                     {
+                        edgeImages.Clear();
+                        edgeImages = null;
                         result.IsCorrectMapping = false;
                         return result;
                     }
                 }
+                subgraphDegrees.Clear();
+                subgraphDegrees = null;
+                edgeImages.Clear();
+                edgeImages = null;
                 result.IsCorrectMapping = true;
                 return result;
             }
@@ -108,6 +126,8 @@ namespace MODA.Impl
             }
             var subgraph = new UndirectedGraph<int>();
             subgraph.AddVerticesAndEdgeRange(inducedSubGraphEdges);
+            inducedSubGraphEdges.Clear();
+            inducedSubGraphEdges = null;
             return subgraph;
         }
 
@@ -123,7 +143,7 @@ namespace MODA.Impl
         /// <param name="getInducedMappingsOnly">If true, then the querygraph must match exactly to the input subgraph. In other words, only induced subgraphs will be returned</param>
         /// <returns>List of isomorphisms. Remember, Key is h, Value is g</returns>
         internal static Dictionary<IList<int>, List<Mapping>> IsomorphicExtension(Dictionary<int, int> partialMap, QueryGraph queryGraph
-            , List<Edge<int>> queryGraphEdges, UndirectedGraph<int> inputGraph, bool getInducedMappingsOnly)
+            , Edge<int>[] queryGraphEdges, UndirectedGraph<int> inputGraph, bool getInducedMappingsOnly)
         {
             if (partialMap.Count == queryGraph.VertexCount)
             {
@@ -170,6 +190,8 @@ namespace MODA.Impl
                     }
                     newPartialMap[m] = neighbourRange[i];
                     var subList = IsomorphicExtension(newPartialMap, queryGraph, queryGraphEdges, inputGraph, getInducedMappingsOnly);
+                    newPartialMap.Clear();
+                    newPartialMap = null;
                     if (subList != null && subList.Count > 0)
                     {
                         foreach (var item in subList)
@@ -184,9 +206,15 @@ namespace MODA.Impl
                                 listOfIsomorphisms[item.Key] = item.Value;
                             }
                         }
+                        subList.Clear();
+                        subList = null;
                     }
                 }
             }
+
+            neighborsOfM = null; // DO NOT Clear this variable
+            neighbourRange.Clear();
+            neighbourRange = null;
             return listOfIsomorphisms;
         }
 
@@ -227,6 +255,7 @@ namespace MODA.Impl
                 }
                 if (!neighboursOfN.Contains(val))
                 {
+                    neighboursOfN = null;
                     return true;
                 }
             }
@@ -238,14 +267,17 @@ namespace MODA.Impl
                 {
                     if (!partialMap.TryGetValue(d, out val))
                     {
+                        neighboursOfN = null;
                         return false;
                     }
                     if (neighboursOfN.Contains(val))
                     {
+                        neighboursOfN = null;
                         return true;
                     }
                 }
             }
+            neighboursOfN = null;
             return false;
         }
 
@@ -275,10 +307,10 @@ namespace MODA.Impl
                 }
                 else
                 {
-                    return toReturn;
+                    break;
                 }
             }
-
+            usedRangeSet = null;
             return toReturn;
         }
 
@@ -311,7 +343,10 @@ namespace MODA.Impl
                         }
                     }
                 }
+                local = null; // DO NOT clear
             }
+            domainDict.Clear();
+            domainDict = null;
             return -1;
         }
 

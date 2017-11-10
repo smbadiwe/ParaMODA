@@ -31,7 +31,7 @@ namespace MODA.Impl
                 {
                     qGraph = GetNextNode()?.QueryGraph;
                     if (qGraph == null) break;
-                    IList<Mapping> mappings;
+                    ICollection<Mapping> mappings;
                     if (qGraph.EdgeCount == (subgraphSize - 1)) // i.e. if qGraph is a tree
                     {
                         var inputGraphClone = inputGraph.Clone();
@@ -98,7 +98,7 @@ namespace MODA.Impl
             }
             else
             {
-                List<Mapping> mappings;
+                ICollection<Mapping> mappings;
                 if (UseModifiedGrochow)
                 {
                     // Modified Mapping module - MODA and Grockow & Kellis
@@ -127,10 +127,10 @@ namespace MODA.Impl
         /// <param name="subgraphSize"></param>
         /// <param name="thresholdValue">Frequency value, above which we can comsider the subgraph a "frequent subgraph"</param>
         /// <returns></returns>
-        public static Dictionary<QueryGraph, IList<Mapping>> Algorithm1(UndirectedGraph<int> inputGraph, QueryGraph qGraph, int subgraphSize = -1, int thresholdValue = 0)
+        public static Dictionary<QueryGraph, ICollection<Mapping>> Algorithm1(UndirectedGraph<int> inputGraph, QueryGraph qGraph, int subgraphSize = -1, int thresholdValue = 0)
         {
             // The enumeration module (Algo 3) needs the mappings generated from the previous run(s)
-            Dictionary<QueryGraph, IList<Mapping>> allMappings;
+            Dictionary<QueryGraph, ICollection<Mapping>> allMappings;
             int numIterations = -1;
             if (inputGraph.VertexCount < 121) numIterations = inputGraph.VertexCount;
 
@@ -138,12 +138,12 @@ namespace MODA.Impl
             {
                 #region Use MODA's expansion tree
                 var treatedNodes = new HashSet<QueryGraph>();
-                allMappings = new Dictionary<QueryGraph, IList<Mapping>>(_builder.NumberOfQueryGraphs);
+                allMappings = new Dictionary<QueryGraph, ICollection<Mapping>>(_builder.NumberOfQueryGraphs);
                 do
                 {
                     qGraph = GetNextNode()?.QueryGraph;
                     if (qGraph == null) break;
-                    IList<Mapping> mappings;
+                    ICollection<Mapping> mappings;
                     if (qGraph.IsTree(subgraphSize))
                     {
                         var inputGraphClone = inputGraph.Clone();
@@ -200,7 +200,7 @@ namespace MODA.Impl
             }
             else
             {
-                List<Mapping> mappings;
+                ICollection<Mapping> mappings;
                 if (UseModifiedGrochow)
                 {
                     // Modified Mapping module - MODA and Grockow & Kellis
@@ -213,7 +213,7 @@ namespace MODA.Impl
                 }
 
                 qGraph.RemoveNonApplicableMappings(mappings, inputGraph);
-                allMappings = new Dictionary<QueryGraph, IList<Mapping>>(1) { { qGraph, mappings } };
+                allMappings = new Dictionary<QueryGraph, ICollection<Mapping>>(1) { { qGraph, mappings } };
             }
 
             return allMappings;

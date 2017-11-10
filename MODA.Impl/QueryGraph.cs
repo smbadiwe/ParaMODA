@@ -47,14 +47,14 @@ namespace MODA.Impl
         /// </summary>
         /// <param name="mappings"></param>
         /// <returns>filename where it is written</returns>
-        public string WriteMappingsToFile(IList<Mapping> mappings)
+        public string WriteMappingsToFile(ICollection<Mapping> mappings)
         {
             var fileName = $"{mappings.Count}#{Identifier}.ser";
             System.IO.File.WriteAllText(fileName, Extensions.CompressString(Newtonsoft.Json.JsonConvert.SerializeObject(mappings)));
             return fileName;
         }
 
-        public void RemoveNonApplicableMappings(IList<Mapping> mappings, UndirectedGraph<int> inputGraph)
+        public void RemoveNonApplicableMappings(ICollection<Mapping> mappings, UndirectedGraph<int> inputGraph)
         {
             if (mappings.Count == 0) return;
 
@@ -62,7 +62,7 @@ namespace MODA.Impl
             var mapGroups = mappings.GroupBy(x => x.Function.Values, ModaAlgorithms.MappingNodesComparer); //.ToDictionary(x => x.Key, x => x.ToArray());
 
             var toAdd = new List<Mapping>();
-            var queryGraphEdges = Edges.ToList();
+            var queryGraphEdges = Edges.ToArray();
             foreach (var group in mapGroups)
             {
                 var g_nodes = group.Key; // Remember, f(h) = g, so .Values is for g's

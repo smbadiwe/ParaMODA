@@ -1,13 +1,9 @@
 ﻿//This is the one that has gone bad
 using QuickGraph;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace MODA.Impl
 {
@@ -25,17 +21,17 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraph">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraph"/> size / 3</param>
-        private static List<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<int> inputGraph, int numberOfSamples, bool getInducedMappingsOnly)
+        private static ICollection<Mapping> Algorithm2_Modified(QueryGraph queryGraph, UndirectedGraph<int> inputGraph, int numberOfSamples, bool getInducedMappingsOnly)
         {
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3;
-            
+
             var theMappings = new Dictionary<IList<int>, List<Mapping>>(MappingNodesComparer);
             var inputGraphDegSeq = inputGraph.GetNodesSortedByDegree(numberOfSamples);
 
             var threadName = Thread.CurrentThread.ManagedThreadId;
             Console.WriteLine("Thread {0}:\tCalling Algo 2-Modified:\n", threadName);
 
-            var queryGraphEdges = queryGraph.Edges.ToList();
+            var queryGraphEdges = queryGraph.Edges.ToArray();
             var h = queryGraph.Vertices.ElementAt(0);
             var f = new Dictionary<int, int>(1);
             for (int i = 0; i < inputGraphDegSeq.Count; i++)
@@ -62,18 +58,25 @@ namespace MODA.Impl
                                 theMappings[item.Key] = item.Value;
                             }
                         }
-                        mappings = null;
                     }
+                    mappings.Clear();
+                    mappings = null;
                     #endregion
                 }
             }
 
-            var toReturn = new HashSet<Mapping>(theMappings.Values.SelectMany(s => s));
-            theMappings = null;
+            f.Clear();
+            f = null;
+            Array.Clear(queryGraphEdges, 0, queryGraphEdges.Length);
+            queryGraphEdges = null;
+            inputGraphDegSeq.Clear();
             inputGraphDegSeq = null;
-            
+            var toReturn = new HashSet<Mapping>(theMappings.Values.SelectMany(s => s));
+            theMappings.Clear();
+            theMappings = null;
+
             Console.WriteLine("\nThread {0}:\tAlgorithm 2: All iteration tasks completed. Number of mappings found: {1}.\n", threadName, toReturn.Count);
-            return toReturn.ToList();
+            return toReturn;
         }
 
     }

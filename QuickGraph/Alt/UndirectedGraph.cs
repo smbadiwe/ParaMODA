@@ -85,12 +85,13 @@ namespace QuickGraph
             }
 
             var listToReturn = new List<TVertex>(count);
-            foreach (var item in tempList.OrderBy(x => x.Value))
+            foreach (var item in tempList.OrderByDescending(x => x.Value))
             {
                 listToReturn.Add(item.Key);
             }
 
             tempList.Clear();
+            tempList = null;
             return listToReturn;
         }
 
@@ -149,6 +150,7 @@ namespace QuickGraph
                 }
             }
             ends.Clear();
+            ends = null;
         }
 
         public bool TryGetEdge(TVertex source, TVertex target, out Edge<TVertex> edge)

@@ -13,7 +13,7 @@ namespace MODA.Impl
         /// <param name="queryGraph">H</param>
         /// <param name="inputGraphClone">G</param>
         /// <param name="numberOfSamples">To be decided. If not set, we use the <paramref name="inputGraphClone"/> size / 3</param>
-        internal static List<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<int> inputGraphClone, int numberOfSamples, bool getInducedMappingsOnly)
+        internal static ICollection<Mapping> Algorithm2(QueryGraph queryGraph, UndirectedGraph<int> inputGraphClone, int numberOfSamples, bool getInducedMappingsOnly)
         {
             if (numberOfSamples <= 0) numberOfSamples = inputGraphClone.VertexCount / 3;
 
@@ -22,7 +22,7 @@ namespace MODA.Impl
             var theMappings = new Dictionary<IList<int>, List<Mapping>>(MappingNodesComparer);
             var inputGraphDegSeq = inputGraphClone.GetNodesSortedByDegree(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
-            var queryGraphEdges = queryGraph.Edges.ToList();
+            var queryGraphEdges = queryGraph.Edges.ToArray();
             var subgraphSize = queryGraphVertices.Length;
             var threadName = System.Threading.Thread.CurrentThread.ManagedThreadId;
             Console.WriteLine("Thread {0}:\tCallingu Algo 2:\n", threadName);
@@ -39,7 +39,8 @@ namespace MODA.Impl
                         var f = new Dictionary<int, int>(1);
                         f[h] = g;
                         var mappings = Utils.IsomorphicExtension(f, queryGraph, queryGraphEdges, inputGraphClone, getInducedMappingsOnly);
-                        
+                        f.Clear();
+                        f = null;
                         if (mappings.Count > 0)
                         {
                             foreach (var item in mappings)
@@ -56,6 +57,8 @@ namespace MODA.Impl
                                 }
                             }
                         }
+                        mappings.Clear();
+                        mappings = null;
                         #endregion
                     }
                 }
@@ -63,10 +66,17 @@ namespace MODA.Impl
                 //Remove g
                 inputGraphClone.RemoveVertex(g);
             }
+            Array.Clear(queryGraphEdges, 0, queryGraphEdges.Length);
+            queryGraphEdges = null;
+            inputGraphDegSeq.Clear();
+            inputGraphDegSeq = null;
+
             var toReturn = new HashSet<Mapping>(theMappings.Values.SelectMany(s => s));
-            
+            theMappings.Clear();
+            theMappings = null;
+
             Console.WriteLine("Thread {0}:\tAlgorithm 2: All tasks completed. Number of mappings found: {1}.", threadName, toReturn.Count);
-            return toReturn.ToList();
+            return toReturn;
         }
     }
 }
