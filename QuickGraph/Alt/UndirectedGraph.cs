@@ -101,7 +101,7 @@ namespace QuickGraph
         /// the order direction
         /// </summary>
         /// <returns></returns>
-        public List<int> GetDegreeSequence()
+        public List<int> GetReverseDegreeSequence()
         {
             var tempList = new List<int>(VertexCount);
             foreach (var node in Vertices)

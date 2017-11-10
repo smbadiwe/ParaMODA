@@ -47,10 +47,10 @@ namespace MODA.Impl
             }
 
             // if mapping is possible (=> if compareEdgeCount >= 0)
-            var subgraphDegrees = subgraph.GetDegreeSequence();
+            var subgraphDegrees = subgraph.GetReverseDegreeSequence();
             var testG = new UndirectedGraph<int>();
             testG.AddVerticesAndEdgeRange(edgeImages);
-            var testGdeg = testG.GetDegreeSequence();
+            var testGdeg = testG.GetReverseDegreeSequence();
             if (compareEdgeCount == 0)
             {
                 // Same node count, same edge count
