@@ -44,6 +44,8 @@ namespace MODA.Impl
                 parentQueryGraphEdges.Add(edge);
             }
             var newEdge = GetEdgeDifference(queryGraph, parentQueryGraph, parentQueryGraphEdges);
+            parentQueryGraphEdges.Clear();
+            parentQueryGraphEdges = null;
 
             // if it's NOT a valid edge
             if (newEdge.Source == Utils.DefaultEdgeNodeVal)
@@ -55,14 +57,14 @@ namespace MODA.Impl
             int oldCount = parentGraphMappings.Count, id = 0, queryGraphEdgeCount = queryGraph.EdgeCount;
             var queryGraphEdges = queryGraph.Edges.ToArray();
 
-            var groupByGNodes = parentGraphMappings.GroupBy(x => x.Function.Values, MappingNodesComparer); //.ToDictionary(x => x.Key, x => x.ToArray(), MappingNodesComparer);
+            var groupByGNodes = parentGraphMappings.GroupBy(x => x.Function.Values.ToArray(), MappingNodesComparer); //.ToDictionary(x => x.Key, x => x.ToArray(), MappingNodesComparer);
             foreach (var set in groupByGNodes)
             {
                 // function.value (= set of G nodes) are all same here. So build the subgraph here and pass it dowm
                 var subgraph = Utils.GetSubgraph(inputGraph, set.Key); 
                 foreach (var item in set)
                 {
-                    item.Id = id;
+                    item.Id = id++;
                     // Remember, f(h) = g
 
                     // if (f(u), f(v)) ϵ G and meets the conditions, add to list
@@ -73,6 +75,7 @@ namespace MODA.Impl
                         {
                             list.Add(item);
                         }
+                        isMapping = null;
                     }
                     else if (item.SubGraphEdgeCount > queryGraphEdgeCount)
                     {
@@ -86,7 +89,9 @@ namespace MODA.Impl
                         }
                     }
                 }
+                subgraph = null;
             }
+            Array.Clear(queryGraphEdges, 0, queryGraphEdges.Length);
             queryGraphEdges = null;
             var threadName = System.Threading.Thread.CurrentThread.ManagedThreadId;
             
@@ -99,6 +104,7 @@ namespace MODA.Impl
             {
                 parentGraphMappings.Add(item);
             }
+            theRest.Clear();
             theRest = null;
             // Now, remove duplicates
             queryGraph.RemoveNonApplicableMappings(list, inputGraph);

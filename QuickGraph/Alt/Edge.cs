@@ -10,6 +10,8 @@ namespace QuickGraph //.Alt
     [DebuggerDisplay("{Source}->{Target}")]
     public struct Edge<TVertex>
     {
+        //NB: Really, there's no point overriding .GetHashCode
+
         public readonly TVertex Source;
         public readonly TVertex Target;
 
@@ -40,15 +42,10 @@ namespace QuickGraph //.Alt
 
         public override bool Equals(object obj)
         {
-            var otherStr = obj?.ToString();
-            return !string.IsNullOrWhiteSpace(otherStr) &&
-                (string.Equals($"{Source}->{Target}", otherStr)
-                || string.Equals($"{Target}->{Source}", otherStr));
+            var other = (Edge<TVertex>)obj;
+            return (Source.Equals(other.Source) && Target.Equals(other.Target))
+                || (Source.Equals(other.Target) && Target.Equals(other.Source));
         }
-
-        public override int GetHashCode()
-        {
-            return Source.GetHashCode() + Target.GetHashCode();
-        }
+        
     }
 }

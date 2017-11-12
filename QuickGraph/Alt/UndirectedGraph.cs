@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -42,13 +43,14 @@ namespace QuickGraph
         {
             get
             {
-                var edgeColors = new HashSet<Edge<TVertex>>();
+                var edgeColors = new List<Edge<TVertex>>(); //HashSet
                 foreach (var vertsSet in this.edges)
                 {
                     foreach (var vert in vertsSet.Value)
                     {
                         Edge<TVertex> edge = new Edge<TVertex>(vertsSet.Key, vert);
-                        edgeColors.Add(edge);
+                        if (!edgeColors.Contains(edge))
+                            edgeColors.Add(edge);
                     }
                 }
                 return edgeColors;
@@ -72,7 +74,7 @@ namespace QuickGraph
 
         /// <summary>
         /// NB: The degree sequence of an undirected graph is the non-increasing sequence of its vertex degrees;
-        /// We return the vertices 
+        /// We return the vertices here instead of the vertex degrees 
         /// </summary>
         /// <param name="count">The expected number of items to return. This value is usually less than the <see cref="VertexCount"/></param>
         /// <returns></returns>
@@ -101,21 +103,29 @@ namespace QuickGraph
         /// the order direction
         /// </summary>
         /// <returns></returns>
-        public List<int> GetReverseDegreeSequence()
+        public int[] GetReverseDegreeSequence()
         {
-            var tempList = new List<int>(VertexCount);
+            var tempList = new int[VertexCount];
+            int i = 0;
             foreach (var node in Vertices)
             {
-                tempList.Add(this.GetDegree(node));
+                tempList[i++] = GetDegree(node);
             }
-            tempList.Sort();
+            Array.Sort(tempList);
             return tempList;
         }
 
         public UndirectedGraph<TVertex> Clone()
         {
-            var inputGraphClone = new UndirectedGraph<TVertex>();
-            inputGraphClone.AddVerticesAndEdgeRange(this.Edges);
+            var inputGraphClone = new UndirectedGraph<TVertex>(allowParallelEdges)
+            {
+                edgeCount = edgeCount,
+            };
+            foreach (var edge in edges)
+            {
+                inputGraphClone.edges.Add(edge.Key, new List<TVertex>(edge.Value));
+            }
+
             return inputGraphClone;
         }
 
@@ -135,6 +145,13 @@ namespace QuickGraph
         {
             this.ClearAdjacentEdges(v);
             return this.edges.Remove(v);
+        }
+
+        public void Clear()
+        {
+            this.edgeCount = 0;
+            this.edges.Clear();
+            this.edges = null;
         }
 
         public void ClearAdjacentEdges(TVertex v)
@@ -194,7 +211,7 @@ namespace QuickGraph
                 }
                 else
                 {
-                    edges[target] = new List<TVertex> { source };
+                    edges[target] = new List<TVertex>(1) { source };
                 }
             }
             // since we don't care about direction, chech againby reversing them
@@ -221,8 +238,8 @@ namespace QuickGraph
             }
             else // neither exists. So, add them
             {
-                edges[source] = new List<TVertex> { target };
-                edges[target] = new List<TVertex> { source };
+                edges[source] = new List<TVertex>(1) { target };
+                edges[target] = new List<TVertex>(1) { source };
             }
 
             this.edgeCount++;
@@ -237,30 +254,11 @@ namespace QuickGraph
         public int AddVerticesAndEdgeRange(IEnumerable<Edge<TVertex>> edges)
         {
             int count = 0;
-            //foreach (var edge in edges)
-            //{
-            //    if (this.AddVerticesAndEdge(edge.Source, edge.Target))
-            //    {
-            //        count++;
-            //    }
-            //}
-            var keys = new HashSet<TVertex>();
             foreach (var edge in edges)
             {
-                if (this.AddVerticesAndEdgeStraight(edge))
+                if (this.AddVerticesAndEdge(edge.Source, edge.Target))
                 {
-                    keys.Add(edge.Source);
-                    keys.Add(edge.Target);
                     count++;
-                }
-            }
-            foreach (var key in keys)
-            {
-                List<TVertex> vals;
-                if (this.edges.TryGetValue(key, out vals))
-                {
-                    var set = new HashSet<TVertex>();
-                    vals.RemoveAll(x => !set.Add(x));
                 }
             }
             return count;

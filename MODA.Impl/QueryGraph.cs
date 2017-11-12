@@ -6,20 +6,22 @@ namespace MODA.Impl
 {
     public sealed class QueryGraph : UndirectedGraph<int>
     {
-        public QueryGraph() : base()
-        {
+        //NB: Don't bother overriding .Equals and .GetHashCode
 
+        public QueryGraph(string label) : base()
+        {
+            Identifier = label;
         }
 
-        public QueryGraph(bool allowParralelEdges) : base(allowParralelEdges)
+        public QueryGraph(string label, bool allowParralelEdges) : base(allowParralelEdges)
         {
-
+            Identifier = label;
         }
 
         /// <summary>
         /// A name to identify / refer to this query graph
         /// </summary>
-        public string Identifier { get; set; }
+        public string Identifier { get; }
 
         public bool IsFrequentSubgraph { get; set; }
 
@@ -54,13 +56,13 @@ namespace MODA.Impl
             return fileName;
         }
 
-        public void RemoveNonApplicableMappings(ICollection<Mapping> mappings, UndirectedGraph<int> inputGraph)
+        public void RemoveNonApplicableMappings(ICollection<Mapping> mappings, UndirectedGraph<int> inputGraph, bool checkInducedMappingOnly = true)
         {
-            if (mappings.Count == 0) return;
+            if (mappings.Count < 2) return;
 
             int subgraphSize = VertexCount;
             var mapGroups = mappings.GroupBy(x => x.Function.Values, ModaAlgorithms.MappingNodesComparer); //.ToDictionary(x => x.Key, x => x.ToArray());
-
+            
             var toAdd = new List<Mapping>();
             var queryGraphEdges = Edges.ToArray();
             foreach (var group in mapGroups)
@@ -84,14 +86,20 @@ namespace MODA.Impl
                 subgraph.AddVerticesAndEdgeRange(inducedSubGraphEdges);
                 foreach (var item in group)
                 {
-                    var result = Utils.IsMappingCorrect2(item.Function, subgraph, queryGraphEdges, true);
+                    var result = Utils.IsMappingCorrect2(item.Function, subgraph, queryGraphEdges, checkInducedMappingOnly);
                     if (result.IsCorrectMapping)
                     {
                         toAdd.Add(item);
+                        result = null;
                         break;
                     }
+                    result = null;
                 }
+                subgraph = null;
+                inducedSubGraphEdges.Clear();
+                inducedSubGraphEdges = null;
             }
+            mapGroups = null;
             mappings.Clear();
             if (toAdd.Count > 0)
             {
@@ -99,17 +107,9 @@ namespace MODA.Impl
                 {
                     mappings.Add(item);
                 }
+                toAdd.Clear();
             }
-        }
-
-        public override int GetHashCode()
-        {
-            return Identifier.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            return Identifier.Equals(((QueryGraph)obj).Identifier);
+            toAdd = null;
         }
     }
 }

@@ -34,19 +34,21 @@ namespace MODA.Impl
                     ICollection<Mapping> mappings;
                     if (qGraph.EdgeCount == (subgraphSize - 1)) // i.e. if qGraph is a tree
                     {
-                        var inputGraphClone = inputGraph.Clone();
                         if (UseModifiedGrochow)
                         {
                             // Modified Mapping module - MODA and Grockow & Kellis
-                            mappings = Algorithm2_Modified(qGraph, inputGraphClone, numIterations, false);
+                            mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations, false);
                         }
                         else
                         {
+                            var inputGraphClone = inputGraph.Clone();
                             mappings = Algorithm2(qGraph, inputGraphClone, numIterations, false);
+                            inputGraphClone.Clear();
+                            inputGraphClone = null;
                         }
 
                         // Because we're saving to file, we're better off doing this now
-                        qGraph.RemoveNonApplicableMappings(mappings, inputGraph);
+                        qGraph.RemoveNonApplicableMappings(mappings, inputGraph, false);
                         treatedNodes.Add(qGraph);
                     }
                     else
@@ -146,16 +148,18 @@ namespace MODA.Impl
                     ICollection<Mapping> mappings;
                     if (qGraph.IsTree(subgraphSize))
                     {
-                        var inputGraphClone = inputGraph.Clone();
                         if (UseModifiedGrochow)
                         {
                             // Modified Mapping module - MODA and Grockow & Kellis
-                            mappings = Algorithm2_Modified(qGraph, inputGraphClone, numIterations, false);
+                            mappings = Algorithm2_Modified(qGraph, inputGraph, numIterations, false);
                         }
                         else
                         {
                             // Mapping module - MODA and Grockow & Kellis.
+                            var inputGraphClone = inputGraph.Clone();
                             mappings = Algorithm2(qGraph, inputGraphClone, numIterations, false);
+                            inputGraphClone.Clear();
+                            inputGraphClone = null;
                         }
                     }
                     else
@@ -177,7 +181,7 @@ namespace MODA.Impl
                     // Save mappings. Do we need to save to disk? Maybe not!
 
                     allMappings.Add(qGraph, mappings);
-
+                    // Do not call mappings.Clear()
                     mappings = null;
                     // Check for complete-ness; if complete, break
                     if (qGraph.IsComplete(subgraphSize))
@@ -187,15 +191,20 @@ namespace MODA.Impl
                     }
                     qGraph = null;
                 }
-                while (true); 
+                while (true);
 
-                foreach (var mapping in allMappings)
+                if (treatedNodes.Count > 0)
                 {
-                    if (mapping.Key.IsTree(subgraphSize) && !treatedNodes.Contains(mapping.Key))
+                    foreach (var mapping in allMappings)
                     {
-                        mapping.Key.RemoveNonApplicableMappings(mapping.Value, inputGraph);
+                        if (mapping.Key.IsTree(subgraphSize) && !treatedNodes.Contains(mapping.Key))
+                        {
+                            mapping.Key.RemoveNonApplicableMappings(mapping.Value, inputGraph);
+                        }
                     }
+                    treatedNodes.Clear();
                 }
+                treatedNodes = null;
                 #endregion
             }
             else
@@ -214,10 +223,13 @@ namespace MODA.Impl
 
                 qGraph.RemoveNonApplicableMappings(mappings, inputGraph);
                 allMappings = new Dictionary<QueryGraph, ICollection<Mapping>>(1) { { qGraph, mappings } };
+
+                // Do not call mappings.Clear()
+                mappings = null;
             }
 
             return allMappings;
         }
-        
+
     }
 }

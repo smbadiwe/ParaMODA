@@ -57,9 +57,8 @@ namespace MODA.Impl
             UndirectedGraph<int> newGraphInstance;
             if (isQueryGraph)
             {
-                newGraphInstance = new QueryGraph
+                newGraphInstance = new QueryGraph(Path.GetFileNameWithoutExtension(filename))
                 {
-                    Identifier = Path.GetFileNameWithoutExtension(filename)
                 };
             }
             else

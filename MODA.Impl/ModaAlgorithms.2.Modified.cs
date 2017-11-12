@@ -3,6 +3,7 @@ using QuickGraph;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace MODA.Impl
@@ -25,7 +26,7 @@ namespace MODA.Impl
         {
             if (numberOfSamples <= 0) numberOfSamples = inputGraph.VertexCount / 3;
 
-            var theMappings = new Dictionary<IList<int>, List<Mapping>>(MappingNodesComparer);
+            var theMappings = new Dictionary<int[], List<Mapping>>(MappingNodesComparer);
             var inputGraphDegSeq = inputGraph.GetNodesSortedByDegree(numberOfSamples);
 
             var threadName = Thread.CurrentThread.ManagedThreadId;
@@ -47,6 +48,10 @@ namespace MODA.Impl
                     {
                         foreach (var item in mappings)
                         {
+                            if (item.Value.Count > 1)
+                            {
+                                queryGraph.RemoveNonApplicableMappings(item.Value, inputGraph, getInducedMappingsOnly);
+                            }
                             //Recall: f(h) = g
                             List<Mapping> maps;
                             if (theMappings.TryGetValue(item.Key, out maps))
@@ -58,8 +63,8 @@ namespace MODA.Impl
                                 theMappings[item.Key] = item.Value;
                             }
                         }
+                        mappings.Clear();
                     }
-                    mappings.Clear();
                     mappings = null;
                     #endregion
                 }
@@ -71,13 +76,28 @@ namespace MODA.Impl
             queryGraphEdges = null;
             inputGraphDegSeq.Clear();
             inputGraphDegSeq = null;
-            var toReturn = new HashSet<Mapping>(theMappings.Values.SelectMany(s => s));
-            theMappings.Clear();
+
+            var toReturn = GetSet(theMappings);
             theMappings = null;
 
             Console.WriteLine("\nThread {0}:\tAlgorithm 2: All iteration tasks completed. Number of mappings found: {1}.\n", threadName, toReturn.Count);
             return toReturn;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static HashSet<Mapping> GetSet(Dictionary<int[], List<Mapping>> theMappings)
+        {
+            var toReturn = new HashSet<Mapping>(theMappings.Values.SelectMany(s => s));
+            //foreach (var set in theMappings.Keys.ToArray())
+            //{
+            //    foreach (var item in theMappings[set])
+            //    {
+            //        toReturn.Add(item);
+            //    }
+            //    theMappings.Remove(set);
+            //}
+            theMappings.Clear(); // = null;
+            return toReturn;
+        }
     }
 }

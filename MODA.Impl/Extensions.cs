@@ -23,9 +23,8 @@ namespace MODA.Impl
         /// <returns></returns>
         public static QueryGraph ToQueryGraph(this IEnumerable<Edge<int>> edges, string graphLabel)
         {
-            var g = new QueryGraph
+            var g = new QueryGraph(graphLabel)
             {
-                Identifier = graphLabel
             };
             g.AddVerticesAndEdgeRange(edges);
             return g;

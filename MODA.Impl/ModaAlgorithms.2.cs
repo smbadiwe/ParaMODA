@@ -19,7 +19,7 @@ namespace MODA.Impl
 
             // Do we need this clone? Can't we just remove the node directly from the graph? 
             // We do need it.
-            var theMappings = new Dictionary<IList<int>, List<Mapping>>(MappingNodesComparer);
+            var theMappings = new Dictionary<int[], List<Mapping>>(MappingNodesComparer);
             var inputGraphDegSeq = inputGraphClone.GetNodesSortedByDegree(numberOfSamples);
             var queryGraphVertices = queryGraph.Vertices.ToArray();
             var queryGraphEdges = queryGraph.Edges.ToArray();
@@ -45,6 +45,10 @@ namespace MODA.Impl
                         {
                             foreach (var item in mappings)
                             {
+                                if (item.Value.Count > 1)
+                                {
+                                    queryGraph.RemoveNonApplicableMappings(item.Value, inputGraphClone, getInducedMappingsOnly);
+                                }
                                 //Recall: f(h) = g
                                 List<Mapping> maps;
                                 if (theMappings.TryGetValue(item.Key, out maps))
@@ -56,8 +60,8 @@ namespace MODA.Impl
                                     theMappings[item.Key] = item.Value;
                                 }
                             }
+                            mappings.Clear();
                         }
-                        mappings.Clear();
                         mappings = null;
                         #endregion
                     }
@@ -65,14 +69,16 @@ namespace MODA.Impl
 
                 //Remove g
                 inputGraphClone.RemoveVertex(g);
+                if (inputGraphClone.EdgeCount == 0) break;
             }
             Array.Clear(queryGraphEdges, 0, queryGraphEdges.Length);
             queryGraphEdges = null;
+            Array.Clear(queryGraphVertices, 0, subgraphSize);
+            queryGraphVertices = null;
             inputGraphDegSeq.Clear();
             inputGraphDegSeq = null;
 
-            var toReturn = new HashSet<Mapping>(theMappings.Values.SelectMany(s => s));
-            theMappings.Clear();
+            var toReturn = GetSet(theMappings);
             theMappings = null;
 
             Console.WriteLine("Thread {0}:\tAlgorithm 2: All tasks completed. Number of mappings found: {1}.", threadName, toReturn.Count);

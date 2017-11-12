@@ -29,19 +29,19 @@ namespace MODA.Impl
         /// <summary>
         /// Usage is temporary - to help organize stuffs in Algorithm 3
         /// </summary>
-        public int Id;
+        public int Id { get; set; }
 
         /// <summary>
         /// This represents the [f(h) = g] relation. Meaning key is h and value is g.
         /// </summary>
-        public SortedList<int, int> Function;
+        public SortedList<int, int> Function { get; set; }
 
         /// <summary>
         /// Count of all the edges in the input subgraph G that fit the query graph (---Function.Keys).
         /// This count is for the induced subgraph
         /// </summary>
-        public int SubGraphEdgeCount;
-        
+        public int SubGraphEdgeCount { get; set; }
+
         /// <summary>
         /// Gets the corresponding image of the <see cref="newlyAddedEdge"/> in the <see cref="inputGraph"/>.
         /// Use only for when (InducedSubGraph.EdgeCount > currentQueryGraphEdgeCount)
@@ -64,7 +64,7 @@ namespace MODA.Impl
             var other = obj as Mapping;
             if (other == null) return false;
 
-            if (Id >= 0 && Id != other.Id) return false;
+            if (Id >= 0 || other.Id >= 0) return Id == other.Id;
 
             int i = 0;
             foreach (var func in Function)
@@ -82,7 +82,9 @@ namespace MODA.Impl
 
         public override int GetHashCode()
         {
-            return GetMappedNodes().GetHashCode();
+            if (Id >= 0) return Id.GetHashCode();
+
+            return base.GetHashCode();
         }
 
         /// <summary>
@@ -92,13 +94,14 @@ namespace MODA.Impl
         /// <returns></returns>
         public string GetMappedNodes()
         {
-            var sb = new StringBuilder();
-            foreach (var item in Function)
-            {
-                sb.AppendFormat("{0}-", item.Value);
-            }
-            sb.Remove(sb.Length - 1, 1);
-            return sb.ToString();
+            return string.Join("-", Function.Values);
+            //var sb = new StringBuilder();
+            //foreach (var item in Function)
+            //{
+            //    sb.AppendFormat("{0}-", item.Value);
+            //}
+            //sb.Remove(sb.Length - 1, 1);
+            //return sb.ToString();
         }
 
         public override string ToString()

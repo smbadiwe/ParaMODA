@@ -67,7 +67,7 @@ namespace ParaMODA
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Error. For more details, run the command: MODA.Console --help");
 
-                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.ForegroundColor = fgColor;
                     return;
                 }
 
