@@ -1,0 +1,99 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\QuickGraph\Algorithms\AlgorithmBase.cs" Link="Algorithms\AlgorithmBase.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\ComputationState.cs" Link="Algorithms\ComputationState.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\Contracts\IAlgorithmContract.cs" Link="Algorithms\Contracts\IAlgorithmContract.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\Contracts\IComputationContract.cs" Link="Algorithms\Contracts\IComputationContract.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\IAlgorithm.cs" Link="Algorithms\IAlgorithm.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\IComputation.cs" Link="Algorithms\IComputation.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\IDistanceRecorderAlgorithm.cs" Link="Algorithms\IDistanceRecorderAlgorithm.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\IEdgePredecessorRecorderAlgorithm.cs" Link="Algorithms\IEdgePredecessorRecorderAlgorithm.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\ITreeBuilderAlgorithm.cs" Link="Algorithms\ITreeBuilderAlgorithm.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\IVertexColorizerAlgorithm.cs" Link="Algorithms\IVertexColorizerAlgorithm.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\IVertexPredecessorRecorderAlgorithm.cs" Link="Algorithms\IVertexPredecessorRecorderAlgorithm.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\IVertexTimeStamperAlgorithm.cs" Link="Algorithms\IVertexTimeStamperAlgorithm.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\RootedAlgorithmBase.cs" Link="Algorithms\RootedAlgorithmBase.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\Search\BreadthFirstSearchAlgorithm.cs" Link="Algorithms\Search\BreadthFirstSearchAlgorithm.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\Search\BreadthFirstSearchAlgorithm2.cs" Link="Algorithms\Search\BreadthFirstSearchAlgorithm2.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\Search\DepthFirstSearchAlgorithm.cs" Link="Algorithms\Search\DepthFirstSearchAlgorithm.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\Search\DepthFirstSearchAlgorithm2.cs" Link="Algorithms\Search\DepthFirstSearchAlgorithm2.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\Services\IAlgorithmComponent.cs" Link="Algorithms\Services\IAlgorithmComponent.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\Services\IAlgorithmServices.cs" Link="Algorithms\Services\IAlgorithmServices.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\Services\ICancelManager.cs" Link="Algorithms\Services\ICancelManager.cs" />
+    <Compile Include="..\..\QuickGraph\Algorithms\Services\IService.cs" Link="Algorithms\Services\IService.cs" />
+    <Compile Include="..\..\QuickGraph\Alt\AdjacencyGraph.cs" Link="Alt\AdjacencyGraph.cs" />
+    <Compile Include="..\..\QuickGraph\Alt\Edge.cs" Link="Alt\Edge.cs" />
+    <Compile Include="..\..\QuickGraph\Alt\UndirectedGraph.cs" Link="Alt\UndirectedGraph.cs" />
+    <Compile Include="..\..\QuickGraph\Collections\EdgeEdgeDictionary.cs" Link="Collections\EdgeEdgeDictionary.cs" />
+    <Compile Include="..\..\QuickGraph\Collections\EdgeList.cs" Link="Collections\EdgeList.cs" />
+    <Compile Include="..\..\QuickGraph\Collections\IEdgeList.cs" Link="Collections\IEdgeList.cs" />
+    <Compile Include="..\..\QuickGraph\Collections\IQueue.cs" Link="Collections\IQueue.cs" />
+    <Compile Include="..\..\QuickGraph\Collections\IVertexEdgeDictionary.cs" Link="Collections\IVertexEdgeDictionary.cs" />
+    <Compile Include="..\..\QuickGraph\Collections\Queue.cs" Link="Collections\Queue.cs" />
+    <Compile Include="..\..\QuickGraph\Collections\VertexEdgeDictionary.cs" Link="Collections\VertexEdgeDictionary.cs" />
+    <Compile Include="..\..\QuickGraph\Collections\VertexList.cs" Link="Collections\VertexList.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\Collections\IEdgeListContract.cs" Link="Contracts\Collections\IEdgeListContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\Collections\IVertexEdgeDictionaryContract.cs" Link="Contracts\Collections\IVertexEdgeDictionaryContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IEdgeContract.cs" Link="Contracts\IEdgeContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IEdgeListGraphContract.cs" Link="Contracts\IEdgeListGraphContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IEdgeSetContract.cs" Link="Contracts\IEdgeSetContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IGraphContract.cs" Link="Contracts\IGraphContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IImplicitGraphContract.cs" Link="Contracts\IImplicitGraphContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IImplicitUndirectedGraphContract.cs" Link="Contracts\IImplicitUndirectedGraphContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IImplicitVertexSetContract.cs" Link="Contracts\IImplicitVertexSetContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IIncidenceGraphContract.cs" Link="Contracts\IIncidenceGraphContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IMutableEdgeListGraphContract.cs" Link="Contracts\IMutableEdgeListGraphContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IMutableGraphContract.cs" Link="Contracts\IMutableGraphContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IMutableIncidenceGraphContract.cs" Link="Contracts\IMutableIncidenceGraphContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IMutableUndirectedGraphContract.cs" Link="Contracts\IMutableUndirectedGraphContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IMutableVertexAndEdgeSetContract.cs" Link="Contracts\IMutableVertexAndEdgeSetContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IMutableVertexListGraphContract.cs" Link="Contracts\IMutableVertexListGraphContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IMutableVertexSetContract.cs" Link="Contracts\IMutableVertexSetContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IUndirectedEdgeContract.cs" Link="Contracts\IUndirectedEdgeContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IUndirectedGraphContract.cs" Link="Contracts\IUndirectedGraphContract.cs" />
+    <Compile Include="..\..\QuickGraph\Contracts\IVertexSetContract.cs" Link="Contracts\IVertexSetContract.cs" />
+    <Compile Include="..\..\QuickGraph\EdgeEdgeEventArgs.cs" Link="EdgeEdgeEventArgs.cs" />
+    <Compile Include="..\..\QuickGraph\EdgeEventArgs.cs" Link="EdgeEventArgs.cs" />
+    <Compile Include="..\..\QuickGraph\EdgeExtensions.cs" Link="EdgeExtensions.cs" />
+    <Compile Include="..\..\QuickGraph\EdgePredicate.cs" Link="EdgePredicate.cs" />
+    <Compile Include="..\..\QuickGraph\GraphColor.cs" Link="GraphColor.cs" />
+    <Compile Include="..\..\QuickGraph\IEdge.cs" Link="IEdge.cs" />
+    <Compile Include="..\..\QuickGraph\IEdgeListAndIncidenceGraph.cs" Link="IEdgeListAndIncidenceGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IEdgeListGraph.cs" Link="IEdgeListGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IEdgeSet.cs" Link="IEdgeSet.cs" />
+    <Compile Include="..\..\QuickGraph\IGraph.cs" Link="IGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IImplicitGraph.cs" Link="IImplicitGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IImplicitUndirectedGraph.cs" Link="IImplicitUndirectedGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IImplicitVertexSet.cs" Link="IImplicitVertexSet.cs" />
+    <Compile Include="..\..\QuickGraph\IIncidenceGraph.cs" Link="IIncidenceGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IMutableEdgeListGraph.cs" Link="IMutableEdgeListGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IMutableGraph.cs" Link="IMutableGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IMutableIncidenceGraph.cs" Link="IMutableIncidenceGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IMutableUndirectedGraph.cs" Link="IMutableUndirectedGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IMutableVertexAndEdgeListGraph.cs" Link="IMutableVertexAndEdgeListGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IMutableVertexAndEdgeSet.cs" Link="IMutableVertexAndEdgeSet.cs" />
+    <Compile Include="..\..\QuickGraph\IMutableVertexListGraph.cs" Link="IMutableVertexListGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IMutableVertexSet.cs" Link="IMutableVertexSet.cs" />
+    <Compile Include="..\..\QuickGraph\IUndirectedEdge.cs" Link="IUndirectedEdge.cs" />
+    <Compile Include="..\..\QuickGraph\IUndirectedGraph.cs" Link="IUndirectedGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IVertexAndEdgeListGraph.cs" Link="IVertexAndEdgeListGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IVertexListGraph.cs" Link="IVertexListGraph.cs" />
+    <Compile Include="..\..\QuickGraph\IVertexSet.cs" Link="IVertexSet.cs" />
+    <Compile Include="..\..\QuickGraph\VertexEventArgs.cs" Link="VertexEventArgs.cs" />
+    <Compile Include="..\..\QuickGraph\VertexPredicate.cs" Link="VertexPredicate.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Algorithms\Contracts\" />
+    <Folder Include="Algorithms\Services\" />
+    <Folder Include="Alt\" />
+    <Folder Include="Collections\" />
+    <Folder Include="Contracts\Collections\" />
+  </ItemGroup>
+
+</Project>

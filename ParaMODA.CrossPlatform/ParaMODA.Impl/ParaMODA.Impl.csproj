@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\ParaMODA.Impl\ExpansionTrees\ExpansionTreeBuilder.cs" Link="ExpansionTrees\ExpansionTreeBuilder.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\ExpansionTrees\ExpansionTreeNode.cs" Link="ExpansionTrees\ExpansionTreeNode.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\ExpansionTrees\FiveNodes.cs" Link="ExpansionTrees\FiveNodes.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\ExpansionTrees\FourNodes.cs" Link="ExpansionTrees\FourNodes.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\ExpansionTrees\ThreeNodes.cs" Link="ExpansionTrees\ThreeNodes.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\Extensions.cs" Link="Extensions.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\Graph.cs" Link="Graph.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\Graphics\DotPrinter.cs" Link="Graphics\DotPrinter.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\Graphics\FileDotEngine.cs" Link="Graphics\FileDotEngine.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\Graphics\Visualizer.cs" Link="Graphics\Visualizer.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\GraphProcessor.cs" Link="GraphProcessor.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\Mapping.cs" Link="Mapping.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\MappingNodesComparer.cs" Link="MappingNodesComparer.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\ModaAlgorithms.1.cs" Link="ModaAlgorithms.1.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\ModaAlgorithms.2.cs" Link="ModaAlgorithms.2.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\ModaAlgorithms.2.Modified.cs" Link="ModaAlgorithms.2.Modified.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\ModaAlgorithms.3.cs" Link="ModaAlgorithms.3.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\ModaAlgorithms.cs" Link="ModaAlgorithms.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\QueryGraph.cs" Link="QueryGraph.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\RecursionHelper.cs" Link="RecursionHelper.cs" />
+    <Compile Include="..\..\ParaMODA.Impl\Utils.cs" Link="Utils.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ExpansionTrees\" />
+    <Folder Include="Graphics\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj" />
+    <ProjectReference Include="..\QuickGraph\QuickGraph.csproj" />
+  </ItemGroup>
+
+</Project>

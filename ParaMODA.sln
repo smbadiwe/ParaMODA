@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParaMODA.Impl", "MODA.Impl\ParaMODA.Impl.csproj", "{D9455E2F-1009-4A4C-8953-66E7F5CBA577}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParaMODA.Impl", "ParaMODA.Impl\ParaMODA.Impl.csproj", "{D9455E2F-1009-4A4C-8953-66E7F5CBA577}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickGraph", "QuickGraph\QuickGraph.csproj", "{9F41DBEF-471A-438B-8AC1-AE124F2C7AF3}"
 EndProject

@@ -4,6 +4,9 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Threading;
+using CommandLine;
+using CommandLine.Text;
+using QuickGraph;
 
 namespace ParaMODA
 {
@@ -11,143 +14,33 @@ namespace ParaMODA
     {
         private const string OUTPUT_DIR = "MappingOutputs";
         private static StringBuilder sb = new StringBuilder("Processing Graph...");
-        private static BaseVerb invokedVerbInstance = null;
-        private static void OnVerbCommand(string verb, object subOptions)
-        {
-            // if parsing succeeds the verb name and correct instance
-            // will be passed to onVerbCommand delegate (string,object)
-            switch (verb)
-            {
-                case "runone":
-                    invokedVerbInstance = subOptions as RunOneVerb;
-                    break;
-                case "runmany":
-                    var many = subOptions as RunManyVerb;
-                    if (string.IsNullOrWhiteSpace(many.QueryGraphFolder)
-                        && many.QueryGraphFiles == null)
-                    {
-                        Console.WriteLine("One of the options -f (--folder) or -q (--querygraphs) has to be set.\n\n");
-                        many.GetUsage();
-                        Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
-                    }
-                    else
-                    {
-                        invokedVerbInstance = many;
-                    }
-                    break;
-                case "runall":
-                    invokedVerbInstance = subOptions as RunAllVerb;
-                    break;
-                default:
-                    break;
-            }
-        }
-
+        
         internal static void Run(string[] args)
         {
             var fgColor = Console.ForegroundColor;
             try
             {
-                using (var parser = new CommandLine.Parser(with =>
-                        {
-                            with.HelpWriter = Console.Error;
-                            with.ParsingCulture = System.Globalization.CultureInfo.InvariantCulture;
-                            with.IgnoreUnknownArguments = true;
-                        }))
+                using (var parser = new Parser(with =>
                 {
-                    if (!parser.ParseArguments(args, new Options(), OnVerbCommand))
+                    with.HelpWriter = Console.Error;
+                    with.ParsingCulture = System.Globalization.CultureInfo.InvariantCulture;
+                    with.IgnoreUnknownArguments = true;
+                }))
+                {
+                    var parseResult = parser.ParseArguments<RunOneVerb, RunManyVerb, RunAllVerb>(args);
+                    // parseResult is "CommandLine.Parsed`1[[System.Object, System.Private.CoreLib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+                    
+                    //var val = (parseResult as Parsed<object>).Value;
+                    var exitValue = parseResult.MapResult(
+                                        (RunOneVerb opts) => RunOneVerbAndReturnExitCode(opts),
+                                        (RunManyVerb opts) => RunManyVerbAndReturnExitCode(opts),
+                                        (RunAllVerb opts) => RunAllVerbAndReturnExitCode(opts),
+                                        errs => 1);
+                    if (exitValue > 0)
                     {
-                        Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
+                        Environment.Exit(exitValue);
                     }
                 }
-                #region Process input parameters
-                if (invokedVerbInstance == null)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Error. For more details, run the command: MODA.Console --help");
-
-                    Console.ForegroundColor = fgColor;
-                    return;
-                }
-
-                ModaAlgorithms.UseModifiedGrochow = invokedVerbInstance.UseGrochow == false;
-
-                var inputGraph = GraphProcessor.LoadGraph(invokedVerbInstance.InputGraphFile);
-                Console.WriteLine("Input Graph (G): Nodes - {0}; Edges: {1}\n", inputGraph.VertexCount, inputGraph.EdgeCount);
-
-                if (invokedVerbInstance.SaveOutputs && !Directory.Exists(OUTPUT_DIR))
-                {
-                    Directory.CreateDirectory(OUTPUT_DIR);
-                }
-                RunOneVerb runOneVerb = invokedVerbInstance as RunOneVerb;
-                if (runOneVerb != null)
-                {
-                    #region Run One
-                    QueryGraph queryGraph = GraphProcessor.LoadGraph(runOneVerb.QueryGraphFile, true) as QueryGraph;
-                    Process(runOneVerb, inputGraph, queryGraph);
-                    return;
-                    #endregion
-                }
-
-                RunManyVerb runManyVerb = invokedVerbInstance as RunManyVerb;
-                if (runManyVerb != null)
-                {
-                    #region Run Many
-                    IList<QueryGraph> queryGraphs;
-                    if (string.IsNullOrWhiteSpace(runManyVerb.QueryGraphFolder))
-                    {
-                        queryGraphs = new QueryGraph[runManyVerb.QueryGraphFiles.Length];
-                        foreach (var gFile in runManyVerb.QueryGraphFiles)
-                        {
-                            QueryGraph qGraph = GraphProcessor.LoadGraph(gFile, true) as QueryGraph;
-
-                            queryGraphs.Add(qGraph);
-                        }
-                    }
-                    else
-                    {
-                        var files = Directory.GetFiles(runManyVerb.QueryGraphFolder);
-                        queryGraphs = new QueryGraph[files.Length];
-                        foreach (var gFile in files)
-                        {
-                            QueryGraph qGraph = GraphProcessor.LoadGraph(gFile, true) as QueryGraph;
-
-                            queryGraphs.Add(qGraph);
-                        }
-                    }
-                    foreach (var qGraph in queryGraphs)
-                    {
-                        Process(runManyVerb, inputGraph, qGraph);
-                    }
-                    return;
-                    #endregion
-                }
-
-                RunAllVerb runAllVerb = invokedVerbInstance as RunAllVerb;
-                if (runAllVerb != null)
-                {
-                    #region Run All
-                    if (runAllVerb.SubgraphSize < 3 || runAllVerb.SubgraphSize > 5)
-                    {
-                        Console.WriteLine("Invalid input for -s (--size; subgraph size). Program currently supports sizes from 3 to 5.\n\n");
-                        runAllVerb.GetUsage();
-                        Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
-                    }
-                    if (runAllVerb.SubgraphSize >= inputGraph.VertexCount)
-                    {
-                        Console.WriteLine("The specified subgraaph size is too large.\n\n\n");
-                        runAllVerb.GetUsage();
-                        Environment.Exit(CommandLine.Parser.DefaultExitCodeFail);
-                    }
-                    ModaAlgorithms.BuildTree(runAllVerb.SubgraphSize);
-                    Process(runAllVerb, inputGraph, subGraphSize: runAllVerb.SubgraphSize, saveTempMappingsToDisk: runAllVerb.SaveTempMappingsToDisk);
-                    return;
-                    #endregion
-                }
-
-                Console.ForegroundColor = ConsoleColor.Green;
-
-                #endregion
 
             }
             catch (Exception ex)
@@ -156,6 +49,80 @@ namespace ParaMODA
                 Console.WriteLine(ex);
             }
             Console.ForegroundColor = fgColor;
+        }
+
+        private static UndirectedGraph<int> Initialize(BaseVerb invokedVerbInstance)
+        {
+            ModaAlgorithms.UseModifiedGrochow = invokedVerbInstance.UseGrochow == false;
+
+            var inputGraph = GraphProcessor.LoadGraph(invokedVerbInstance.InputGraphFile);
+            Console.WriteLine("Input Graph (G): Nodes - {0}; Edges: {1}\n", inputGraph.VertexCount, inputGraph.EdgeCount);
+
+            if (invokedVerbInstance.SaveOutputs && !Directory.Exists(OUTPUT_DIR))
+            {
+                Directory.CreateDirectory(OUTPUT_DIR);
+            }
+            return inputGraph;
+        }
+
+        private static int RunOneVerbAndReturnExitCode(RunOneVerb runOneVerb)
+        {
+            var inputGraph = Initialize(runOneVerb);
+            QueryGraph queryGraph = GraphProcessor.LoadGraph(runOneVerb.QueryGraphFile, true) as QueryGraph;
+            Process(runOneVerb, inputGraph, queryGraph);
+            return 0;
+        }
+
+        private static int RunManyVerbAndReturnExitCode(RunManyVerb runManyVerb)
+        {
+            var inputGraph = Initialize(runManyVerb);
+            IList<QueryGraph> queryGraphs;
+            if (string.IsNullOrWhiteSpace(runManyVerb.QueryGraphFolder))
+            {
+                queryGraphs = new QueryGraph[runManyVerb.QueryGraphFiles.Length];
+                foreach (var gFile in runManyVerb.QueryGraphFiles)
+                {
+                    QueryGraph qGraph = GraphProcessor.LoadGraph(gFile, true) as QueryGraph;
+
+                    queryGraphs.Add(qGraph);
+                }
+            }
+            else
+            {
+                var files = Directory.GetFiles(runManyVerb.QueryGraphFolder);
+                queryGraphs = new QueryGraph[files.Length];
+                foreach (var gFile in files)
+                {
+                    QueryGraph qGraph = GraphProcessor.LoadGraph(gFile, true) as QueryGraph;
+
+                    queryGraphs.Add(qGraph);
+                }
+            }
+            foreach (var qGraph in queryGraphs)
+            {
+                Process(runManyVerb, inputGraph, qGraph);
+            }
+            return 0;
+        }
+
+        private static int RunAllVerbAndReturnExitCode(RunAllVerb runAllVerb)
+        {
+            if (runAllVerb.SubgraphSize < 3 || runAllVerb.SubgraphSize > 5)
+            {
+                Console.WriteLine("Invalid input for -s (--size; subgraph size). Program currently supports sizes from 3 to 5.\n\n");
+                runAllVerb.GetUsage();
+                return 1;
+            }
+            var inputGraph = Initialize(runAllVerb);
+            if (runAllVerb.SubgraphSize >= inputGraph.VertexCount)
+            {
+                Console.WriteLine("The specified subgraaph size is too large.\n\n\n");
+                runAllVerb.GetUsage();
+                return 1;
+            }
+            ModaAlgorithms.BuildTree(runAllVerb.SubgraphSize);
+            Process(runAllVerb, inputGraph, subGraphSize: runAllVerb.SubgraphSize, saveTempMappingsToDisk: runAllVerb.SaveTempMappingsToDisk);
+            return 0;
         }
 
         /// <summary>
@@ -318,5 +285,6 @@ namespace ParaMODA
             sb.Clear();
 
         }
+
     }
 }

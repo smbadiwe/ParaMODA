@@ -73,7 +73,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MODA.Impl\ParaMODA.Impl.csproj">
+    <ProjectReference Include="..\ParaMODA.Impl\ParaMODA.Impl.csproj">
       <Project>{d9455e2f-1009-4a4c-8953-66e7f5cba577}</Project>
       <Name>ParaMODA.Impl</Name>
     </ProjectReference>

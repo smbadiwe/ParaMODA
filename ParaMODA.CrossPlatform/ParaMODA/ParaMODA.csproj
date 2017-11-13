@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <Authors>Somadina Mbadiwe</Authors>
+    <Company>University of Washington Bothell</Company>
+    <Description>A C# implementation of Motif-Centric Network Motif Discovery Algorithms</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\ParaMODA\ExecutionStopwatch.cs" Link="ExecutionStopwatch.cs" />
+    <Compile Include="..\..\ParaMODA\Program.cs" Link="Program.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.1.1-beta" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ParaMODA.Impl\ParaMODA.Impl.csproj" />
+    <ProjectReference Include="..\QuickGraph.Graphviz\QuickGraph.Graphviz.csproj" />
+    <ProjectReference Include="..\QuickGraph\QuickGraph.csproj" />
+  </ItemGroup>
+
+</Project>
