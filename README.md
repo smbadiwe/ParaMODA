@@ -15,3 +15,6 @@ The command:`ParaMODA --help` will show you the available (verb) options, what t
 
 ## Can't Run On Windows Machine?
 For users wanting to run program on non-Windows machine, all the source files for this project will work on .NET Core. It should be easy to create .NET Core projects, import the source files accordingly, build and run. This porting will be provided for in future.
+
+## Contribute
+The goal is to make this tool more usable, intuitive and fast for users. THerefore your contributions will really be appreciated. If you discover a bug or you want to recommend a feature or you have an idea for speeding up or minimising memory consumption, simply send a pull request or open an issue. In all pull equests, strive to keep memory consumption and speed at a minimum.
